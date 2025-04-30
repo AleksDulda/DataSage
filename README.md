@@ -14,12 +14,13 @@ Bu proje, bir Flask uygulaması üzerinden doğal dilde verilen sorguları OpenA
 
 ---
 ## Dosya Yapısı
+```bash
 .
 ├── fla4.py                 # Flask uygulaması
 ├── sakila.db               # SQLite veritabanı
 ├── templates/
 │   └── top_renters.html    # Web arayüzü
-
+```
 
 ##  Kütüphaneler
 
