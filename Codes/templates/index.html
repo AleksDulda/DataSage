@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}DATASAGE - Akıllı SQL Sorguları{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+  <h1 class="display-4 fw-bold text-primary">🤖 DATASAGE</h1>
+  <p class="lead">SQL bilmeden veritabanınızı akıllıca sorgulayın. Doğal dil ile, anında sonuç alın.</p>
+  <a href="{{ url_for('auth.login') }}" class="btn btn-lg btn-success mt-3">Giriş Yap ve Başla</a>
+</div>
+
+<div class="row mt-5">
+  <div class="col-md-4">
+    <h4>📂 Veritabanı Yükle</h4>
+    <p>SQLite dosyanızı yükleyin, sorgulamak için hazırlanın.</p>
+  </div>
+  <div class="col-md-4">
+    <h4>💬 Doğal Dil Sorgusu</h4>
+    <p>"En çok satan ürün nedir?" gibi sorular sorun, SQL yazmak yok.</p>
+  </div>
+  <div class="col-md-4">
+    <h4>📈 Analiz & İndirme</h4>
+    <p>Sonuçları görüntüleyin, CSV ya da Excel olarak indirin.</p>
+  </div>
+</div>
+{% endblock %}

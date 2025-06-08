@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}DATASAGE{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg border-bottom py-2" id="main-navbar">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="{{ url_for('index') }}">DATASAGE</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Menüyü Aç">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Anasayfa</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('features') }}">Özellikler</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">Hakkımızda</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('contact') }}">İletişim</a></li>
+        {% if session.username %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('ask') }}">Sorgu</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Panel</a></li>
+        {% endif %}
+      </ul>
+
+      <div class="d-flex align-items-center gap-2">
+        {% if session.username %}
+          <span class="text-muted me-2">👤 {{ session.username }}</span>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-danger">Çıkış</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-primary">Giriş</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary ms-1">Kayıt</a>
+        {% endif %}
+        <button id="theme-toggle" class="btn btn-sm btn-secondary ms-3">🌗</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<script>
+    // Tema geçişi
+    const html = document.documentElement;
+    const toggleBtn = document.getElementById("theme-toggle");
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme) html.setAttribute("data-bs-theme", savedTheme);
+
+    toggleBtn.addEventListener("click", () => {
+        const newTheme = html.getAttribute("data-bs-theme") === "light" ? "dark" : "light";
+        html.setAttribute("data-bs-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+    });
+</script>
+
+<style>
+  html[data-bs-theme="dark"] #main-navbar {
+    background-color: #212529 !important;
+    border-color: #444;
+  }
+
+  html[data-bs-theme="dark"] .navbar .nav-link,
+  html[data-bs-theme="dark"] .navbar-brand,
+  html[data-bs-theme="dark"] .navbar-text {
+    color: #f8f9fa !important;
+  }
+
+  html[data-bs-theme="dark"] .btn-outline-primary {
+    color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  html[data-bs-theme="dark"] .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: #fff;
+  }
+</style>
+
+
+</body>
+</html>

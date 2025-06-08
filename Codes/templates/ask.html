@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Sorgu Sistemi</h2>
+
+<form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label class="form-label">Veritabanı (.db):</label>
+        <input type="file" name="database" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Sormak istediğiniz soru:</label>
+        <input type="text" name="question" class="form-control" placeholder="Örn: En uzun film nedir?" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Sorgula</button>
+</form>
+
+{% if result %}
+    <h4 class="mt-5">Sonuç:</h4>
+
+    <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-outline-success btn-sm" onclick='downloadResult("csv")'>📥 CSV İndir</button>
+        <button class="btn btn-outline-primary btn-sm" onclick='downloadResult("xlsx")'>📥 Excel İndir</button>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            {% for col in result["columns"] %}
+                <th>{{ col }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in result["rows"] %}
+            <tr>
+                {% for item in row %}
+                    <td>{{ item }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+    let rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
+    let columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
+
+    function downloadResult(format) {
+        fetch("/download", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                rows: rows,
+                columns: columns,
+                format: format
+            })
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = format === "xlsx" ? "sonuc.xlsx" : "sonuc.csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        });
+    }
+</script>
+
+{% endif %}
+{% endblock %}

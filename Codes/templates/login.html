@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş Yap{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Giriş Yap</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Kullanıcı Adı</label>
+        <input type="text" name="username" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Şifre</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-success">Giriş Yap</button>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-link">Hesabınız yok mu?</a>
+</form>
+{% endblock %}

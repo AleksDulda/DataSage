@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Kontrol Paneli{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Merhaba, {{ session.username }}</h2>
+
+<h4>🗃️ Yüklenen Veritabanı Dosyaları</h4>
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Dosya Adı</th>
+            <th>Yükleme Tarihi</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for db in uploads %}
+        <tr>
+            <td>{{ db.filename }}</td>
+            <td>{{ db.uploaded_at }}</td>
+            <td>
+                <a href="{{ url_for('download_db', filename=db.filename) }}" class="btn btn-sm btn-outline-success">⬇️ İndir</a>
+                <a href="{{ url_for('delete_upload', upload_id=db.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bu dosyayı silmek istediğinize emin misiniz?')">🗑️ Sil</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">Henüz veri yüklenmemiş.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4 class="mt-5">📊 Sorgu İstatistikleri</h4>
+<div class="row mb-4">
+  <div class="col-md-6">
+    <label for="chartTypeLeft" class="form-label">Grafik Sol</label>
+    <select id="chartTypeLeft" class="form-select mb-2">
+      <option value="status">Sorgu Başarı Durumu</option>
+      <option value="daily">Günlük Sorgu Sayısı</option>
+      <option value="keywords">En Sık Anahtar Kelimeler</option>
+      <option value="usage">Veritabanı Kullanım Oranı</option>
+    </select>
+    <canvas id="chartLeft" width="100%" height="300"></canvas>
+  </div>
+  <div class="col-md-6">
+    <label for="chartTypeRight" class="form-label">Grafik Sağ</label>
+    <select id="chartTypeRight" class="form-select mb-2">
+      <option value="status">Sorgu Başarı Durumu</option>
+      <option value="daily">Günlük Sorgu Sayısı</option>
+      <option value="keywords">En Sık Anahtar Kelimeler</option>
+      <option value="usage">Veritabanı Kullanım Oranı</option>
+    </select>
+    <canvas id="chartRight" width="100%" height="300"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let chartLeftInstance = null;
+let chartRightInstance = null;
+
+function renderChart(canvasId, chartData, instanceRefName) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
+  if (instanceRefName === 'left' && chartLeftInstance) {
+    chartLeftInstance.destroy();
+  }
+  if (instanceRefName === 'right' && chartRightInstance) {
+    chartRightInstance.destroy();
+  }
+
+  const newChart = new Chart(ctx, {
+    type: chartData.chartType,
+    data: {
+      labels: chartData.labels,
+      datasets: [{
+        label: chartData.label,
+        data: chartData.data,
+        backgroundColor: chartData.colors || ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: { display: true, text: chartData.title },
+        legend: { display: chartData.chartType !== "bar" }
+      }
+    }
+  });
+
+  if (instanceRefName === 'left') chartLeftInstance = newChart;
+  if (instanceRefName === 'right') chartRightInstance = newChart;
+}
+
+function loadChart(selectId, canvasId, refName) {
+  const selected = document.getElementById(selectId).value;
+  fetch(`/stats?type=${selected}`)
+    .then(res => res.json())
+    .then(data => renderChart(canvasId, data, refName));
+}
+
+document.getElementById("chartTypeLeft").addEventListener("change", () => {
+  loadChart("chartTypeLeft", "chartLeft", "left");
+});
+document.getElementById("chartTypeRight").addEventListener("change", () => {
+  loadChart("chartTypeRight", "chartRight", "right");
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  loadChart("chartTypeLeft", "chartLeft", "left");
+  loadChart("chartTypeRight", "chartRight", "right");
+});
+</script>
+
+<style>
+#chartLeft, #chartRight {
+  max-height: 300px;
+}
+</style>
+
+<h4 class="mt-5">📜 Sorgu Geçmişi</h4>
+<form method="get" class="mb-3">
+  <div class="row g-2">
+    <div class="col-md-6">
+      <input type="text" class="form-control" name="query_filter" placeholder="Sorgularda ara..." value="{{ request.args.get('query_filter', '') }}">
+    </div>
+    <div class="col-md-4">
+      <select name="sort_order" class="form-select">
+        <option value="desc" {% if request.args.get('sort_order', 'desc') == 'desc' %}selected{% endif %}>📅 Yeni → Eski</option>
+        <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>📅 Eski → Yeni</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-primary w-100" type="submit">Uygula</button>
+    </div>
+  </div>
+</form>
+
+<table class="table table-bordered table-sm">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Soru</th>
+      <th>SQL</th>
+      <th>Sonuç</th>
+      <th>Tarih</th>
+      <th>İşlem</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for index, q in history %}
+    <tr>
+      <td>{{ index }}</td>
+      <td>{{ q.question }}</td>
+      <td><code>{{ q.sql_query }}</code></td>
+      <td><pre style="white-space: pre-wrap">{{ q.result }}</pre></td>
+      <td>{{ q.timestamp }}</td>
+      <td>
+        <a href="{{ url_for('download_query', query_id=q.id) }}" class="btn btn-sm btn-outline-primary">⬇️ İndir</a>
+        <a href="{{ url_for('delete_query', query_id=q.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bu sorguyu silmek istediğinize emin misiniz?')">🗑️ Sil</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">Henüz sorgu yok.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
