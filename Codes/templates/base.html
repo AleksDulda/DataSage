@@ -5,7 +5,7 @@
     <title>{% block title %}DATASAGE{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+    </head>
 <body>
 
 <nav class="navbar navbar-expand-lg border-bottom py-2" id="main-navbar">
@@ -43,31 +43,29 @@
   </div>
 </nav>
 
-<div class="container mt-4">
-    <!-- Flash mesajlar -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+<div id="page-content-wrapper"> {# Sticky footer için ana içerik kapsayıcısı #}
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
 
-    {% block content %}{% endblock %}
+        {% block content %}{% endblock %}
+    </div>
 </div>
 
-<!-- Footer -->
 <footer class="text-center py-3 mt-5 border-top bg-body-tertiary text-muted">
   <small>© 2025 DATASAGE — Tüm Hakları Saklıdır.</small>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Tema geçişi -->
 <script>
     const html = document.documentElement;
     const toggleBtn = document.getElementById("theme-toggle");
@@ -83,6 +81,26 @@
 </script>
 
 <style>
+  /* Sticky Footer için CSS Kuralları */
+  html, body {
+      height: 100%; /* HTML ve body'nin tüm ekran yüksekliğini kaplamasını sağlar */
+      margin: 0; /* Tarayıcı varsayılan marjinlerini sıfırla */
+      display: flex; /* Body'yi flex konteyner yapar */
+      flex-direction: column; /* İçeriklerini dikey olarak sırala */
+  }
+
+  #page-content-wrapper { /* Ana içerik kapsayıcısı */
+      flex-grow: 1; /* Mevcut alanı kaplamak için büyüyebilir */
+      flex-shrink: 0; /* Küçülmesini engeller */
+  }
+
+  footer {
+    flex-shrink: 0; /* Footer'ın küçülmesini engeller */
+    font-size: 0.9rem;
+    /* Footer'daki mevcut Bootstrap sınıfları: text-center py-3 mt-5 border-top bg-body-tertiary text-muted */
+  }
+
+  /* Mevcut tema geçişi stilleri */
   html[data-bs-theme="dark"] #main-navbar {
     background-color: #212529 !important;
     border-color: #444;
@@ -102,10 +120,6 @@
   html[data-bs-theme="dark"] .btn-outline-primary:hover {
     background-color: #0d6efd;
     color: #fff;
-  }
-
-  footer {
-    font-size: 0.9rem;
   }
 </style>
 
