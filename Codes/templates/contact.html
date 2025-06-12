@@ -6,49 +6,25 @@
 <p>Her türlü soru, görüş ve öneriniz için bizimle iletişime geçebilirsiniz.</p>
 
 <ul class="list-group list-group-flush mb-4">
-  <li class="list-group-item"><strong>Email:</strong> info@datasage.com</li>
-  <li class="list-group-item"><strong>GitHub:</strong> 
+  <li class="list-group-item bg-body text-body"><strong>Proje Email:</strong> info@datasage.com</li>
+  <li class="list-group-item bg-body text-body"><strong>GitHub:</strong> 
     <a href="https://github.com/AleksDulda/DataSage" target="_blank">Proje GitHub Sayfası</a>
   </li>
 </ul>
 
-<h4 class="mb-3">👥 Ekip Üyeleri</h4>
-<ul class="list-group mb-4">
-  <li class="list-group-item">
-    <strong>Aleks Dulda:</strong>
-    <a href="https://www.linkedin.com/in/aleks-dulda-47435b221/" target="_blank">LinkedIn Profili</a>
-  </li>
-  <li class="list-group-item">
-    <strong>Murat Demirbaş:</strong>
-    <a href="https://www.linkedin.com/in/muratdemirbas1436/" target="_blank">LinkedIn Profili</a>
-  </li>
-  <li class="list-group-item">
-    <strong>M. Emin Alantepe:</strong>
-    <a href="https://www.linkedin.com/in/m-emin-alantepe/" target="_blank">LinkedIn Profili</a>
-  </li>
-  <li class="list-group-item">
-    <strong>Enes Malik Altınpınar:</strong>
-    <a href="https://www.linkedin.com/in/enes-malik-alt%C4%B1np%C4%B1nar/" target="_blank">LinkedIn Profili</a>
-  </li>
-  <li class="list-group-item">
-    <strong>Kaan Çardak:</strong>
-    <a href="https://www.linkedin.com/in/kaan-%C3%A7ardak-82a155175/" target="_blank">LinkedIn Profili</a>
-  </li>
-</ul>
-
-<h4 class="mb-3">📨 Mesaj Gönderin</h4>
-<form method="post" action="#">
+<h4 class="mt-5 mb-3">📨 Mesaj Gönderin</h4>
+<form method="post" action="{{ url_for('contact') }}">
   <div class="mb-3">
     <label for="name" class="form-label">Adınız</label>
-    <input type="text" class="form-control" id="name" placeholder="Adınızı giriniz">
+    <input type="text" name="name" class="form-control" id="name" placeholder="Adınızı giriniz" required>
   </div>
   <div class="mb-3">
     <label for="email" class="form-label">Email adresiniz</label>
-    <input type="email" class="form-control" id="email" placeholder="Email adresinizi giriniz">
+    <input type="email" name="email" class="form-control" id="email" placeholder="Email adresinizi giriniz" required>
   </div>
   <div class="mb-3">
     <label for="message" class="form-label">Mesajınız</label>
-    <textarea class="form-control" id="message" rows="4" placeholder="Mesajınızı yazınız"></textarea>
+    <textarea name="message" class="form-control" id="message" rows="4" placeholder="Mesajınızı yazınız" required></textarea>
   </div>
   <button type="submit" class="btn btn-primary">Gönder</button>
 </form>

@@ -1,10 +1,107 @@
 {% extends "base.html" %}
 {% block title %}Hakkımızda - DATASAGE{% endblock %}
 {% block content %}
-<h2 class="mb-3">👨‍💻 Hakkımızda</h2>
-<p>DATASAGE projesi, teknik bilgisi olmayan kullanıcıların bile veritabanı sorguları yazabilmesini sağlamak için geliştirilmiştir.</p>
 
-<p>Flask tabanlı bu sistem; doğal dil işleme, veritabanı yönetimi ve veri görselleştirme gibi teknolojileri bir araya getirerek kullanıcı dostu bir analiz ortamı sunar.</p>
+<h2 class="mb-4">👨‍💻 Hakkımızda</h2>
+<div class="bg-body p-4 border rounded shadow-sm text-body mb-4">
+  <p><strong>DATASAGE</strong>, teknik bilgiye sahip olmayan kullanıcıların bile SQL bilmeden veritabanı sorguları yapabilmesini sağlayan bir web platformudur. Amacımız, veri analizi süreçlerini herkes için erişilebilir ve anlaşılır hale getirmektir.</p>
+  <p>Flask altyapısı ile geliştirilen sistem; doğal dil işleme, veri tabanı yönetimi ve görselleştirme gibi birçok teknolojiyi kullanıcı dostu bir arayüzde birleştirir. Kullanıcılar kendi SQLite veritabanlarını yükleyip doğal dilde sorular sorarak anında analiz sonuçlarına ulaşabilirler.</p>
+</div>
 
-<p>Proje, <strong>Bursa Teknik Üniversitesi</strong> Bilgisayar Mühendisliği öğrencileri tarafından 2025 yılında geliştirilmiştir.</p>
+<h4 class="mb-4">🌟 Vizyonumuz</h4>
+<div class="bg-body p-4 border rounded shadow-sm text-body mb-4">
+  <p>Dijital dünyaın verilerle şekillendiği bu çağta, herkesin veriye kolayca erişebildiği ve anlamlı sonuçlar çıkarabildiği bir düzen oluşturmak. Güler yüzlü, sade ve akıllı sistemler geliştirerek bilgiye erişimi demokratikleştirmek.</p>
+</div>
+
+<h4 class="mb-4">🌎 Misyonumuz</h4>
+<div class="bg-body p-4 border rounded shadow-sm text-body mb-5">
+  <ul class="mb-0">
+    <li>Kullanıcı dostu veri analiz platformları geliştirmek</li>
+    <li>Yapay zeka ile veritabanı sorgularını sadeleştirip herkes için erişilebilir kılmak</li>
+    <li>Açık kaynak teknolojilerle topluluğa katkı sunmak</li>
+    <li>Gizliliğe, veriye ve tasarıma önem veren bir yaklaşım sergilemek</li>
+  </ul>
+</div>
+
+<h4 class="mb-3">👥 Proje Ekibi</h4>
+<div class="bg-body p-4 border rounded shadow-sm text-body">
+  <p>Bu proje, <strong>Bursa Teknik Üniversitesi</strong> Bilgisayar Mühendisliği öğrencileri tarafından 2025 yılında geliştirilmiştir. Projede görev alan ekip üyeleri şunlardır:</p>
+</div>
+<br>
+
+<!-- Aleks -->
+<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
+  <img src="{{ url_for('static', filename='team/aleks.jpg') }}" alt="Aleks Dulda"
+       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+  <div>
+    <h5 class="mb-1">Aleks Dulda</h5>
+    <p class="mb-1">Full Stack Developer / İletşiim Sorumlusu</p>
+    <p class="mb-0">
+      <a href="mailto:aleksdulda@gmail.com" class="me-2 link-primary">📧 Email</a>
+      <a href="https://github.com/AleksDulda" class="me-2 link-primary" target="_blank">💻 GitHub</a>
+      <a href="https://www.linkedin.com/in/aleks-dulda-47435b221/" class="link-primary" target="_blank">🔗 LinkedIn</a>
+    </p>
+  </div>
+</div>
+
+<!-- Murat -->
+<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
+  <img src="{{ url_for('static', filename='team/murat.jpg') }}" alt="Murat Demirbaş"
+       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+  <div>
+    <h5 class="mb-1">Murat Demirbaş</h5>
+    <p class="mb-1">Backend & Security</p>
+    <p class="mb-0">
+      <a href="mailto:murat@example.com" class="me-2 link-primary">📧 Email</a>
+      <a href="https://github.com/demirbas1436" class="me-2 link-primary" target="_blank">💻 GitHub</a>
+      <a href="https://www.linkedin.com/in/muratdemirbas1436/" class="link-primary" target="_blank">🔗 LinkedIn</a>
+    </p>
+  </div>
+</div>
+
+<!-- Emin -->
+<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
+  <img src="{{ url_for('static', filename='team/emin.jpg') }}" alt="M. Emin Alantepe"
+       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+  <div>
+    <h5 class="mb-1">M. Emin Alantepe</h5>
+    <p class="mb-1">Frontend Developer</p>
+    <p class="mb-0">
+      <a href="mailto:emin@example.com" class="me-2 link-primary">📧 Email</a>
+      <a href="https://github.com/alantepeemin" class="me-2 link-primary" target="_blank">💻 GitHub</a>
+      <a href="https://www.linkedin.com/in/m-emin-alantepe/" class="link-primary" target="_blank">🔗 LinkedIn</a>
+    </p>
+  </div>
+</div>
+
+<!-- Enes -->
+<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
+  <img src="{{ url_for('static', filename='team/enes.jpg') }}" alt="Enes Malik Altınpınar"
+       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+  <div>
+    <h5 class="mb-1">Enes Malik Altınpınar</h5>
+    <p class="mb-1">Mobile Developer</p>
+    <p class="mb-0">
+      <a href="mailto:enes@example.com" class="me-2 link-primary">📧 Email</a>
+      <a href="https://github.com/malikaltinpinar" class="me-2 link-primary" target="_blank">💻 GitHub</a>
+      <a href="https://www.linkedin.com/in/enes-malik-alt%C4%B1np%C4%B1nar/" class="link-primary" target="_blank">🔗 LinkedIn</a>
+    </p>
+  </div>
+</div>
+
+<!-- Kaan -->
+<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
+  <img src="{{ url_for('static', filename='team/kaan.jpg') }}" alt="Kaan Çardak"
+       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+  <div>
+    <h5 class="mb-1">Kaan Çardak</h5>
+    <p class="mb-1">UI/UX Designer</p>
+    <p class="mb-0">
+      <a href="mailto:kaan@example.com" class="me-2 link-primary">📧 Email</a>
+      <a href="https://github.com/kaancardak" class="me-2 link-primary" target="_blank">💻 GitHub</a>
+      <a href="https://www.linkedin.com/in/kaan-%C3%A7ardak-82a155175/" class="link-primary" target="_blank">🔗 LinkedIn</a>
+    </p>
+  </div>
+</div>
+
 {% endblock %}

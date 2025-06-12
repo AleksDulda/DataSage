@@ -43,12 +43,15 @@
   </div>
 </nav>
 
-
 <div class="container mt-4">
+    <!-- Flash mesajlar -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">{{ message }}</div>
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+          </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
@@ -56,8 +59,16 @@
     {% block content %}{% endblock %}
 </div>
 
+<!-- Footer -->
+<footer class="text-center py-3 mt-5 border-top bg-body-tertiary text-muted">
+  <small>© 2025 DATASAGE — Tüm Hakları Saklıdır.</small>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Tema geçişi -->
 <script>
-    // Tema geçişi
     const html = document.documentElement;
     const toggleBtn = document.getElementById("theme-toggle");
     const savedTheme = localStorage.getItem("theme");
@@ -92,8 +103,11 @@
     background-color: #0d6efd;
     color: #fff;
   }
-</style>
 
+  footer {
+    font-size: 0.9rem;
+  }
+</style>
 
 </body>
 </html>
