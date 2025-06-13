@@ -2,8 +2,8 @@
 {% block title %}DATASAGE - Akıllı SQL Sorguları{% endblock %}
 {% block content %}
 <div class="text-center py-5">
-  <h1 class="display-4 fw-bold text-primary">🤖 DATASAGE</h1>
-  <p class="lead">SQL bilmeden veritabanınızı akıllıca sorgulayın. Doğal dil ile, anında sonuç alın.</p>
+  <img id="main-logo" src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="DATASAGE Logo" class="img-fluid" style="max-width: 300px; height: auto;">
+  <p class="lead mt-3">SQL bilmeden veritabanınızı akıllıca sorgulayın. Doğal dil ile, anında sonuç alın.</p>
   <a href="{{ url_for('auth.login') }}" class="btn btn-lg btn-success mt-3">Giriş Yap ve Başla</a>
 </div>
 

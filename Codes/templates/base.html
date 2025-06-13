@@ -5,12 +5,15 @@
     <title>{% block title %}DATASAGE{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
     </head>
 <body>
 
 <nav class="navbar navbar-expand-lg border-bottom py-2" id="main-navbar">
   <div class="container">
-    <a class="navbar-brand fw-bold text-primary" href="{{ url_for('index') }}">DATASAGE</a>
+    <a class="navbar-brand" href="{{ url_for('index') }}">
+      <img id="navbar-logo" src="{{ url_for('static', filename='images/logo-navbar.png') }}" alt="DATASAGE Logo" style="height: 30px;">
+    </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Menüyü Aç">
@@ -37,13 +40,16 @@
           <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-primary">Giriş</a>
           <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary ms-1">Kayıt</a>
         {% endif %}
-        <button id="theme-toggle" class="btn btn-sm btn-secondary ms-3">🌗</button>
+        <button id="theme-toggle" class="btn btn-sm btn-secondary ms-3">
+          <img id="theme-toggle-icon" src="{{ url_for('static', filename='images/switch-button.png') }}" alt="Tema Değiştir" style="width: auto; height: 28px;">
+        </button>
       </div>
     </div>
   </div>
 </nav>
 
-<div id="page-content-wrapper"> {# Sticky footer için ana içerik kapsayıcısı #}
+{# Yeni eklenen #page-content-wrapper div'i content bloğunu sarıyor #}
+<div id="page-content-wrapper">
     <div class="container mt-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -69,35 +75,75 @@
 <script>
     const html = document.documentElement;
     const toggleBtn = document.getElementById("theme-toggle");
-    const savedTheme = localStorage.getItem("theme");
+    const navbarLogo = document.getElementById("navbar-logo");
+    const mainLogo = document.getElementById("main-logo");
+    const themeToggleIcon = document.getElementById("theme-toggle-icon");
 
-    if (savedTheme) html.setAttribute("data-bs-theme", savedTheme);
+    const lightNavbarLogo = "{{ url_for('static', filename='images/logo-navbar.png') }}";
+    const darkNavbarLogo = "{{ url_for('static', filename='images/logo-navbar-dark.png') }}";
+    const lightMainLogo = "{{ url_for('static', filename='images/logo.png') }}";
+    const darkMainLogo = "{{ url_for('static', filename='images/logo-dark.png') }}";
+    const lightToggleButton = "{{ url_for('static', filename='images/switch-button.png') }}";
+    const darkToggleButton = "{{ url_for('static', filename='images/switch-button-dark.png') }}";
+
+
+    function updateThemeElements(theme) {
+        if (theme === "dark") {
+            if (navbarLogo) navbarLogo.src = darkNavbarLogo;
+            if (mainLogo) mainLogo.src = darkMainLogo;
+            if (themeToggleIcon) themeToggleIcon.src = darkToggleButton;
+        } else {
+            if (navbarLogo) navbarLogo.src = lightNavbarLogo;
+            if (mainLogo) mainLogo.src = lightMainLogo;
+            if (themeToggleIcon) themeToggleIcon.src = lightToggleButton;
+        }
+    }
+
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+        html.setAttribute("data-bs-theme", savedTheme);
+        updateThemeElements(savedTheme);
+    } else {
+        updateThemeElements("light");
+    }
 
     toggleBtn.addEventListener("click", () => {
         const newTheme = html.getAttribute("data-bs-theme") === "light" ? "dark" : "light";
         html.setAttribute("data-bs-theme", newTheme);
         localStorage.setItem("theme", newTheme);
+        updateThemeElements(newTheme);
     });
 </script>
 
 <style>
   /* Sticky Footer için CSS Kuralları */
   html, body {
-      height: 100%; /* HTML ve body'nin tüm ekran yüksekliğini kaplamasını sağlar */
-      margin: 0; /* Tarayıcı varsayılan marjinlerini sıfırla */
-      display: flex; /* Body'yi flex konteyner yapar */
-      flex-direction: column; /* İçeriklerini dikey olarak sırala */
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      /* Temel renk değişimi için geçiş ekle */
+      transition: background-color 0.3s ease; /* Arka plan rengi değişimi için */
   }
 
-  #page-content-wrapper { /* Ana içerik kapsayıcısı */
-      flex-grow: 1; /* Mevcut alanı kaplamak için büyüyebilir */
-      flex-shrink: 0; /* Küçülmesini engeller */
+  /* Tüm genel elementler için yumuşak geçiş */
+  body * {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Logo ve buton görselleri için de geçiş ekle */
+  #navbar-logo, #main-logo, #theme-toggle-icon {
+      transition: filter 0.3s ease, transform 0.3s ease; /* Görsel değişimi için filter veya transform kullanılabilir */
+  }
+
+  #page-content-wrapper {
+      flex-grow: 1;
+      flex-shrink: 0;
   }
 
   footer {
-    flex-shrink: 0; /* Footer'ın küçülmesini engeller */
+    flex-shrink: 0;
     font-size: 0.9rem;
-    /* Footer'daki mevcut Bootstrap sınıfları: text-center py-3 mt-5 border-top bg-body-tertiary text-muted */
   }
 
   /* Mevcut tema geçişi stilleri */
@@ -120,6 +166,32 @@
   html[data-bs-theme="dark"] .btn-outline-primary:hover {
     background-color: #0d6efd;
     color: #fff;
+  }
+
+  /* Tema geçiş butonu için stil düzenlemesi */
+  #theme-toggle.btn-secondary {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+  }
+
+  #theme-toggle-icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Dark modda yazı renklerini de kontrol et */
+  html[data-bs-theme="dark"] .text-muted {
+      color: #adb5bd !important; /* Koyu modda daha görünür gri */
+  }
+
+  html[data-bs-theme="dark"] .text-primary {
+      color: #8ab4f8 !important; /* Koyu modda daha uyumlu mavi */
+  }
+
+  html[data-bs-theme="dark"] .lead {
+      color: #e2e6ea !important; /* Koyu modda lead metin rengi */
   }
 </style>
 
