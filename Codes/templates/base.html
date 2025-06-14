@@ -55,12 +55,14 @@
             </ul>
           </div>
         {% else %}
-          <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-box-arrow-in-right me-1"></i>Giriş
-          </a>
-          <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary ms-1">
-            <i class="bi bi-person-plus me-1"></i>Kayıt
-          </a>
+       <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm-custom">
+          <i class="bi bi-box-arrow-in-right me-1"></i>Giriş
+        </a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-sm-custom">
+          <i class="bi bi-person-plus me-1"></i>Kayıt
+        </a>
+
+
         {% endif %}
         <button id="theme-toggle" class="btn btn-sm btn-secondary ms-3" title="Tema Değiştir">
           <i id="theme-icon" class="bi bi-sun-fill"></i>
@@ -315,6 +317,17 @@ footer {
 .btn-outline-primary:hover {
     box-shadow: 0 8px 25px rgba(13, 110, 253, 0.2);
 }
+
+  .btn-sm-custom {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
 
 /* Ripple Efekti */
 .ripple {

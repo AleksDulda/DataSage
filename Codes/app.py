@@ -57,34 +57,49 @@ def login_required(view_func):
 
 @app.route("/ask", methods=["GET", "POST"])
 def ask():
-    # Giriş kontrolü
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
-    if request.method == "GET":
-        return render_template("ask.html")
-
-    # POST işlemleri
     user_id = session["user_id"]
-    question = request.form["question"]
+
+    if request.method == "GET":
+        last_db = session.get("current_db")
+        return render_template("ask.html", last_db=last_db)
+
+    question = request.form.get("question", "").strip()
     db_file = request.files.get("database")
 
-    if not db_file or db_file.filename == "":
-        return render_template("ask.html", result={"rows": [["Veritabanı dosyası yüklenmedi."]], "columns": ["Hata"], "sql": ""})
+    if not question:
+        flash("Lütfen bir soru girin.", "warning")
+        return render_template("ask.html", last_db=session.get("current_db"))
 
-    filename = f"user{user_id}_{db_file.filename}"
-    filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
-    db_file.save(filepath)
+    # Eğer yeni veritabanı dosyası yüklenmişse...
+    if db_file and db_file.filename:
+        filename = f"user{user_id}_{db_file.filename}"
+        filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
+        db_file.save(filepath)
 
-    # Veritabanı kaydı
-    conn = sqlite3.connect("database.sqlite")
-    conn.execute("INSERT INTO db_uploads (user_id, filename) VALUES (?, ?)", (user_id, filename))
-    conn.commit()
-    conn.close()
+        # Veritabanı kaydı
+        conn = sqlite3.connect("database.sqlite")
+        conn.execute("INSERT INTO db_uploads (user_id, filename) VALUES (?, ?)", (user_id, filename))
+        conn.commit()
+        conn.close()
 
-    # SQL oluştur
+        session["current_db"] = filename
+    else:
+        # Yeni veritabanı yüklenmediyse, daha önceki yüklü dosya var mı kontrol et
+        if "current_db" not in session:
+            flash("Lütfen önce bir veritabanı yükleyin.", "danger")
+            return render_template("ask.html")
+        filename = session["current_db"]
+        filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
+
+    # Şema çıkarımı ve SQL üretimi
     schema = get_schema(filepath)
     sql = generate_sql(schema, question)
+
+    print("== Soru:", question)
+    print("== SQL:", sql)
 
     try:
         userdb = sqlite3.connect(filepath)
@@ -95,22 +110,25 @@ def ask():
         userdb.close()
         result = {"rows": rows, "columns": columns, "sql": sql}
     except Exception as e:
+        print("[!] SQL çalıştırma hatası:", str(e))
         result = {
             "rows": [["Hata: " + str(e)]],
             "columns": ["Hata"],
-            "sql": sql[:500] if sql else ""
+            "sql": sql[:500]
         }
 
     # Sorgu geçmişine kaydet
     conn = sqlite3.connect("database.sqlite")
-    conn.execute("""
-        INSERT INTO query_history (user_id, question, sql_query, result)
-        VALUES (?, ?, ?, ?)
-    """, (user_id, question, result["sql"], str(result["rows"])))
+    conn.execute(
+        "INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
+        (user_id, question, result["sql"], str(result["rows"]))
+    )
     conn.commit()
     conn.close()
 
-    return render_template("ask.html", result=result)
+    # SQL sorgusunu da template'e gönderiyoruz
+    return render_template("ask.html", result=result, last_db=filename, sql_query=result["sql"])
+
 
 @app.route("/download", methods=["POST"])
 def download():
@@ -137,7 +155,10 @@ def download():
 def dashboard():
     user_id = session["user_id"]
     query_filter = request.args.get("query_filter", "")
-    sort_order = request.args.get("sort_order", "desc")
+    sort_order = request.args.get("sort_order", "desc").lower()
+
+    if sort_order not in ["asc", "desc"]:
+        sort_order = "desc"
 
     conn = sqlite3.connect("database.sqlite")
     conn.row_factory = sqlite3.Row
@@ -148,18 +169,20 @@ def dashboard():
         ORDER BY uploaded_at DESC
     """, (user_id,)).fetchall()
 
-    history_query = "SELECT * FROM query_history WHERE user_id = ?"
+    history_query = """
+        SELECT * FROM query_history
+        WHERE user_id = ?
+    """
     params = [user_id]
+
     if query_filter:
-        history_query += " AND question LIKE ?"
-        params.append(f"%{query_filter}%")
-    history_query += " ORDER BY timestamp " + ("ASC" if sort_order == "asc" else "DESC")
+        history_query += " AND LOWER(question) LIKE ?"
+        params.append(f"%{query_filter.lower()}%")
+
+    history_query += f" ORDER BY timestamp {sort_order.upper()}"
 
     history = conn.execute(history_query, params).fetchall()
     conn.close()
-
-    if sort_order == "desc":
-        history = list(reversed(history))
 
     indexed_history = list(enumerate(history, 1))
     return render_template("dashboard.html", uploads=uploads, history=indexed_history)

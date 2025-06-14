@@ -22,6 +22,18 @@
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <div class="query-card" data-aos="fade-up" data-aos-delay="200">
+        
+        <!-- Active Database Alert -->
+        {% if last_db %}
+        <div class="alert alert-info d-flex align-items-center mb-4" data-aos="fade-down">
+          <i class="bi bi-database-check text-info me-3 fs-4"></i>
+          <div>
+            <strong>Aktif veritabanı:</strong> {{ last_db.split('_', 1)[1] if '_' in last_db else last_db }}<br>
+            <small class="text-muted">Yeni bir veritabanı yüklersen, bu veritabanının yerine geçer.</small>
+          </div>
+        </div>
+        {% endif %}
+
         <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form">
           
           <!-- Database Upload -->
@@ -30,7 +42,7 @@
               <i class="bi bi-database me-2 text-primary"></i>Veritabanı Dosyası
             </label>
             <div class="upload-area" id="uploadArea">
-              <input type="file" name="database" class="form-control d-none" id="databaseFile" accept=".db,.sqlite,.sqlite3" required>
+              <input type="file" name="database" class="form-control d-none" id="databaseFile" accept=".db,.sqlite,.sqlite3">
               <div class="upload-content">
                 <i class="bi bi-cloud-upload upload-icon"></i>
                 <p class="upload-text mb-2">SQLite dosyanızı sürükleyin veya tıklayın</p>
@@ -78,11 +90,45 @@
     </div>
   </div>
 
+  <!-- SQL Query Display -->
+  {% if sql_query %}
+  <div class="row justify-content-center mt-4">
+    <div class="col-lg-10">
+      <div class="sql-card" data-aos="fade-up">
+        <div class="sql-header">
+          <h5 class="mb-0">
+            <i class="bi bi-code-slash text-info me-2"></i>Üretilen SQL Sorgusu
+          </h5>
+        </div>
+        <div class="sql-content">
+          <pre class="sql-query mb-0"><code>{{ sql_query }}</code></pre>
+          <button class="btn btn-sm btn-outline-secondary copy-sql" onclick="copySql()">
+            <i class="bi bi-clipboard me-1"></i>Kopyala
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Results Section -->
   {% if result %}
   <div class="row justify-content-center mt-5">
     <div class="col-lg-10">
       <div class="results-card" data-aos="fade-up">
+        {% if result["columns"][0] == "Hata" %}
+        <!-- Error Display -->
+        <div class="error-section">
+          <div class="error-header">
+            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+            <h4 class="mb-0">Hata Oluştu</h4>
+          </div>
+          <div class="error-content">
+            <p class="mb-0">{{ result["rows"][0][0] }}</p>
+          </div>
+        </div>
+        {% else %}
+        <!-- Success Results -->
         <div class="results-header">
           <h4 class="mb-0">
             <i class="bi bi-table text-success me-2"></i>Sorgu Sonuçları
@@ -117,13 +163,123 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Chart Section -->
+        {% if result["columns"]|length >= 2 and result["rows"]|length > 0 %}
+        <div class="chart-section">
+          <div class="chart-controls">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-bar-chart me-2 text-warning"></i>Grafik Görünümü
+            </label>
+            <select id="chartType" class="form-select chart-select" onchange="drawChart()">
+              <option value="bar">📊 Sütun Grafik</option>
+              <option value="line">📈 Çizgi Grafik</option>
+              <option value="pie">🥧 Pasta Grafik</option>
+              <option value="doughnut">🍩 Halka Grafik</option>
+              <option value="radar">🎯 Radar Grafik</option>
+            </select>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartArea"></canvas>
+          </div>
+        </div>
+        {% endif %}
+        {% endif %}
       </div>
     </div>
   </div>
 
+  <!-- Chart.js and Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  {% if result and result["columns"][0] != "Hata" %}
   <script>
-    let rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
-    let columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
+    
+    const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
+    const columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
+    let chartInstance = null;
+
+    function generateColors(count) {
+        const colors = [];
+        const baseColors = [
+            '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1',
+            '#20c997', '#fd7e14', '#e83e8c', '#6c757d', '#17a2b8'
+        ];
+        
+        for (let i = 0; i < count; i++) {
+            if (i < baseColors.length) {
+                colors.push(baseColors[i]);
+            } else {
+                const hue = (i * 360 / count) % 360;
+                colors.push(`hsl(${hue}, 65%, 60%)`);
+            }
+        }
+        return colors;
+    }
+
+    function drawChart() {
+        const type = document.getElementById("chartType").value;
+        const labels = [];
+        const values = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const label = rows[i][0];
+            const raw = rows[i][1];
+            const value = parseFloat(String(raw).replace(/[^\d.-]/g, ""));
+            if (!isNaN(value)) {
+                labels.push(label);
+                values.push(value);
+            }
+        }
+
+        if (labels.length > 0 && values.length > 0) {
+            if (chartInstance) chartInstance.destroy();
+
+            const ctx = document.getElementById("chartArea").getContext("2d");
+            const isXY = (type === "bar" || type === "line");
+
+            chartInstance = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: columns[1],
+                        data: values,
+                        backgroundColor: generateColors(labels.length),
+                        borderColor: generateColors(labels.length),
+                        borderWidth: 2,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: "Grafiksel Görselleştirme",
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
+                            labels: { usePointStyle: true }
+                        }
+                    },
+                    ...(isXY && {
+                        scales: {
+                            x: { 
+                                ticks: { color: '#6c757d' },
+                                grid: { color: '#e9ecef' }
+                            },
+                            y: { 
+                                ticks: { color: '#6c757d' },
+                                grid: { color: '#e9ecef' }
+                            }
+                        }
+                    })
+                }
+            });
+        }
+    }
 
     function downloadResult(format) {
         const btn = event.target.closest('button');
@@ -152,7 +308,14 @@
             btn.disabled = false;
         });
     }
+
+    // Initialize chart when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(drawChart, 500);
+    });
+    
   </script>
+  {% endif %}
   {% endif %}
 </div>
 
@@ -266,6 +429,44 @@
   box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
 }
 
+/* SQL Query Card */
+.sql-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border: 1px solid #e3f2fd;
+}
+
+.sql-header {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e3f2fd;
+}
+
+.sql-content {
+  padding: 2rem;
+  position: relative;
+}
+
+.sql-query {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #17a2b8;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.copy-sql {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+/* Results Card */
 .results-card {
   background: white;
   border-radius: 16px;
@@ -310,6 +511,54 @@
   border-color: #f0f0f0;
 }
 
+/* Error Section */
+.error-section {
+  padding: 2rem;
+}
+
+.error-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f8d7da;
+}
+
+.error-content {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #dc3545;
+}
+
+/* Chart Section */
+.chart-section {
+  padding: 2rem;
+  border-top: 1px solid #e9ecef;
+  background: #fafbfc;
+}
+
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.chart-select {
+  max-width: 200px;
+  border-radius: 8px;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  height: 400px;
+}
+
 /* Dark Theme */
 html[data-bs-theme="dark"] .query-card {
   background: #2d2d2d;
@@ -329,6 +578,28 @@ html[data-bs-theme="dark"] .results-header {
   background: linear-gradient(135deg, #404040 0%, #555 100%);
 }
 
+html[data-bs-theme="dark"] .sql-card {
+  background: #2d2d2d;
+  border-color: #404040;
+}
+
+html[data-bs-theme="dark"] .sql-header {
+  background: linear-gradient(135deg, #404040 0%, #555 100%);
+}
+
+html[data-bs-theme="dark"] .sql-query {
+  background: #383838;
+  border-color: #17a2b8;
+}
+
+html[data-bs-theme="dark"] .chart-section {
+  background: #383838;
+}
+
+html[data-bs-theme="dark"] .chart-container {
+  background: #2d2d2d;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .query-card {
@@ -343,6 +614,25 @@ html[data-bs-theme="dark"] .results-header {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+  
+  .chart-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .chart-container {
+    height: 300px;
+    padding: 1rem;
+  }
+  
+  .sql-content {
+    padding: 1rem;
+  }
+  
+  .copy-sql {
+    position: static;
+    margin-top: 1rem;
   }
 }
 </style>
@@ -359,63 +649,92 @@ document.addEventListener('DOMContentLoaded', function() {
   const fileName = document.getElementById('fileName');
   const removeFile = document.getElementById('removeFile');
 
-  uploadArea.addEventListener('click', () => fileInput.click());
-  
-  uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.classList.add('dragover');
-  });
-  
-  uploadArea.addEventListener('dragleave', () => {
-    uploadArea.classList.remove('dragover');
-  });
-  
-  uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      fileInput.files = files;
-      showFileInfo(files[0]);
+  if (uploadArea && fileInput) {
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        showFileInfo(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        showFileInfo(e.target.files[0]);
+      }
+    });
+
+    if (removeFile) {
+      removeFile.addEventListener('click', () => {
+        fileInput.value = '';
+        hideFileInfo();
+      });
     }
-  });
 
-  fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      showFileInfo(e.target.files[0]);
+    function showFileInfo(file) {
+      if (fileName && fileInfo && uploadArea) {
+        fileName.textContent = file.name;
+        uploadArea.classList.add('d-none');
+        fileInfo.classList.remove('d-none');
+      }
     }
-  });
 
-  removeFile.addEventListener('click', () => {
-    fileInput.value = '';
-    hideFileInfo();
-  });
-
-  function showFileInfo(file) {
-    fileName.textContent = file.name;
-    uploadArea.classList.add('d-none');
-    fileInfo.classList.remove('d-none');
-  }
-
-  function hideFileInfo() {
-    uploadArea.classList.remove('d-none');
-    fileInfo.classList.add('d-none');
+    function hideFileInfo() {
+      if (uploadArea && fileInfo) {
+        uploadArea.classList.remove('d-none');
+        fileInfo.classList.add('d-none');
+      }
+    }
   }
 });
 
 function setSuggestion(element) {
-  document.querySelector('.question-input').value = element.textContent;
+  const questionInput = document.querySelector('.question-input');
+  if (questionInput) {
+    questionInput.value = element.textContent;
+  }
 }
 
 // Form Submission with Loading
-document.querySelector('.query-form').addEventListener('submit', function() {
-  const btn = document.querySelector('.submit-btn');
-  const btnText = btn.querySelector('.btn-text');
-  const spinner = btn.querySelector('.loading-spinner');
-  
-  btnText.classList.add('d-none');
-  spinner.classList.remove('d-none');
-  btn.disabled = true;
-});
+const queryForm = document.querySelector('.query-form');
+if (queryForm) {
+  queryForm.addEventListener('submit', function() {
+    const btn = document.querySelector('.submit-btn');
+    const btnText = btn.querySelector('.btn-text');
+    const spinner = btn.querySelector('.loading-spinner');
+    
+    if (btnText && spinner) {
+      btnText.classList.add('d-none');
+      spinner.classList.remove('d-none');
+      btn.disabled = true;
+    }
+  });
+}
+
+// Copy SQL function
+function copySql() {
+  const sqlQuery = document.querySelector('.sql-query').textContent;
+  navigator.clipboard.writeText(sqlQuery).then(() => {
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check me-1"></i>Kopyalandı';
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+    }, 2000);
+  });
+}
 </script>
 {% endblock %}

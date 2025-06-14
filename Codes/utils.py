@@ -9,20 +9,34 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 def generate_sql(schema, question):
     prompt = f"""
-SQL veritabanı şeması:
+Aşağıda bir SQLite veritabanı şeması bulunmaktadır.
+
+Veritabanı şeması:
 {schema}
 
-Soru: "{question}"
-print(f"API Key: {repr(OPENROUTER_API_KEY)}")
+Kullanıcıdan gelen doğal dildeki sorgu:
+"{question}"
 
+Kriterler:
+- Kullanıcı SQL bilmeyebilir.
+- Sorular bazen eksik, muğlak veya yanlış terimlerle ifade edilmiş olabilir.
+- Uygun JOIN, GROUP BY, HAVING, COUNT, ORDER BY gibi SQL yapıları gerekiyorsa kullan.
+- Eğer kullanıcının isteği bir metrik içeriyorsa (örneğin "en çok", "kaç film", "sayısı") → sayısal sütunlar üret.
+- Sonuç tablosu kullanıcıya açık ve sade olmalı. Sütun adları anlamlı seçilmeli (örneğin: "oyuncu", "film_sayisi" gibi).
+- Sadece kullanıcı açıkça istemişse ORDER BY veya LIMIT kullan.
+- “sırala” gibi ifadeler varsa sıralama yap. Aksi halde, doğal tablo sırasını koru.
 
-Bu soruya karşılık gelen SQL sorgusunu üret. Sadece SQL döndür.
-"""
+Çıktı:
+- SADECE çalıştırılabilir ve tamamlanmış SQL sorgusunu üret.
+- Açıklama, yorum veya format dışı bilgi verme.
+
+SQL Sorgusu:
+    """
 
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "User-Agent": "DataSage"  # Sadece ASCII karakter, sorun yaratmaz
+        "User-Agent": "DataSage"
     }
 
     data = {
@@ -33,6 +47,7 @@ Bu soruya karşılık gelen SQL sorgusunu üret. Sadece SQL döndür.
     response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
 
     if response.status_code != 200:
-        return f"[HATA] OpenRouter: {response.text}"
+        raise Exception(f"OpenRouter API Hatası: {response.text}")
 
     return response.json()['choices'][0]['message']['content']
+
