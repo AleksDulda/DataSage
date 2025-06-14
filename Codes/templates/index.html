@@ -1,27 +1,720 @@
 {% extends "base.html" %}
 {% block title %}DATASAGE - Akıllı SQL Sorguları{% endblock %}
+
 {% block content %}
-<div class="text-center py-5">
-  <img id="main-logo" src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="DATASAGE Logo" class="img-fluid" style="max-width: 300px; height: auto;">
-  <p class="lead mt-3">SQL bilmeden veritabanınızı akıllıca sorgulayın. Doğal dil ile, anında sonuç alın.</p>
-  {% if not session.username %}
-  <a href="{{ url_for('auth.login') }}" class="btn btn-lg btn-success mt-3">Giriş Yap ve Başla</a>
-  {% endif %}
+<!-- HERO SECTION -->
+<section class="hero-section d-flex align-items-center min-vh-100 position-relative overflow-hidden">
+  <div class="hero-bg"></div>
+  <div class="container text-center position-relative z-3">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div data-aos="fade-up" data-aos-duration="800">
+          <h1 class="display-3 fw-bold mb-4">
+            SQL Bilmeden <span class="text-primary">Akıllı Sorgular</span>
+          </h1>
+          <p class="lead mb-5 text-muted">
+            Doğal dil kullanarak veritabanınızı sorgulayın. Yapay zeka destekli platformumuz ile saniyeler içinde istediğiniz verilere ulaşın.
+          </p>
+        </div>
+        
+        <div data-aos="fade-up" data-aos-delay="200">
+          <div class="hero-demo mb-5">
+            <div class="demo-input-container">
+              <input type="text" class="form-control demo-input" placeholder="Örnek: 'En çok satan ürün nedir?'" readonly>
+              <button class="btn btn-primary demo-btn">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+            <div class="demo-animation mt-3">
+              <div class="typing-indicator">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mb-5">
+            {% if session.username %}
+              <a href="{{ url_for('ask') }}" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-play-circle me-2"></i>Hemen Sorgula
+              </a>
+              <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-lg px-4">
+                <i class="bi bi-speedometer2 me-2"></i>Panelim
+              </a>
+            {% else %}
+              <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-play-circle me-2"></i>Ücretsiz Deneyin
+              </a>
+              <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg px-4">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yapın
+              </a>
+            {% endif %}
+          </div>
+        </div>
 
-</div>
+        <div data-aos="fade-up" data-aos-delay="400">
+          <div class="hero-stats row text-center">
+            <div class="col-4">
+              <div class="stat-item">
+                <h3 class="fw-bold text-primary mb-1">10K+</h3>
+                <p class="small text-muted mb-0">Aktif Kullanıcı</p>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="stat-item">
+                <h3 class="fw-bold text-primary mb-1">1M+</h3>
+                <p class="small text-muted mb-0">Tamamlanan Sorgu</p>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="stat-item">
+                <h3 class="fw-bold text-primary mb-1">99%</h3>
+                <p class="small text-muted mb-0">Doğruluk Oranı</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Floating Elements -->
+  <div class="floating-elements">
+    <div class="floating-card" data-aos="fade" data-aos-delay="600">
+      <i class="bi bi-database text-primary"></i>
+    </div>
+    <div class="floating-card" data-aos="fade" data-aos-delay="800">
+      <i class="bi bi-graph-up text-success"></i>
+    </div>
+    <div class="floating-card" data-aos="fade" data-aos-delay="1000">
+      <i class="bi bi-cpu text-warning"></i>
+    </div>
+  </div>
+</section>
 
-<div class="row mt-5">
-  <div class="col-md-4">
-    <h4>📂 Veritabanı Yükle</h4>
-    <p>SQLite dosyanızı yükleyin, sorgulamak için hazırlanın.</p>
+<!-- FEATURES SECTION -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <h2 class="display-5 fw-bold mb-3">Güçlü Özellikler</h2>
+      <p class="lead text-muted">Veri analizini herkes için kolay ve erişilebilir hale getiren özellikler</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="feature-card h-100">
+          <div class="feature-icon">
+            <i class="bi bi-chat-dots text-primary"></i>
+          </div>
+          <h4>Doğal Dil İşleme</h4>
+          <p class="text-muted">SQL bilmeden, günlük konuşma dilinizle sorular sorun ve anında cevap alın.</p>
+          <div class="feature-demo">
+            <small class="text-primary">"Hangi müşteri en çok alışveriş yaptı?"</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="feature-card h-100">
+          <div class="feature-icon">
+            <i class="bi bi-cloud-upload text-success"></i>
+          </div>
+          <h4>Kolay Veri Yükleme</h4>
+          <p class="text-muted">Drag & drop ile SQLite dosyalarınızı saniyeler içinde yükleyin ve sorgulamaya başlayın.</p>
+          <div class="feature-demo">
+            <div class="upload-demo">
+              <i class="bi bi-file-earmark-arrow-up"></i>
+              <span>Dosya yükle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="feature-card h-100">
+          <div class="feature-icon">
+            <i class="bi bi-graph-up-arrow text-info"></i>
+          </div>
+          <h4>Akıllı Görselleştirme</h4>
+          <p class="text-muted">Verilerinizi otomatik olarak en uygun grafik türünde görselleştirin.</p>
+          <div class="feature-demo">
+            <div class="chart-demo">
+              <div class="mini-chart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="feature-card h-100">
+          <div class="feature-icon">
+            <i class="bi bi-shield-check text-warning"></i>
+          </div>
+          <h4>Güvenli & Özel</h4>
+          <p class="text-muted">Verileriniz tamamen güvende. Kendi sunucunuzda işleniyor, hiçbir yerde saklanmıyor.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+        <div class="feature-card h-100">
+          <div class="feature-icon">
+            <i class="bi bi-download text-purple"></i>
+          </div>
+          <h4>Çoklu Export</h4>
+          <p class="text-muted">Sonuçlarınızı CSV, Excel, PDF veya JSON formatında anında indirin.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
+        <div class="feature-card h-100">
+          <div class="feature-icon">
+            <i class="bi bi-clock-history text-danger"></i>
+          </div>
+          <h4>Sorgu Geçmişi</h4>
+          <p class="text-muted">Tüm sorgularınız kaydediliyor. Geçmiş analizlerinize kolayca erişin.</p>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-md-4">
-    <h4>💬 Doğal Dil Sorgusu</h4>
-    <p>"En çok satan ürün nedir?" gibi sorular sorun, SQL yazmak yok.</p>
+</section>
+
+<!-- HOW IT WORKS SECTION -->
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <h2 class="display-5 fw-bold mb-3">Nasıl Çalışır?</h2>
+      <p class="lead text-muted">3 basit adımda verilerinizi analiz edin</p>
+    </div>
+
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6" data-aos="fade-right">
+        <div class="steps-container">
+          <div class="step-item active">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h4>📂 Veritabanını Yükle</h4>
+              <p class="text-muted">SQLite dosyanızı drag & drop ile yükleyin</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h4>💬 Sorunuzu Sorun</h4>
+              <p class="text-muted">Doğal dilde istediğinizi yazın</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h4>📈 Sonuçları Alın</h4>
+              <p class="text-muted">Anında tablo ve grafik olarak görün</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6" data-aos="fade-left">
+        <div class="demo-interface">
+          <div class="demo-screen">
+            <div class="demo-header">
+              <div class="demo-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="demo-content">
+              <div class="demo-query">
+                <i class="bi bi-chat-left-text text-primary"></i>
+                <span>"En çok satan ürün nedir?"</span>
+              </div>
+              <div class="demo-result">
+                <div class="demo-table">
+                  <div class="table-row header">
+                    <span>Ürün</span>
+                    <span>Satış</span>
+                  </div>
+                  <div class="table-row">
+                    <span>iPhone 15</span>
+                    <span>1,250</span>
+                  </div>
+                  <div class="table-row">
+                    <span>MacBook Pro</span>
+                    <span>980</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-md-4">
-    <h4>📈 Analiz & İndirme</h4>
-    <p>Sonuçları görüntüleyin, CSV ya da Excel olarak indirin.</p>
+</section>
+
+<!-- CTA SECTION -->
+<section class="py-5 bg-primary text-white">
+  <div class="container text-center">
+    <div class="row justify-content-center">
+      <div class="col-lg-8" data-aos="fade-up">
+        <h2 class="display-5 fw-bold mb-4">Hemen Başlayın</h2>
+        <p class="lead mb-4">Ücretsiz deneme ile DATASAGE'in gücünü keşfedin. Kredi kartı gerektirmez.</p>
+        {% if session.username %}
+          <a href="{{ url_for('ask') }}" class="btn btn-light btn-lg px-5">
+            <i class="bi bi-rocket-takeoff me-2"></i>Hemen Sorgula
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5">
+            <i class="bi bi-rocket-takeoff me-2"></i>Ücretsiz Başla
+          </a>
+        {% endif %}
+      </div>
+    </div>
   </div>
-</div>
+</section>
+
+{% endblock %}
+
+{% block styles %}
+<style>
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+  position: relative;
+  padding-top: 80px;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="2" fill="%23007bff" opacity="0.1"/><circle cx="75" cy="75" r="3" fill="%2328a745" opacity="0.1"/><circle cx="50" cy="10" r="1.5" fill="%23ffc107" opacity="0.1"/></svg>') repeat;
+  animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.hero-demo {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.demo-input-container {
+  position: relative;
+  background: white;
+  border-radius: 50px;
+  padding: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #e9ecef;
+}
+
+.demo-input {
+  border: none;
+  border-radius: 50px;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  background: transparent;
+}
+
+.demo-input:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.demo-btn {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  border-radius: 50px;
+  padding: 10px 20px;
+  border: none;
+}
+
+.typing-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out infinite;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bs-primary);
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Floating Elements */
+.floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-card {
+  position: absolute;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  animation: floatUpDown 6s ease-in-out infinite;
+}
+
+.floating-card:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.floating-card:nth-child(2) {
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.floating-card:nth-child(3) {
+  bottom: 30%;
+  left: 15%;
+  animation-delay: 4s;
+}
+
+@keyframes floatUpDown {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+/* Feature Cards */
+.feature-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #f8f9fa;
+  text-align: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-demo {
+  margin-top: 1rem;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.upload-demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--bs-success);
+}
+
+.chart-demo {
+  display: flex;
+  justify-content: center;
+}
+
+.mini-chart {
+  width: 60px;
+  height: 30px;
+  background: linear-gradient(45deg, var(--bs-info) 0%, transparent 50%, var(--bs-info) 100%);
+  border-radius: 4px;
+}
+
+/* Steps */
+.steps-container {
+  position: relative;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.step-item:hover {
+  background: #f8f9fa;
+}
+
+.step-item.active {
+  background: rgba(0, 123, 255, 0.05);
+  border-left: 4px solid var(--bs-primary);
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--bs-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.step-content h4 {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+/* Demo Interface */
+.demo-interface {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.demo-screen {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.demo-header {
+  background: #f8f9fa;
+  padding: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.demo-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.demo-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #dee2e6;
+}
+
+.demo-dots span:nth-child(1) { background: #dc3545; }
+.demo-dots span:nth-child(2) { background: #ffc107; }
+.demo-dots span:nth-child(3) { background: #28a745; }
+
+.demo-content {
+  padding: 20px;
+}
+
+.demo-query {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.demo-result {
+  animation: slideUp 1s ease-out 2s both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.demo-table {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.table-row.header {
+  background: #f8f9fa;
+  font-weight: bold;
+}
+
+.table-row:not(.header) {
+  border-top: 1px solid #e9ecef;
+}
+
+.text-purple {
+  color: #6f42c1 !important;
+}
+
+/* Dark Theme */
+html[data-bs-theme="dark"] .hero-section {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.2) 0%, rgba(26, 26, 26, 0.95) 100%);
+}
+
+html[data-bs-theme="dark"] .feature-card {
+  background: #2d2d2d;
+  border-color: #404040;
+}
+
+html[data-bs-theme="dark"] .demo-screen {
+  background: #2d2d2d;
+}
+
+html[data-bs-theme="dark"] .demo-header {
+  background: #404040;
+  border-color: #555;
+}
+
+html[data-bs-theme="dark"] .floating-card {
+  background: #2d2d2d;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-section {
+    padding-top: 100px;
+  }
+  
+  .display-3 {
+    font-size: 2.5rem;
+  }
+  
+  .floating-elements {
+    display: none;
+  }
+  
+  .feature-card {
+    margin-bottom: 2rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+// Demo Input Animation
+document.addEventListener('DOMContentLoaded', function() {
+  const demoInput = document.querySelector('.demo-input');
+  if (!demoInput) return;
+  
+  const demoQueries = [
+    'En çok satan ürün nedir?',
+    'Hangi müşteri en fazla harcama yaptı?',
+    'Bu ay kaç tane sipariş aldık?',
+    'En popüler kategori hangisi?'
+  ];
+  let currentQuery = 0;
+  
+  function typeQuery() {
+    const query = demoQueries[currentQuery];
+    let i = 0;
+    demoInput.value = '';
+    
+    const typeInterval = setInterval(() => {
+      if (i < query.length) {
+        demoInput.value += query.charAt(i);
+        i++;
+      } else {
+        clearInterval(typeInterval);
+        setTimeout(() => {
+          currentQuery = (currentQuery + 1) % demoQueries.length;
+          setTimeout(typeQuery, 1000);
+        }, 3000);
+      }
+    }, 100);
+  }
+  
+  setTimeout(typeQuery, 2000);
+});
+
+// Stats Counter Animation
+function animateCounter(element, target, duration = 2000) {
+  let start = 0;
+  const increment = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += increment;
+    if (start >= target) {
+      element.textContent = formatNumber(target);
+      clearInterval(timer);
+    } else {
+      element.textContent = formatNumber(Math.floor(start));
+    }
+  }, 16);
+}
+
+function formatNumber(num) {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M+';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(0) + 'K+';
+  } else if (num === 99) {
+    return '99%';
+  }
+  return num.toString();
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const statElements = entry.target.querySelectorAll('.stat-item h3');
+      const targets = [10000, 1000000, 99];
+      statElements.forEach((element, index) => {
+        setTimeout(() => {
+          animateCounter(element, targets[index]);
+        }, index * 200);
+      });
+      observer.unobserve(entry.target);
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const statsSection = document.querySelector('.hero-stats');
+  if (statsSection) {
+    observer.observe(statsSection);
+  }
+});
+</script>
 {% endblock %}

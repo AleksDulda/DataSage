@@ -1,66 +1,140 @@
 {% extends "base.html" %}
 
-{% block title %}Ana Sayfa{% endblock %}
+{% block title %}Sorgu - DATASAGE{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Sorgu Sistemi</h2>
-
-<form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label class="form-label">Veritabanı (.db):</label>
-        <input type="file" name="database" class="form-control" required>
+<!-- Hero Section -->
+<section class="query-hero py-5 mb-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <h1 class="display-4 fw-bold mb-3">
+          <i class="bi bi-search text-primary me-3"></i>Akıllı Sorgu
+        </h1>
+        <p class="lead text-muted mb-4">Veritabanınızı yükleyin ve doğal dilde sorularınızı sorun</p>
+      </div>
     </div>
+  </div>
+</section>
 
-    <div class="mb-3">
-        <label class="form-label">Sormak istediğiniz soru:</label>
-        <input type="text" name="question" class="form-control" placeholder="Örn: En uzun film nedir?" required>
+<!-- Query Form -->
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="query-card" data-aos="fade-up" data-aos-delay="200">
+        <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form">
+          
+          <!-- Database Upload -->
+          <div class="upload-section mb-4">
+            <label class="form-label fw-semibold mb-3">
+              <i class="bi bi-database me-2 text-primary"></i>Veritabanı Dosyası
+            </label>
+            <div class="upload-area" id="uploadArea">
+              <input type="file" name="database" class="form-control d-none" id="databaseFile" accept=".db,.sqlite,.sqlite3" required>
+              <div class="upload-content">
+                <i class="bi bi-cloud-upload upload-icon"></i>
+                <p class="upload-text mb-2">SQLite dosyanızı sürükleyin veya tıklayın</p>
+                <small class="text-muted">Desteklenen formatlar: .db, .sqlite, .sqlite3</small>
+              </div>
+            </div>
+            <div class="file-info d-none" id="fileInfo">
+              <i class="bi bi-file-earmark-check text-success me-2"></i>
+              <span id="fileName"></span>
+              <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="removeFile">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Question Input -->
+          <div class="question-section mb-4">
+            <label class="form-label fw-semibold mb-3">
+              <i class="bi bi-chat-dots me-2 text-success"></i>Sorunuz
+            </label>
+            <div class="question-input-container">
+              <input type="text" name="question" class="form-control question-input" 
+                     placeholder="Örn: En uzun film nedir?" required>
+              <div class="question-suggestions">
+                <small class="text-muted">Örnekler:</small>
+                <div class="suggestion-pills mt-2">
+                  <span class="suggestion-pill" onclick="setSuggestion(this)">En çok satan ürün nedir?</span>
+                  <span class="suggestion-pill" onclick="setSuggestion(this)">Toplam müşteri sayısı kaç?</span>
+                  <span class="suggestion-pill" onclick="setSuggestion(this)">En yüksek fiyatlı ürün hangisi?</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg px-5 submit-btn">
+              <i class="bi bi-play-circle me-2"></i>
+              <span class="btn-text">Sorgula</span>
+              <div class="loading-spinner d-none"></div>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <button type="submit" class="btn btn-primary">Sorgula</button>
-</form>
-
-{% if result %}
-    <h4 class="mt-5">Sonuç:</h4>
-
-    <div class="d-flex gap-2 mb-3">
-        <button class="btn btn-outline-success btn-sm" onclick='downloadResult("csv")'>📥 CSV İndir</button>
-        <button class="btn btn-outline-primary btn-sm" onclick='downloadResult("xlsx")'>📥 Excel İndir</button>
-    </div>
-
-    <table class="table table-bordered table-striped">
-        <thead>
-        <tr>
-            {% for col in result["columns"] %}
-                <th>{{ col }}</th>
-            {% endfor %}
-        </tr>
-        </thead>
-        <tbody>
-        {% for row in result["rows"] %}
-            <tr>
-                {% for item in row %}
-                    <td>{{ item }}</td>
+  <!-- Results Section -->
+  {% if result %}
+  <div class="row justify-content-center mt-5">
+    <div class="col-lg-10">
+      <div class="results-card" data-aos="fade-up">
+        <div class="results-header">
+          <h4 class="mb-0">
+            <i class="bi bi-table text-success me-2"></i>Sorgu Sonuçları
+          </h4>
+          <div class="results-actions">
+            <button class="btn btn-outline-success btn-sm" onclick='downloadResult("csv")'>
+              <i class="bi bi-download me-1"></i>CSV
+            </button>
+            <button class="btn btn-outline-primary btn-sm" onclick='downloadResult("xlsx")'>
+              <i class="bi bi-download me-1"></i>Excel
+            </button>
+          </div>
+        </div>
+        
+        <div class="table-container">
+          <table class="table table-hover results-table">
+            <thead>
+              <tr>
+                {% for col in result["columns"] %}
+                  <th>{{ col }}</th>
                 {% endfor %}
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in result["rows"] %}
+                <tr>
+                  {% for item in row %}
+                    <td>{{ item }}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script>
+  <script>
     let rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
     let columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
 
     function downloadResult(format) {
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> İndiriliyor...';
+        btn.disabled = true;
+
         fetch("/download", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                rows: rows,
-                columns: columns,
-                format: format
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rows: rows, columns: columns, format: format })
         })
         .then(response => response.blob())
         .then(blob => {
@@ -72,9 +146,276 @@
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         });
     }
-</script>
+  </script>
+  {% endif %}
+</div>
 
-{% endif %}
+{% endblock %}
+
+{% block styles %}
+<style>
+.query-hero {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border-radius: 0 0 30px 30px;
+}
+
+.query-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #f0f0f0;
+}
+
+.upload-area {
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafbfc;
+}
+
+.upload-area:hover {
+  border-color: var(--bs-primary);
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.upload-area.dragover {
+  border-color: var(--bs-success);
+  background: rgba(40, 167, 69, 0.05);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: var(--bs-primary);
+  margin-bottom: 1rem;
+}
+
+.upload-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.file-info {
+  padding: 1rem;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.question-input-container {
+  position: relative;
+}
+
+.question-input {
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  font-size: 1.1rem;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.question-input:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+}
+
+.suggestion-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestion-pill {
+  background: #f8f9fa;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.suggestion-pill:hover {
+  background: var(--bs-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.submit-btn {
+  border-radius: 50px;
+  padding: 12px 40px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+.results-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.results-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.results-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.table-container {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.results-table {
+  margin: 0;
+}
+
+.results-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  border: none;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.results-table td {
+  padding: 0.75rem 1rem;
+  border-color: #f0f0f0;
+}
+
+/* Dark Theme */
+html[data-bs-theme="dark"] .query-card {
+  background: #2d2d2d;
+  border-color: #404040;
+}
+
+html[data-bs-theme="dark"] .upload-area {
+  background: #383838;
+  border-color: #555;
+}
+
+html[data-bs-theme="dark"] .results-card {
+  background: #2d2d2d;
+}
+
+html[data-bs-theme="dark"] .results-header {
+  background: linear-gradient(135deg, #404040 0%, #555 100%);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .query-card {
+    padding: 1.5rem;
+  }
+  
+  .suggestion-pills {
+    justify-content: center;
+  }
+  
+  .results-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+// File Upload Handling
+document.addEventListener('DOMContentLoaded', function() {
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('databaseFile');
+  const fileInfo = document.getElementById('fileInfo');
+  const fileName = document.getElementById('fileName');
+  const removeFile = document.getElementById('removeFile');
+
+  uploadArea.addEventListener('click', () => fileInput.click());
+  
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+  
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+  });
+  
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      showFileInfo(files[0]);
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      showFileInfo(e.target.files[0]);
+    }
+  });
+
+  removeFile.addEventListener('click', () => {
+    fileInput.value = '';
+    hideFileInfo();
+  });
+
+  function showFileInfo(file) {
+    fileName.textContent = file.name;
+    uploadArea.classList.add('d-none');
+    fileInfo.classList.remove('d-none');
+  }
+
+  function hideFileInfo() {
+    uploadArea.classList.remove('d-none');
+    fileInfo.classList.add('d-none');
+  }
+});
+
+function setSuggestion(element) {
+  document.querySelector('.question-input').value = element.textContent;
+}
+
+// Form Submission with Loading
+document.querySelector('.query-form').addEventListener('submit', function() {
+  const btn = document.querySelector('.submit-btn');
+  const btnText = btn.querySelector('.btn-text');
+  const spinner = btn.querySelector('.loading-spinner');
+  
+  btnText.classList.add('d-none');
+  spinner.classList.remove('d-none');
+  btn.disabled = true;
+});
+</script>
 {% endblock %}

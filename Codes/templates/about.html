@@ -1,102 +1,267 @@
 {% extends "base.html" %}
 {% block title %}Hakkımızda - DATASAGE{% endblock %}
+
+{% block styles %}
+<style>
+/* About Section */
+.about-section {
+  padding: 100px 0;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark Mode */
+html[data-bs-theme="dark"] .about-section {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.15) 0%, rgba(20, 20, 20, 0.95) 100%);
+}
+
+/* Content Cards */
+.content-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 123, 255, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.content-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+html[data-bs-theme="dark"] .content-card {
+  background: #1e1e1e;
+  border-color: rgba(0, 123, 255, 0.2);
+  color: #d9d9d9;
+}
+
+/* Team Cards */
+.team-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 123, 255, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.team-card img {
+  border: 2px solid var(--bs-primary);
+  transition: transform 0.3s ease;
+}
+
+.team-card:hover img {
+  transform: scale(1.1);
+}
+
+html[data-bs-theme="dark"] .team-card {
+  background: #1e1e1e;
+  border-color: rgba(0, 123, 255, 0.2);
+}
+
+/* Typography */
+.section-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 50px;
+  height: 4px;
+  background: var(--bs-primary);
+}
+
+.sub-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 1.5rem;
+}
+
+html[data-bs-theme="dark"] .section-title,
+html[data-bs-theme="dark"] .sub-title {
+  color: #ffffff;
+}
+
+/* Icons */
+.content-card i.bi {
+  font-size: 1.4rem;
+  color: var(--bs-primary);
+  margin-right: 0.5rem;
+}
+
+.list-icon {
+  color: var(--bs-success);
+  margin-right: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-section {
+    padding: 60px 0;
+  }
+
+  .section-title {
+    font-size: 2.2rem;
+  }
+
+  .sub-title {
+    font-size: 1.4rem;
+  }
+
+  .content-card,
+  .team-card {
+    padding: 1.5rem;
+  }
+
+  .team-card img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<section class="about-section">
+  <div class="container">
+    <!-- About Us -->
+    <div class="text-center mb-5" data-aos="fade-up">
+      <h2 class="section-title">Hakkımızda</h2>
+      <p class="lead text-muted">DATASAGE ile veri analizini herkes için basit ve güçlü hale getiriyoruz.</p>
+    </div>
+    
+    <div class="content-card" data-aos="fade-up" data-aos-delay="100">
+      <p><i class="bi bi-rocket-takeoff"></i> <strong>DATASAGE</strong>, SQL bilgisi gerektirmeden veritabanı sorgularını herkesin yapabileceği bir platformdur. Veri analizini sadeleştirerek, işletmelerin ve bireylerin verilerinden maksimum fayda sağlamasını hedefliyoruz.</p>
+      <p><i class="bi bi-code-slash"></i> Flask tabanlı sistemimiz, doğal dil işleme, veritabanı yönetimi ve otomatik görselleştirme teknolojilerini birleştiriyor. SQLite veritabanınızı yükleyin, doğal dilde sorular sorun ve saniyeler içinde sonuç alın.</p>
+    </div>
 
-<h2 class="mb-4">👨‍💻 Hakkımızda</h2>
-<div class="bg-body p-4 border rounded shadow-sm text-body mb-4">
-  <p><strong>DATASAGE</strong>, teknik bilgiye sahip olmayan kullanıcıların bile SQL bilmeden veritabanı sorguları yapabilmesini sağlayan bir web platformudur. Amacımız, veri analizi süreçlerini herkes için erişilebilir ve anlaşılır hale getirmektir.</p>
-  <p>Flask altyapısı ile geliştirilen sistem; doğal dil işleme, veri tabanı yönetimi ve görselleştirme gibi birçok teknolojiyi kullanıcı dostu bir arayüzde birleştirir. Kullanıcılar kendi SQLite veritabanlarını yükleyip doğal dilde sorular sorarak anında analiz sonuçlarına ulaşabilirler.</p>
-</div>
+    <!-- Vision -->
+    <div class="mb-5">
+      <h4 class="sub-title" data-aos="fade-up">Vizyonumuz</h4>
+      <div class="content-card" data-aos="fade-up" data-aos-delay="200">
+        <p><i class="bi bi-globe"></i> Verinin gücünü herkesin eline teslim etmek. Kullanıcı dostu ve akıllı çözümlerle, bilgiye erişimi demokratikleştiriyor ve veri odaklı bir geleceği şekillendiriyoruz.</p>
+      </div>
+    </div>
 
-<h4 class="mb-4">🌟 Vizyonumuz</h4>
-<div class="bg-body p-4 border rounded shadow-sm text-body mb-4">
-  <p>Dijital dünyaın verilerle şekillendiği bu çağta, herkesin veriye kolayca erişebildiği ve anlamlı sonuçlar çıkarabildiği bir düzen oluşturmak. Güler yüzlü, sade ve akıllı sistemler geliştirerek bilgiye erişimi demokratikleştirmek.</p>
-</div>
+    <!-- Mission -->
+    <div class="mb-5">
+      <h4 class="sub-title" data-aos="fade-up">Misyonumuz</h4>
+      <div class="content-card" data-aos="fade-up" data-aos-delay="300">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><i class="bi bi-check-circle-fill list-icon"></i> Kullanıcı odaklı veri analiz platformları sunmak</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill list-icon"></i> Yapay zeka ile sorguları herkes için erişilebilir kılmak</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill list-icon"></i> Açık kaynak teknolojilerle yenilikçi çözümler üretmek</li>
+          <li><i class="bi bi-check-circle-fill list-icon"></i> Veri gizliliğine ve estetik tasarıma öncelik vermek</li>
+        </ul>
+      </div>
+    </div>
 
-<h4 class="mb-4">🌎 Misyonumuz</h4>
-<div class="bg-body p-4 border rounded shadow-sm text-body mb-5">
-  <ul class="mb-0">
-    <li>Kullanıcı dostu veri analiz platformları geliştirmek</li>
-    <li>Yapay zeka ile veritabanı sorgularını sadeleştirip herkes için erişilebilir kılmak</li>
-    <li>Açık kaynak teknolojilerle topluluğa katkı sunmak</li>
-    <li>Gizliliğe, veriye ve tasarıma önem veren bir yaklaşım sergilemek</li>
-  </ul>
-</div>
+    <!-- Team -->
+    <div class="mb-5">
+      <h4 class="sub-title text-center" data-aos="fade-up">Ekibimiz</h4>
+      <div class="content-card mb-4 text-center" data-aos="fade-up" data-aos-delay="400">
+        <p><i class="bi bi-people-fill"></i> DATASAGE, <strong>Bursa Teknik Üniversitesi</strong> Bilgisayar Mühendisliği öğrencileri tarafından 2025 yılında geliştirildi. Tutkuyla çalışan ekibimizle tanışın:</p>
+      </div>
 
-<h4 class="mb-3">👥 Proje Ekibi</h4>
-<div class="bg-body p-4 border rounded shadow-sm text-body">
-  <p>Bu proje, <strong>Bursa Teknik Üniversitesi</strong> Bilgisayar Mühendisliği öğrencileri tarafından 2025 yılında geliştirilmiştir. Projede görev alan ekip üyeleri şunlardır:</p>
-</div>
-<br>
+      <!-- Team Members -->
+      <div class="row g-4">
+        <!-- Aleks -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+          <div class="team-card d-flex align-items-center">
+            <img src="{{ url_for('static', filename='team/aleks.jpg') }}" alt="Aleks Dulda"
+                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+            <div>
+              <h5 class="mb-1">Aleks Dulda</h5>
+              <p class="mb-1 text-muted small">Full Stack Developer / İletişim Sorumlusu</p>
+              <p class="mb-0">
+                <a href="https://github.com/AleksDulda" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
+                <a href="https://www.linkedin.com/in/aleks-dulda-47435b221/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
+              </p>
+            </div>
+          </div>
+        </div>
 
-<!-- Aleks -->
-<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
-  <img src="{{ url_for('static', filename='team/aleks.jpg') }}" alt="Aleks Dulda"
-       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-  <div>
-    <h5 class="mb-1">Aleks Dulda</h5>
-    <p class="mb-1">Full Stack Developer / İletşiim Sorumlusu</p>
-    <p class="mb-0">
-      <a href="https://github.com/AleksDulda" class="me-2 link-primary" target="_blank">💻 GitHub</a>
-      <a href="https://www.linkedin.com/in/aleks-dulda-47435b221/" class="link-primary" target="_blank">🔗 LinkedIn</a>
-    </p>
+        <!-- Murat -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
+          <div class="team-card d-flex align-items-center">
+            <img src="{{ url_for('static', filename='team/murat.jpg') }}" alt="Murat Demirbaş"
+                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+            <div>
+              <h5 class="mb-1">Murat Demirbaş</h5>
+              <p class="mb-1 text-muted small">Backend & Security</p>
+              <p class="mb-0">
+                <a href="https://github.com/demirbas1436" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
+                <a href="https://www.linkedin.com/in/muratdemirbas1436/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emin -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="700">
+          <div class="team-card d-flex align-items-center">
+            <img src="{{ url_for('static', filename='team/emin.jpg') }}" alt="M. Emin Alantepe"
+                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+            <div>
+              <h5 class="mb-1">M. Emin Alantepe</h5>
+              <p class="mb-1 text-muted small">Frontend Developer</p>
+              <p class="mb-0">
+                <a href="https://github.com/alantepeemin" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
+                <a href="https://www.linkedin.com/in/m-emin-alantepe/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enes -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="800">
+          <div class="team-card d-flex align-items-center">
+            <img src="{{ url_for('static', filename='team/enes.jpg') }}" alt="Enes Malik Altınpınar"
+                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+            <div>
+              <h5 class="mb-1">Enes Malik Altınpınar</h5>
+              <p class="mb-1 text-muted small">Mobile Developer</p>
+              <p class="mb-0">
+                <a href="https://github.com/malikaltinpinar" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
+                <a href="https://www.linkedin.com/in/enes-malik-alt%C4%B1np%C4%B1nar/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kaan -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="900">
+          <div class="team-card d-flex align-items-center">
+            <img src="{{ url_for('static', filename='team/kaan.jpg') }}" alt="Kaan Çardak"
+                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
+            <div>
+              <h5 class="mb-1">Kaan Çardak</h5>
+              <p class="mb-1 text-muted small">UI/UX Designer</p>
+              <p class="mb-0">
+                <a href="https://github.com/kaancardak" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
+                <a href="https://www.linkedin.com/in/kaan-%C3%A7ardak-82a155175/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-
-<!-- Murat -->
-<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
-  <img src="{{ url_for('static', filename='team/murat.jpg') }}" alt="Murat Demirbaş"
-       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-  <div>
-    <h5 class="mb-1">Murat Demirbaş</h5>
-    <p class="mb-1">Backend & Security</p>
-    <p class="mb-0">
-      <a href="https://github.com/demirbas1436" class="me-2 link-primary" target="_blank">💻 GitHub</a>
-      <a href="https://www.linkedin.com/in/muratdemirbas1436/" class="link-primary" target="_blank">🔗 LinkedIn</a>
-    </p>
-  </div>
-</div>
-
-<!-- Emin -->
-<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
-  <img src="{{ url_for('static', filename='team/emin.jpg') }}" alt="M. Emin Alantepe"
-       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-  <div>
-    <h5 class="mb-1">M. Emin Alantepe</h5>
-    <p class="mb-1">Frontend Developer</p>
-    <p class="mb-0">
-      <a href="https://github.com/alantepeemin" class="me-2 link-primary" target="_blank">💻 GitHub</a>
-      <a href="https://www.linkedin.com/in/m-emin-alantepe/" class="link-primary" target="_blank">🔗 LinkedIn</a>
-    </p>
-  </div>
-</div>
-
-<!-- Enes -->
-<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
-  <img src="{{ url_for('static', filename='team/enes.jpg') }}" alt="Enes Malik Altınpınar"
-       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-  <div>
-    <h5 class="mb-1">Enes Malik Altınpınar</h5>
-    <p class="mb-1">Mobile Developer</p>
-    <p class="mb-0">
-      <a href="https://github.com/malikaltinpinar" class="me-2 link-primary" target="_blank">💻 GitHub</a>
-      <a href="https://www.linkedin.com/in/enes-malik-alt%C4%B1np%C4%B1nar/" class="link-primary" target="_blank">🔗 LinkedIn</a>
-    </p>
-  </div>
-</div>
-
-<!-- Kaan -->
-<div class="d-flex align-items-center p-3 border rounded shadow-sm mb-4 bg-body text-body">
-  <img src="{{ url_for('static', filename='team/kaan.jpg') }}" alt="Kaan Çardak"
-       class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-  <div>
-    <h5 class="mb-1">Kaan Çardak</h5>
-    <p class="mb-1">UI/UX Designer</p>
-    <p class="mb-0">
-      <a href="https://github.com/kaancardak" class="me-2 link-primary" target="_blank">💻 GitHub</a>
-      <a href="https://www.linkedin.com/in/kaan-%C3%A7ardak-82a155175/" class="link-primary" target="_blank">🔗 LinkedIn</a>
-    </p>
-  </div>
-</div>
-
+</section>
 {% endblock %}

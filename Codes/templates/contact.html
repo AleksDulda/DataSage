@@ -1,44 +1,265 @@
 {% extends "base.html" %}
 {% block title %}İletişim - DATASAGE{% endblock %}
+
+{% block styles %}
+<style>
+/* Contact Section */
+.contact-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.03) 0%, rgba(255, 255, 255, 1) 100%);
+  min-height: calc(100vh - 100px);
+}
+
+/* Dark Mode */
+html[data-bs-theme="dark"] .contact-section {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.08) 0%, rgba(18, 18, 18, 1) 100%);
+}
+
+/* Content Cards */
+.content-card {
+  background: white;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 123, 255, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.content-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+html[data-bs-theme="dark"] .content-card {
+  background: #1c1c1c;
+  border-color: rgba(0, 123, 255, 0.12);
+  color: #e6e6e6;
+}
+
+/* Form Styling */
+.form-control {
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.9rem 1.2rem;
+  font-size: 1rem;
+  background: #f9f9f9;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--bs-primary);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+html[data-bs-theme="dark"] .form-control {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: #2a2a2a;
+  color: #e6e6e6;
+}
+
+html[data-bs-theme="dark"] .form-control:focus {
+  background: #2a2a2a;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.form-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.4rem;
+}
+
+html[data-bs-theme="dark"] .form-label {
+  color: #d9d9d9;
+}
+
+.btn-primary {
+  border-radius: 12px;
+  padding: 0.9rem 2rem;
+  font-weight: 500;
+  font-size: 1rem;
+  background: var(--bs-primary);
+  border: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--bs-primary-dark);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Typography */
+.section-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.sub-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin-bottom: 1.5rem;
+}
+
+html[data-bs-theme="dark"] .section-title,
+html[data-bs-theme="dark"] .sub-title {
+  color: #f5f5f5;
+}
+
+/* Contact List */
+.contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.contact-list li {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 0;
+  font-size: 1rem;
+}
+
+.contact-list i.bi {
+  font-size: 1.3rem;
+  color: var(--bs-primary);
+  margin-right: 0.8rem;
+}
+
+.contact-list a {
+  color: var(--bs-primary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contact-list a:hover {
+  color: var(--bs-primary-dark);
+}
+
+/* Alerts */
+.alert {
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  border: none;
+}
+
+.alert-success {
+  background: #e6f4ea;
+  color: #2e7d32;
+}
+
+.alert-danger {
+  background: #fce4ec;
+  color: #d81b60;
+}
+
+html[data-bs-theme="dark"] .alert-success {
+  background: #1b3a22;
+  color: #66bb6a;
+}
+
+html[data-bs-theme="dark"] .alert-danger {
+  background: #3f1c25;
+  color: #f06292;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contact-section {
+    padding: 50px 0;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .sub-title {
+    font-size: 1.3rem;
+  }
+
+  .content-card {
+    padding: 1.5rem;
+  }
+
+  .form-control {
+    padding: 0.8rem 1rem;
+  }
+
+  .btn-primary {
+    padding: 0.8rem 1.5rem;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<section class="contact-section">
+  <div class="container">
+    <!-- Contact Header -->
+    <div class="text-center mb-5">
+      <h2 class="section-title">Bize Ulaşın</h2>
+      <p class="lead text-muted">Fikirlerinizi, sorularınızı veya önerilerinizi paylaşın, hemen yanıtlayalım!</p>
+    </div>
 
-<h2 class="mb-3">📫 İletişim</h2>
-<p>Her türlü soru, görüş ve öneriniz için bizimle iletişime geçebilirsiniz.</p>
+    <div class="row g-4">
+      <!-- Contact Info -->
+      <div class="col-lg-5">
+        <div class="content-card h-100">
+          <h4 class="sub-title">İletişim Bilgileri</h4>
+          <ul class="contact-list">
+            <li>
+              <i class="bi bi-envelope-fill"></i>
+              <span><strong>E-posta:</strong> <a href="mailto:datasagecontact@gmail.com">datasagecontact@gmail.com</a></span>
+            </li>
+            <li>
+              <i class="bi bi-github"></i>
+              <span><strong>GitHub:</strong> <a href="https://github.com/AleksDulda/DataSage" target="_blank">Proje Sayfası</a></span>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-<ul class="list-group list-group-flush mb-4">
-  <li class="list-group-item bg-body text-body"><strong>Proje Email:</strong> datasagecontact@gmail.com
-  <li class="list-group-item bg-body text-body"><strong>GitHub:</strong> 
-    <a href="https://github.com/AleksDulda/DataSage" target="_blank">Proje GitHub Sayfası</a>
-  </li>
-</ul>
+      <!-- Contact Form -->
+      <div class="col-lg-7">
+        <div class="content-card h-100">
+          <h4 class="sub-title">Mesaj Gönder</h4>
+          {% if success %}
+          <div class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>Mesajınız başarıyla gönderildi!
+          </div>
+          {% elif error %}
+          <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
+          </div>
+          {% endif %}
 
-<h4 class="mt-5 mb-3">📨 Mesaj Gönderin</h4>
-
-{% if success %}
-<div class="alert alert-success" role="alert">
-  ✅ Mesajınız başarıyla gönderildi!
-</div>
-{% elif error %}
-<div class="alert alert-danger" role="alert">
-  ❌ Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
-</div>
-{% endif %}
-
-
-<form method="post" action="{{ url_for('contact') }}">
-  <div class="mb-3">
-    <label for="name" class="form-label">Adınız</label>
-    <input type="text" name="name" class="form-control" id="name" placeholder="Adınızı giriniz" required>
+          <form method="post" action="{{ url_for('contact') }}">
+            <div class="mb-3">
+              <label for="name" class="form-label">Adınız</label>
+              <input type="text" name="name" class="form-control" id="name" placeholder="Adınızı yazın" required>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">E-posta Adresiniz</label>
+              <input type="email" name="email" class="form-control" id="email" placeholder="E-posta adresinizi yazın" required>
+            </div>
+            <div class="mb-3">
+              <label for="message" class="form-label">Mesajınız</label>
+              <textarea name="message" class="form-control" id="message" rows="5" placeholder="Mesajınızı buraya yazın" required></textarea>
+            </div>
+            <div class="text-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send-fill me-2"></i>Gönder
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="mb-3">
-    <label for="email" class="form-label">Email adresiniz</label>
-    <input type="email" name="email" class="form-control" id="email" placeholder="Email adresinizi giriniz" required>
-  </div>
-  <div class="mb-3">
-    <label for="message" class="form-label">Mesajınız</label>
-    <textarea name="message" class="form-control" id="message" rows="4" placeholder="Mesajınızı yazınız" required></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Gönder</button>
-</form>
-
+</section>
 {% endblock %}
