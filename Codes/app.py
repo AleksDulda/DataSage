@@ -11,13 +11,19 @@ from datetime import datetime
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.utils import secure_filename
+from functools import wraps
 
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"
 app.register_blueprint(auth)
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+DB_UPLOAD_FOLDER = os.path.join("uploads")
+PROFILE_PIC_FOLDER = os.path.join("static", "uploads")
+
+os.makedirs(DB_UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(PROFILE_PIC_FOLDER, exist_ok=True)
+
 
 init_db()
 
@@ -40,30 +46,43 @@ def get_schema(db_path):
 def index():
     return render_template("index.html")
 
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(**kwargs):
+        if "user_id" not in session:
+            flash("Bu sayfayı görüntülemek için giriş yapmalısınız.", "warning")
+            return redirect(url_for("auth.login"))
+        return view_func(**kwargs)
+    return wrapped_view
 
 @app.route("/ask", methods=["GET", "POST"])
 def ask():
+    # Giriş kontrolü
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
     if request.method == "GET":
         return render_template("ask.html")
 
-    # Mevcut sorgu işlemleri (POST) burada kalacak
-
+    # POST işlemleri
     user_id = session["user_id"]
     question = request.form["question"]
-    db_file = request.files["database"]
+    db_file = request.files.get("database")
+
+    if not db_file or db_file.filename == "":
+        return render_template("ask.html", result={"rows": [["Veritabanı dosyası yüklenmedi."]], "columns": ["Hata"], "sql": ""})
 
     filename = f"user{user_id}_{db_file.filename}"
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
     db_file.save(filepath)
 
+    # Veritabanı kaydı
     conn = sqlite3.connect("database.sqlite")
     conn.execute("INSERT INTO db_uploads (user_id, filename) VALUES (?, ?)", (user_id, filename))
     conn.commit()
     conn.close()
 
+    # SQL oluştur
     schema = get_schema(filepath)
     sql = generate_sql(schema, question)
 
@@ -76,11 +95,18 @@ def ask():
         userdb.close()
         result = {"rows": rows, "columns": columns, "sql": sql}
     except Exception as e:
-        result = {"rows": [["Hata: " + str(e)]], "columns": ["Hata"], "sql": sql[:500]}
+        result = {
+            "rows": [["Hata: " + str(e)]],
+            "columns": ["Hata"],
+            "sql": sql[:500] if sql else ""
+        }
 
+    # Sorgu geçmişine kaydet
     conn = sqlite3.connect("database.sqlite")
-    conn.execute("INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
-                 (user_id, question, result["sql"], str(result["rows"])))
+    conn.execute("""
+        INSERT INTO query_history (user_id, question, sql_query, result)
+        VALUES (?, ?, ?, ?)
+    """, (user_id, question, result["sql"], str(result["rows"])))
     conn.commit()
     conn.close()
 
@@ -107,10 +133,8 @@ def download():
     return send_file(buffer, as_attachment=True, download_name=filename, mimetype=mimetype)
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
-
     user_id = session["user_id"]
     query_filter = request.args.get("query_filter", "")
     sort_order = request.args.get("sort_order", "desc")
@@ -118,7 +142,11 @@ def dashboard():
     conn = sqlite3.connect("database.sqlite")
     conn.row_factory = sqlite3.Row
 
-    uploads = conn.execute("SELECT * FROM db_uploads WHERE user_id = ? ORDER BY uploaded_at DESC", (user_id,)).fetchall()
+    uploads = conn.execute("""
+        SELECT * FROM db_uploads 
+        WHERE user_id = ? 
+        ORDER BY uploaded_at DESC
+    """, (user_id,)).fetchall()
 
     history_query = "SELECT * FROM query_history WHERE user_id = ?"
     params = [user_id]
@@ -126,6 +154,7 @@ def dashboard():
         history_query += " AND question LIKE ?"
         params.append(f"%{query_filter}%")
     history_query += " ORDER BY timestamp " + ("ASC" if sort_order == "asc" else "DESC")
+
     history = conn.execute(history_query, params).fetchall()
     conn.close()
 
@@ -135,12 +164,13 @@ def dashboard():
     indexed_history = list(enumerate(history, 1))
     return render_template("dashboard.html", uploads=uploads, history=indexed_history)
 
+
 @app.route("/download_db/<filename>")
 def download_db(filename):
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join(DB_UPLOAD_FOLDER, filename)
     if not os.path.exists(path):
         return "Dosya bulunamadı", 404
 
@@ -156,7 +186,7 @@ def delete_upload(upload_id):
     upload = conn.execute("SELECT * FROM db_uploads WHERE id = ? AND user_id = ?", (upload_id, session["user_id"])).fetchone()
 
     if upload:
-        path = os.path.join(UPLOAD_FOLDER, upload["filename"])
+        path = os.path.join(DB_UPLOAD_FOLDER, upload["filename"])
         if os.path.exists(path):
             os.remove(path)
         conn.execute("DELETE FROM db_uploads WHERE id = ?", (upload_id,))
@@ -404,7 +434,7 @@ def delete_account():
         cursor.execute("DELETE FROM query_history WHERE user_id = ?", (user_id,))
         uploads = cursor.execute("SELECT filename FROM db_uploads WHERE user_id = ?", (user_id,)).fetchall()
         for (filename,) in uploads:
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
             if os.path.exists(filepath):
                 os.remove(filepath)
         cursor.execute("DELETE FROM db_uploads WHERE user_id = ?", (user_id,))
@@ -419,6 +449,67 @@ def delete_account():
         return redirect(url_for("index"))
 
     return render_template("confirm_delete.html")
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/update-profile", methods=["POST"])
+def update_profile():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    user_id = session["user_id"]
+    first_name = request.form.get("first_name")
+    last_name = request.form.get("last_name")
+    email = request.form.get("email")
+    gender = request.form.get("gender")
+    birth_date = request.form.get("birth_date")
+    profile_picture = request.files.get("profile_picture")
+    remove_picture = request.form.get("remove_picture") == "1"
+
+    conn = sqlite3.connect("database.sqlite")
+    cursor = conn.cursor()
+
+    if remove_picture:
+        old_pic = cursor.execute("SELECT profile_picture FROM users WHERE id = ?", (user_id,)).fetchone()[0]
+        if old_pic:
+            old_path = os.path.join("static", "uploads", old_pic)
+            if os.path.exists(old_path):
+                os.remove(old_path)
+        cursor.execute("""
+            UPDATE users
+            SET first_name = ?, last_name = ?, email = ?, gender = ?, birth_date = ?, profile_picture = NULL
+            WHERE id = ?
+        """, (first_name, last_name, email, gender, birth_date, user_id))
+
+    elif profile_picture and profile_picture.filename:
+        if allowed_file(profile_picture.filename):
+            filename = secure_filename(f"user_{user_id}_{profile_picture.filename}")
+            filepath = os.path.join("static", "uploads", filename)
+            profile_picture.save(filepath)
+
+            cursor.execute("""
+                UPDATE users
+                SET first_name = ?, last_name = ?, email = ?, gender = ?, birth_date = ?, profile_picture = ?
+                WHERE id = ?
+            """, (first_name, last_name, email, gender, birth_date, filename, user_id))
+        else:
+            flash("Geçersiz dosya türü. Sadece PNG, JPG, JPEG veya GIF yükleyebilirsiniz.", "danger")
+            return redirect(url_for("profile"))
+
+    else:
+        cursor.execute("""
+            UPDATE users
+            SET first_name = ?, last_name = ?, email = ?, gender = ?, birth_date = ?
+            WHERE id = ?
+        """, (first_name, last_name, email, gender, birth_date, user_id))
+
+    conn.commit()
+    conn.close()
+    flash("Profil bilgileri başarıyla güncellendi.", "success")
+    return redirect(url_for("profile"))
 
 
 if __name__ == "__main__":

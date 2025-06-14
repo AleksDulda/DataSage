@@ -1,13 +1,133 @@
 {% extends "base.html" %}
-{% block title %}Profilim - DataSage{% endblock %}
+{% block title %}Profilim{% endblock %}
+
 {% block content %}
 
-<h2>👤 Profilim</h2>
-<p><strong>Kullanıcı Adı:</strong> {{ user.username }}</p>
+<style>
+  .profile-picture {
+    object-fit: cover;
+    border: 3px solid #ddd;
+    transition: 0.3s;
+  }
 
-<div class="mt-4">
-  <a href="{{ url_for('change_password') }}" class="btn btn-outline-primary btn-sm">🔑 Şifre Değiştir</a>
-  <a href="{{ url_for('delete_account') }}" class="btn btn-outline-danger btn-sm ms-2">🗑 Hesabı Sil</a>
-</div>
+  .profile-picture-label {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+  }
+
+  .overlay-text {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 0 0 50% 50%;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: 0.3s;
+  }
+
+  .profile-picture-label:hover .overlay-text {
+    opacity: 1;
+  }
+
+  .remove-btn {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #dc3545;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .remove-btn:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<h2 class="mb-4">Profil Bilgilerim</h2>
+<br>
+
+<form method="POST" action="{{ url_for('update_profile') }}" enctype="multipart/form-data">
+  <div class="row">
+    <!-- Sol: Fotoğraf -->
+    <div class="col-md-4 text-center mb-4">
+      <label for="profile_picture_input" class="profile-picture-label">
+        <img id="previewImage"
+             src="{% if user.profile_picture %}{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}{% else %}{{ url_for('static', filename='images/default-profile.png') }}{% endif %}"
+             class="rounded-circle shadow profile-picture"
+             alt="Profil Fotoğrafı" width="160" height="160">
+        <div class="overlay-text">📷 Değiştir</div>
+      </label>
+      <input type="file" id="profile_picture_input" name="profile_picture" class="d-none" onchange="clearRemoveFlag()">
+      <input type="hidden" name="remove_picture" id="remove_picture" value="0">
+      <span class="remove-btn" onclick="resetProfilePicture()">Fotoğrafı Kaldır</span>
+    </div>
+
+    <!-- Sağ: Bilgiler -->
+    <div class="col-md-8">
+      <div class="mb-3">
+        <label for="first_name" class="form-label">Ad</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name or '' }}">
+      </div>
+
+      <div class="mb-3">
+        <label for="last_name" class="form-label">Soyad</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name or '' }}">
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ user.email or '' }}">
+      </div>
+
+      <div class="mb-3">
+        <label for="gender" class="form-label">Cinsiyet</label>
+        <select class="form-select" id="gender" name="gender">
+          <option value="">Seçiniz</option>
+          <option value="Erkek" {% if user.gender == "Erkek" %}selected{% endif %}>Erkek</option>
+          <option value="Kadın" {% if user.gender == "Kadın" %}selected{% endif %}>Kadın</option>
+          <option value="Diğer" {% if user.gender == "Diğer" %}selected{% endif %}>Diğer</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="birth_date" class="form-label">Doğum Tarihi</label>
+        <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ user.birth_date or '' }}">
+      </div>
+
+      <button type="submit" class="btn btn-success">Güncelle</button>
+      <a href="{{ url_for('change_password') }}" class="btn btn-warning ms-2">Şifre Değiştir</a>
+      <a href="{{ url_for('delete_account') }}" class="btn btn-danger ms-2">Hesabı Sil</a>
+    </div>
+  </div>
+</form>
+
+<script>
+  function resetProfilePicture() {
+    const defaultPath = "{{ url_for('static', filename='images/default-profile.png') }}";
+    document.getElementById("previewImage").src = defaultPath;
+    document.getElementById("profile_picture_input").value = "";
+    document.getElementById("remove_picture").value = "1";
+  }
+
+  function clearRemoveFlag() {
+    document.getElementById("remove_picture").value = "0";
+  }
+
+  document.getElementById("profile_picture_input").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        document.getElementById("previewImage").src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
 
 {% endblock %}
