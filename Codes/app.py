@@ -8,6 +8,10 @@ import pandas as pd
 import io
 from collections import Counter
 from datetime import datetime
+from flask_mail import Mail, Message
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"
@@ -273,9 +277,149 @@ def features():
 def about():
     return render_template("about.html")
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'DataSageContact@gmail.com'       # değiştir!
+app.config['MAIL_PASSWORD'] = 'elyswfmlwxkgddib'     # değiştir!
+app.config['MAIL_DEFAULT_SENDER'] = 'DataSageContact@gmail.com' # değiştir!
+
+mail = Mail(app)
+
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        message = request.form.get("message")
+
+        # 1. Veritabanına kaydet
+        try:
+            conn = sqlite3.connect("database.sqlite")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)",
+                           (name, email, message))
+            conn.commit()
+            conn.close()
+        except Exception as db_error:
+            print("[!] DB Hatası:", db_error)
+            return render_template("contact.html", error=True)
+
+        try:
+            # 2. Yöneticiyi bilgilendir
+            admin_msg = Message(
+                subject="Yeni İletişim Mesajı - DataSage",
+                sender=app.config['MAIL_DEFAULT_SENDER'],
+                recipients=["DataSageContact@gmail.com"],
+                reply_to=email,
+                body=f"Ad: {name}\nEmail: {email}\nMesaj:\n{message}"
+            )
+            mail.send(admin_msg)
+
+            # 3. Kullanıcıya otomatik teşekkür maili
+            user_msg = Message(
+                subject="İletişime Geçtiğiniz İçin Teşekkürler! - DataSage",
+                sender=app.config['MAIL_DEFAULT_SENDER'],
+                recipients=[email],
+                body=f"Merhaba {name},\n\nMesajınızı aldık. En kısa sürede sizinle iletişime geçeceğiz.\n\nTeşekkür ederiz!\n\n— DataSage Ekibi"
+            )
+            mail.send(user_msg)
+
+            return render_template("contact.html", success=True)
+
+        except Exception as e:
+            print("[!] Mail gönderim hatası:", e)
+            return render_template("contact.html", error=True)
+
     return render_template("contact.html")
+
+@app.route("/admin/messages")
+def admin_messages():
+    if "user_id" not in session or session.get("username") != "admin":
+        return redirect(url_for("auth.login"))
+
+    conn = sqlite3.connect("database.sqlite")
+    conn.row_factory = sqlite3.Row
+    messages = conn.execute("SELECT * FROM contact_messages ORDER BY created_at DESC").fetchall()
+    conn.close()
+
+    return render_template("admin_messages.html", messages=messages)
+
+@app.route("/profile")
+def profile():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    conn = sqlite3.connect("database.sqlite")
+    conn.row_factory = sqlite3.Row
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+    conn.close()
+
+    return render_template("profile.html", user=user)
+
+@app.route("/change-password", methods=["GET", "POST"])
+def change_password():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        old_password = request.form.get("old_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+
+        conn = sqlite3.connect("database.sqlite")
+        conn.row_factory = sqlite3.Row
+        user = conn.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+
+        if not check_password_hash(user["password"], old_password):
+            flash("Mevcut şifre hatalı!", "danger")
+            return redirect(url_for("change_password"))
+
+        if new_password != confirm_password:
+            flash("Yeni şifreler eşleşmiyor.", "warning")
+            return redirect(url_for("change_password"))
+
+        hashed_pw = generate_password_hash(new_password)
+        conn.execute("UPDATE users SET password = ? WHERE id = ?", (hashed_pw, session["user_id"]))
+        conn.commit()
+        conn.close()
+
+        flash("Şifre başarıyla güncellendi.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template("change_password.html")
+
+@app.route("/delete-account", methods=["GET", "POST"])
+def delete_account():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    user_id = session["user_id"]
+
+    if request.method == "POST":
+        conn = sqlite3.connect("database.sqlite")
+        cursor = conn.cursor()
+
+        # Sorgu geçmişi ve dosyaları sil
+        cursor.execute("DELETE FROM query_history WHERE user_id = ?", (user_id,))
+        uploads = cursor.execute("SELECT filename FROM db_uploads WHERE user_id = ?", (user_id,)).fetchall()
+        for (filename,) in uploads:
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        cursor.execute("DELETE FROM db_uploads WHERE user_id = ?", (user_id,))
+
+        # Kullanıcıyı sil
+        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+        conn.close()
+
+        session.clear()
+        flash("Hesabınız ve tüm verileriniz silindi.", "info")
+        return redirect(url_for("index"))
+
+    return render_template("confirm_delete.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

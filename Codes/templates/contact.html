@@ -13,6 +13,18 @@
 </ul>
 
 <h4 class="mt-5 mb-3">📨 Mesaj Gönderin</h4>
+
+{% if success %}
+<div class="alert alert-success" role="alert">
+  ✅ Mesajınız başarıyla gönderildi!
+</div>
+{% elif error %}
+<div class="alert alert-danger" role="alert">
+  ❌ Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
+</div>
+{% endif %}
+
+
 <form method="post" action="{{ url_for('contact') }}">
   <div class="mb-3">
     <label for="name" class="form-label">Adınız</label>

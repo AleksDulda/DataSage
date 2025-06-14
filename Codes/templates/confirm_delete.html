@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Hesabı Sil{% endblock %}
+{% block content %}
+
+<h2 class="text-danger">⚠️ Hesabınızı Silmek Üzeresiniz</h2>
+<p>Bu işlem geri alınamaz. Tüm verileriniz ve yüklemeleriniz kalıcı olarak silinecek.</p>
+
+<form method="post" class="mt-4">
+  <button type="submit" class="btn btn-danger">Hesabımı Sil</button>
+  <a href="{{ url_for('profile') }}" class="btn btn-secondary ms-2">Vazgeç</a>
+</form>
+
+{% endblock %}
