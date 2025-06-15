@@ -4,84 +4,109 @@
     <meta charset="UTF-8">
     <title>{% block title %}DATASAGE{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap ve iconlar -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Özel sayfa stilleri -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     {% block styles %}{% endblock %}
 </head>
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg border-bottom py-2" id="main-navbar">
+<nav class="navbar navbar-expand-lg" id="main-navbar">
   <div class="container">
     <a class="navbar-brand" href="{{ url_for('index') }}">
-      <img id="navbar-logo" src="{{ url_for('static', filename='images/logo-navbar.png') }}" alt="DATASAGE Logo" style="height: 30px;">
+      <img id="navbar-logo" src="{{ url_for('static', filename='images/logo-navbar.png') }}" alt="DATASAGE Logo" style="height: 32px;">
     </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Menüyü Aç">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Ana Sayfa</a></li>
-        <a class="nav-link" href="{{ url_for('index') }}#features">Özellikler</a>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">Hakkımızda</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('contact') }}">İletişim</a></li>
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('index') }}">
+            <i class="bi bi-house-door me-1"></i>Ana Sayfa
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('index') }}#features">
+            <i class="bi bi-stars me-1"></i>Özellikler
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('about') }}">
+            <i class="bi bi-info-circle me-1"></i>Hakkımızda
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('contact') }}">
+            <i class="bi bi-envelope me-1"></i>İletişim
+          </a>
+        </li>
         {% if session.username %}
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('ask') }}">Sorgu</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Panel</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('ask') }}">
+              <i class="bi bi-search me-1"></i>Sorgu
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('dashboard') }}">
+              <i class="bi bi-speedometer2 me-1"></i>Panel
+            </a>
+          </li>
         {% endif %}
       </ul>
 
-      <div class="d-flex align-items-center gap-2">
+      <div class="d-flex align-items-center gap-3">
+        <button id="theme-toggle" class="theme-toggle-btn" title="Tema Değiştir">
+          <i id="theme-icon" class="bi bi-sun-fill"></i>
+        </button>
+
         {% if session.username %}
           <div class="dropdown">
-            <a class="btn btn-sm btn-outline-secondary dropdown-toggle" href="#" role="button" id="userDropdown"
-               data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-person-circle me-1"></i>{{ session.username }}
+            <a class="btn btn-user dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-2"></i>{{ session.username }}
             </a>
-            <ul class="dropdown-menu dropdown-menu-end animate-dropdown" aria-labelledby="userDropdown">
-              <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="bi bi-person me-2"></i>Profilim</a></li>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{{ url_for('profile') }}">
+                <i class="bi bi-person me-2"></i>Profilim
+              </a></li>
               {% if session.username == "admin" %}
-              <li><a class="dropdown-item" href="{{ url_for('admin_messages') }}"><i class="bi bi-envelope me-2"></i>Mesajlar</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_messages') }}">
+                <i class="bi bi-envelope me-2"></i>Mesajlar
+              </a></li>
               {% endif %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Çıkış</a></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                <i class="bi bi-box-arrow-right me-2"></i>Çıkış
+              </a></li>
             </ul>
           </div>
         {% else %}
-       <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm-custom">
-          <i class="bi bi-box-arrow-in-right me-1"></i>Giriş
-        </a>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-sm-custom">
-          <i class="bi bi-person-plus me-1"></i>Kayıt
-        </a>
-
-
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Giriş
+          </a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-1"></i>Kayıt
+          </a>
         {% endif %}
-        <button id="theme-toggle" class="btn btn-sm btn-secondary ms-3" title="Tema Değiştir">
-          <i id="theme-icon" class="bi bi-sun-fill"></i>
-        </button>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- Flash mesajlar ve ana içerik -->
+<!-- Flash Messages & Content -->
 <div id="page-content-wrapper">
     <div class="container mt-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
-              <div class="alert alert-{{ category }} alert-dismissible fade show animate-alert" role="alert" data-aos="fade-down">
-                <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+              <div class="alert alert-{{ category }} alert-dismissible fade show" data-aos="fade-down">
+                <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'danger' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %} me-2"></i>
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
               </div>
             {% endfor %}
           {% endif %}
@@ -92,443 +117,380 @@
 </div>
 
 <!-- Footer -->
-<footer class="text-center py-4 mt-5 border-top bg-body-tertiary text-muted">
+<footer class="footer mt-5 py-4">
   <div class="container">
     <div class="row align-items-center">
-      <div class="col-md-6 text-md-start">
-        <small>© 2025 DATASAGE — Tüm Hakları Saklıdır.</small>
+      <div class="col-md-6">
+        <div class="d-flex align-items-center">
+          <img src="{{ url_for('static', filename='images/logo-navbar.png') }}" alt="DATASAGE" height="24" class="me-2">
+          <span>© 2025 DATASAGE — Tüm Hakları Saklıdır.</span>
+        </div>
       </div>
       <div class="col-md-6 text-md-end">
         <div class="social-links">
-          <a href="#" class="text-muted me-3"><i class="bi bi-twitter"></i></a>
-          <a href="#" class="text-muted me-3"><i class="bi bi-linkedin"></i></a>
-          <a href="https://github.com/AleksDulda/DataSage" class="text-muted"><i class="bi bi-github"></i></a>
+          <a href="#" class="social-link" title="Twitter"><i class="bi bi-twitter"></i></a>
+          <a href="#" class="social-link" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+          <a href="https://github.com/AleksDulda/DataSage" class="social-link" title="GitHub"><i class="bi bi-github"></i></a>
         </div>
       </div>
     </div>
   </div>
 </footer>
 
-<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 {% block scripts %}
 <script>
 // AOS Initialize
 AOS.init({
-  duration: 800,
-  easing: 'ease-in-out',
-  once: true,
-  offset: 100
+  duration: 600,
+  easing: 'ease-out',
+  once: true
 });
 
-// Tema toggle (koyu-açık)
+// Theme Toggle
 const html = document.documentElement;
 const toggleBtn = document.getElementById("theme-toggle");
 const navbarLogo = document.getElementById("navbar-logo");
 const themeIcon = document.getElementById("theme-icon");
-const lightNavbarLogo = "{{ url_for('static', filename='images/logo-navbar.png') }}";
-const darkNavbarLogo = "{{ url_for('static', filename='images/logo-navbar-dark.png') }}";
 
-function updateThemeElements(theme) {
+function updateTheme(theme) {
     if (theme === "dark") {
-        if (navbarLogo) navbarLogo.src = darkNavbarLogo;
-        if (themeIcon) themeIcon.className = "bi bi-moon-fill";
+        navbarLogo.src = "{{ url_for('static', filename='images/logo-navbar-dark.png') }}";
+        themeIcon.className = "bi bi-moon-stars-fill";
     } else {
-        if (navbarLogo) navbarLogo.src = lightNavbarLogo;
-        if (themeIcon) themeIcon.className = "bi bi-sun-fill";
+        navbarLogo.src = "{{ url_for('static', filename='images/logo-navbar.png') }}";
+        themeIcon.className = "bi bi-sun-fill";
     }
 }
 
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme) {
-    html.setAttribute("data-bs-theme", savedTheme);
-    updateThemeElements(savedTheme);
-} else {
-    updateThemeElements("light");
-}
+// Load saved theme
+const savedTheme = localStorage.getItem("theme") || "light";
+html.setAttribute("data-bs-theme", savedTheme);
+updateTheme(savedTheme);
 
-if (toggleBtn) {
-    toggleBtn.addEventListener("click", () => {
-        const newTheme = html.getAttribute("data-bs-theme") === "light" ? "dark" : "light";
-        html.setAttribute("data-bs-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-        updateThemeElements(newTheme);
-    });
-}
+toggleBtn.addEventListener("click", () => {
+    const newTheme = html.getAttribute("data-bs-theme") === "light" ? "dark" : "light";
+    html.setAttribute("data-bs-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    updateTheme(newTheme);
+});
 
-// Navbar scroll gölge/blur efekti
-window.addEventListener('scroll', function() {
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
   const navbar = document.getElementById('main-navbar');
-  if (window.scrollY > 50) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
-  }
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
 });
-
-// Navbar link hover efekti
-document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
-  link.addEventListener('mouseenter', function() {
-    this.style.transform = 'translateY(-2px)';
-  });
-  
-  link.addEventListener('mouseleave', function() {
-    this.style.transform = 'translateY(0)';
-  });
-});
-
-// Button ripple efekti
-document.querySelectorAll('.btn').forEach(button => {
-  button.addEventListener('click', function(e) {
-    const ripple = document.createElement('span');
-    const rect = this.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = e.clientX - rect.left - size / 2;
-    const y = e.clientY - rect.top - size / 2;
-    
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = x + 'px';
-    ripple.style.top = y + 'px';
-    ripple.classList.add('ripple');
-    
-    this.appendChild(ripple);
-    
-    setTimeout(() => {
-      ripple.remove();
-    }, 600);
-  });
-});
-
 </script>
 {% endblock %}
 
 <style>
-/* Temel Stiller */
-html, body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6610f2;
+  --accent-color: #2c3e50;
+  --text-muted: #6c757d;
+  --light-bg: #f8fafe;
+  --border-color: rgba(0, 123, 255, 0.1);
+  --shadow: rgba(0, 0, 0, 0.1);
+  --success-color: #28a745;
+  --border-light: #e9ecef;
+  --input-bg: #f8f9fa;
+  --dark-bg: #15171d;
+  --dark-surface: #1e2329;
+  --dark-border: #2d3748;
+  --dark-text: #f4f7fa;
+  --dark-muted: #a9b5c7;
+  --transition: all 0.3s ease;
 }
 
-body * {
-    transition: all 0.3s ease;
+* {
+  transition: var(--transition);
 }
 
 body {
-  padding-top: 60px; /* Navbar yüksekliğine göre ayarla */
-}
-
-#main-navbar {
-  position: relative;
-  z-index: 2000;
-}
-
-.dropdown-menu {
-  position: absolute !important;
-  z-index: 2100 !important;
-}
-
-#features {
-  scroll-margin-top: 50px; /* Navbar’ın yüksekliğine göre ayarla */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding-top: 70px;
+  background: linear-gradient(180deg, var(--light-bg) 0%, #e8efff 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 #page-content-wrapper {
-    flex-grow: 1;
-    flex-shrink: 0;
+  flex: 1;
 }
 
-footer {
-    flex-shrink: 0;
-}
-
-/* Navbar Efektleri */
+/* Navbar */
 #main-navbar {
-  position: fixed !important;
+  position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1030;
   width: 100%;
+  z-index: 1030;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  height: 70px;
 }
 
-.navbar {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.95) !important;
-    transition: all 0.3s ease;
-}
-
-.navbar.scrolled {
-    box-shadow: 0 2px 30px rgba(0,0,0,0.1);
-    backdrop-filter: blur(20px);
+#main-navbar.scrolled {
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 2px 20px var(--shadow);
 }
 
 .navbar-nav .nav-link {
-    position: relative;
-    transition: all 0.3s ease;
-    font-weight: 500;
+  font-weight: 500;
+  padding: 8px 16px !important;
+  border-radius: 8px;
+  margin: 0 2px;
+  color: var(--accent-color) !important;
 }
 
 .navbar-nav .nav-link:hover {
-    color: var(--bs-primary) !important;
+  background: var(--border-color);
+  color: var(--primary-color) !important;
 }
 
-.navbar-nav .nav-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -5px;
-    left: 50%;
-    background: linear-gradient(90deg, var(--bs-primary), var(--bs-info));
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
-    border-radius: 2px;
+/* Theme Toggle */
+.theme-toggle-btn {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(255, 140, 0, 0.3);
+  color: white;
 }
 
-.navbar-nav .nav-link:hover::after {
-    width: 80%;
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
 }
 
-/* Dropdown Animasyonları */
-.animate-dropdown {
-    animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Alert Animasyonları */
-.animate-alert {
-    animation: slideInDown 0.5s ease;
-}
-
-@keyframes slideInDown {
-    from {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Button Efektleri */
+/* Buttons */
 .btn {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    font-weight: 500;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 8px 20px;
+  transition: var(--transition);
 }
 
-.btn:hover {
-    transform: translateY(-2px);
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+}
+
+.btn-outline-primary {
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
 }
 
 .btn-outline-primary:hover {
-    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.2);
+  background: var(--primary-color);
+  transform: translateY(-1px);
 }
 
-  .btn-sm-custom {
-    padding: 6px 12px;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-
-
-/* Ripple Efekti */
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.6);
-    pointer-events: none;
-    transform: scale(0);
-    animation: ripple-animation 0.6s linear;
+.btn-user {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  color: var(--accent-color);
+  text-decoration: none;
 }
 
-@keyframes ripple-animation {
-    to {
-        transform: scale(4);
-        opacity: 0;
-    }
+.btn-user:hover {
+  background: var(--border-color);
+  color: var(--primary-color);
 }
 
-/* Tema Toggle */
-#theme-toggle {
-    border: none;
-    background: transparent;
-    font-size: 1.2rem;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Dropdown */
+.dropdown-menu {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px var(--shadow);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-#theme-toggle:hover {
-    background: rgba(var(--bs-primary-rgb), 0.1);
-    transform: rotate(180deg);
+.dropdown-item {
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin: 2px 4px;
+  font-weight: 500;
 }
 
-/* Koyu Tema */
+.dropdown-item:hover {
+  background: var(--border-color);
+  color: var(--primary-color);
+}
+
+/* Alerts */
+.alert {
+  border: none;
+  border-radius: 12px;
+  border-left: 4px solid;
+  backdrop-filter: blur(10px);
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1);
+  border-left-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.alert-danger {
+  background: rgba(220, 53, 69, 0.1);
+  border-left-color: #dc3545;
+  color: #dc3545;
+}
+
+.alert-info {
+  background: var(--border-color);
+  border-left-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Footer */
+.footer {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  color: var(--text-muted);
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.social-link {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Dark Theme */
 html[data-bs-theme="dark"] {
-    --bs-body-bg: #0d1117;
-    --bs-body-color: #e6edf3;
+  --bs-body-bg: var(--dark-bg);
+  --bs-body-color: var(--dark-text);
 }
 
-html[data-bs-theme="dark"] .navbar {
-    background: rgba(13, 17, 23, 0.95) !important;
-    border-color: #30363d;
+html[data-bs-theme="dark"] body {
+  background: linear-gradient(180deg, #23272f 0%, #181c22 100%);
 }
 
-html[data-bs-theme="dark"] .navbar.scrolled {
-    box-shadow: 0 2px 30px rgba(0,0,0,0.3);
+html[data-bs-theme="dark"] #main-navbar {
+  background: rgba(30, 35, 41, 0.95) !important;
+  border-bottom-color: var(--dark-border);
 }
 
-html[data-bs-theme="dark"] .navbar .nav-link,
-html[data-bs-theme="dark"] .navbar-brand {
-    color: #e6edf3 !important;
+html[data-bs-theme="dark"] .navbar-nav .nav-link {
+  color: var(--dark-text) !important;
 }
 
-html[data-bs-theme="dark"] .btn-outline-primary {
-    color: #58a6ff;
-    border-color: #58a6ff;
+html[data-bs-theme="dark"] .navbar-nav .nav-link:hover {
+  background: rgba(76, 140, 255, 0.1);
+  color: #4c8cff !important;
 }
 
-html[data-bs-theme="dark"] .btn-outline-primary:hover {
-    background-color: #58a6ff;
-    color: #0d1117;
+html[data-bs-theme="dark"] .theme-toggle-btn {
+  background: linear-gradient(135deg, #4c8cff, #1a365d);
+  box-shadow: 0 2px 10px rgba(76, 140, 255, 0.3);
 }
 
-html[data-bs-theme="dark"] .text-muted {
-    color: #8b949e !important;
+html[data-bs-theme="dark"] .btn-user {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
 }
 
-html[data-bs-theme="dark"] footer {
-    background-color: #161b22 !important;
-    border-color: #30363d !important;
+html[data-bs-theme="dark"] .btn-user:hover {
+  background: rgba(76, 140, 255, 0.1);
+  color: #4c8cff;
 }
 
-/* Social Links */
-.social-links a {
-    transition: all 0.3s ease;
-    font-size: 1.2rem;
-    padding: 5px;
-    border-radius: 50%;
+html[data-bs-theme="dark"] .dropdown-menu {
+  background: rgba(30, 35, 41, 0.95);
 }
 
-.social-links a:hover {
-    color: var(--bs-primary) !important;
-    transform: translateY(-2px);
+html[data-bs-theme="dark"] .dropdown-item:hover {
+  background: rgba(76, 140, 255, 0.1);
+  color: #4c8cff;
 }
 
-/* Logo Hover Efekti */
-#navbar-logo {
-    transition: all 0.3s ease;
+html[data-bs-theme="dark"] .footer {
+  background: rgba(30, 35, 41, 0.95);
+  border-top-color: var(--dark-border);
+  color: var(--dark-muted);
 }
 
-.navbar-brand:hover #navbar-logo {
-    transform: scale(1.05);
+html[data-bs-theme="dark"] .social-link {
+  background: rgba(76, 140, 255, 0.1);
+  color: #4c8cff;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, var(--bs-info), var(--bs-primary));
-}
-
-html[data-bs-theme="dark"] ::-webkit-scrollbar-track {
-    background: #30363d;
+html[data-bs-theme="dark"] .social-link:hover {
+  background: #4c8cff;
+  color: white;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .navbar-nav .nav-link::after {
-        display: none;
-    }
-    
-    .social-links {
-        margin-top: 1rem;
-    }
-    
-    footer .row > div {
-        text-align: center !important;
-        margin-bottom: 1rem;
-    }
+  .social-links {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .theme-toggle-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .btn {
+    padding: 6px 16px;
+    font-size: 0.9rem;
+  }
 }
 
-/* Accessibility */
-.btn:focus,
-.nav-link:focus {
-    outline: 2px solid var(--bs-primary);
-    outline-offset: 2px;
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* Loading Animation */
-.loading-spinner {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255,255,255,.3);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s ease-in-out infinite;
+::-webkit-scrollbar-track {
+  background: var(--border-color);
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-radius: 10px;
 }
 
-/* Smooth transitions */
-* {
-    scroll-behavior: smooth;
-}
-
-/* Text Selection */
-::selection {
-    background-color: var(--bs-primary);
-    color: white;
-}
-
-::-moz-selection {
-    background-color: var(--bs-primary);
-    color: white;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
 }
 </style>
 
