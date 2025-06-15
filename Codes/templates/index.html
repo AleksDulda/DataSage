@@ -10,6 +10,7 @@
       <div class="col-lg-10 col-xl-8">
         <div data-aos="fade-up" data-aos-duration="1000">
           <h1 class="display-2 fw-bold mb-4 lh-1">
+            <br>
             <span class="text-gradient">SQL Bilmeden</span><br>
             <span class="text-primary">Akıllı Sorgular</span>
           </h1>
@@ -692,21 +693,26 @@
   color: white;
   position: relative;
   overflow: hidden;
+  border-radius: 30px; /* Dış kenarları ovalleştir */
+  margin: 0 1rem; /* Kenarlarda boşluk */
 }
 
 .cta-section::before {
-  content: '';
+  content: "";
+  display: block;
   position: absolute;
-  top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="80" r="3" fill="white" opacity="0.05"/></svg>') repeat;
+  top: -80px; /* Geçişin yukarıdan başlaması için */
+  height: 80px;
+  background: linear-gradient(180deg, #f8fafe 0%, var(--bs-primary) 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .cta-wrapper {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--card-border-radius);
+  border-radius: 30px; /* Daha oval iç kenarlar */
   padding: 3rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -724,9 +730,53 @@
   margin: 0;
 }
 
-.btn-light.btn-xl:hover {
+/* Chevron şekli için btn-light btn-xl */
+.btn-light.btn-xl {
+  position: relative;
+  padding: 16px 48px 16px 32px; /* Sağda chevron için ekstra padding */
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   background: white;
   color: var(--bs-primary);
+  transition: var(--transition-smooth);
+  display: inline-flex;
+  align-items: center;
+  /* Clip-path ile chevron şekli - sağ tarafta keskin chevron */
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%);
+  border-radius: 0; /* Clip-path kullandığımız için border-radius kaldırıyoruz */
+}
+
+/* Hover efekti */
+.btn-light.btn-xl:hover {
+  background: #e2e8f0;
+  color: var(--bs-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.05);
+}
+
+/* Koyu tema için */
+html[data-bs-theme="dark"] .btn-light.btn-xl {
+  background: #f7fafc;
+  border-color: #f7fafc;
+  color: #1a202c;
+}
+
+html[data-bs-theme="dark"] .btn-light.btn-xl:hover {
+  background: #e2e8f0;
+  border-color: #e2e8f0;
+  color: #1a202c;
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 768px) {
+  .btn-light.btn-xl {
+    padding: 14px 40px 14px 24px; /* Daha küçük ekranlar için padding */
+    font-size: 1rem;
+    /* Küçük ekranlarda chevron boyutunu küçültüyoruz */
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+  }
 }
 
 /* Koyu Tema Tüm Sayfa Arka Planı */
@@ -842,10 +892,15 @@ html[data-bs-theme="dark"] .chart-bar {
 /* CTA (Call To Action) KOYU MOD */
 html[data-bs-theme="dark"] .cta-section {
   background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-  color: #f7fafc;
+  border-radius: 30px; /* Koyu temada da oval kenar */
 }
+html[data-bs-theme="dark"] .cta-section::before {
+  background: linear-gradient(180deg, #15171d 0%, #2d3748 100%);
+}
+
 html[data-bs-theme="dark"] .cta-wrapper {
   background: rgba(45, 55, 72, 0.8);
+  border-radius: 30px; /* Koyu temada da daha oval */
   border: 1px solid #4a5568;
   backdrop-filter: blur(10px);
 }
@@ -871,16 +926,7 @@ html[data-bs-theme="dark"] .btn-outline-primary.btn-xl:hover {
   border-color: #4c8cff;
   color: #ffffff;
 }
-html[data-bs-theme="dark"] .btn-light.btn-xl {
-  background: #f7fafc;
-  border-color: #f7fafc;
-  color: #1a202c;
-}
-html[data-bs-theme="dark"] .btn-light.btn-xl:hover {
-  background: #e2e8f0;
-  border-color: #e2e8f0;
-  color: #1a202c;
-}
+
 
 
 /* Responsive */

@@ -55,6 +55,8 @@ def login_required(view_func):
         return view_func(**kwargs)
     return wrapped_view
 
+from utils import summarize_db  # En başta ekli olmalı
+
 @app.route("/ask", methods=["GET", "POST"])
 def ask():
     if "user_id" not in session:
@@ -62,16 +64,21 @@ def ask():
 
     user_id = session["user_id"]
 
+    # --- GET: Soru ekranı açıldığında, varsa seçili db özetle beraber göster ---
     if request.method == "GET":
         last_db = session.get("current_db")
-        return render_template("ask.html", last_db=last_db)
+        db_summary = summarize_db(os.path.join(DB_UPLOAD_FOLDER, last_db)) if last_db else None
+        return render_template("ask.html", last_db=last_db, db_summary=db_summary)
 
+    # --- POST: Soru gönderildiğinde ---
     question = request.form.get("question", "").strip()
     db_file = request.files.get("database")
 
     if not question:
         flash("Lütfen bir soru girin.", "warning")
-        return render_template("ask.html", last_db=session.get("current_db"))
+        last_db = session.get("current_db")
+        db_summary = summarize_db(os.path.join(DB_UPLOAD_FOLDER, last_db)) if last_db else None
+        return render_template("ask.html", last_db=last_db, db_summary=db_summary)
 
     # Eğer yeni veritabanı dosyası yüklenmişse...
     if db_file and db_file.filename:
@@ -120,17 +127,23 @@ def ask():
     # Sorgu geçmişine kaydet
     conn = sqlite3.connect("database.sqlite")
     conn.execute(
-    "INSERT INTO query_history (user_id, question, sql_query, result, columns, db_filename) VALUES (?, ?, ?, ?, ?, ?)",
-    (user_id, question, result["sql"], str(result["rows"]), str(result["columns"]), filename)
+        "INSERT INTO query_history (user_id, question, sql_query, result, columns, db_filename) VALUES (?, ?, ?, ?, ?, ?)",
+        (user_id, question, result["sql"], str(result["rows"]), str(result["columns"]), filename)
     )
-
-
     conn.commit()
     conn.close()
 
-    # SQL sorgusunu da template'e gönderiyoruz
-    return render_template("ask.html", result=result, last_db=filename, sql_query=result["sql"])
+    # --- HER POST SONUNDA: Aktif veritabanı özetini üret ---
+    db_summary = summarize_db(filepath)
 
+    # Sonucu ve özet ile template'e gönder
+    return render_template(
+        "ask.html",
+        result=result,
+        last_db=filename,
+        sql_query=result["sql"],
+        db_summary=db_summary
+    )
 
 @app.route("/download", methods=["POST"])
 def download():
@@ -725,6 +738,14 @@ def delete_all_queries():
     conn.close()
     return redirect(url_for("dashboard"))
 
+@app.route("/db_summary", methods=["POST"])
+def db_summary():
+    data = request.json
+    db_filename = data.get("db_filename")
+    mode = data.get("mode", "short")
+    db_path = os.path.join(DB_UPLOAD_FOLDER, db_filename)
+    summary = summarize_db(db_path, mode)
+    return jsonify({"summary": summary})
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -31,6 +31,20 @@
           </div>
         </div>
         {% endif %}
+        {% if db_summary %}
+        <input type="hidden" id="current-db-filename" value="{{ last_db }}">
+
+        <div class="db-summary-bubble position-relative my-4">
+          <strong class="d-block mb-2">Veritabanı Özeti:</strong>
+          <div id="db-summary-text" class="mb-4" style="white-space: pre-line;">{{ db_summary }}</div>
+          <button id="toggle-summary-btn" class="btn btn-sm btn-outline-primary position-absolute end-0 bottom-0 m-3">
+            Daha ayrıntılı göster
+          </button>
+          <input type="hidden" id="current-db-filename" value="{{ last_db }}">
+        </div>
+
+        {% endif %}
+
 
         <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form">
           
@@ -163,13 +177,21 @@
         </div>
 
         <!-- Chart Section -->
-        {% if result["columns"]|length >= 2 and result["rows"]|length > 0 %}
-        <div class="chart-section">
-          <div class="chart-controls">
-            <label class="form-label fw-semibold">
-              <i class="bi bi-bar-chart me-2 text-warning"></i>Grafik Görünümü
-            </label>
-            <select id="chartType" class="form-select chart-select" onchange="drawChart()">
+     {% if result["columns"]|length >= 2 and result["rows"]|length > 0 %}
+      <div class="chart-section">
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+          <div>
+            <label class="form-label mb-1"><small>X Eksen Sütunu</small></label>
+            <select id="labelColumn" class="form-select form-select-sm"></select>
+          </div>
+          <div>
+            <label class="form-label mb-1"><small>Y Eksen Sütunu</small></label>
+            <select id="valueColumn" class="form-select form-select-sm"></select>
+          </div>
+          <div class="flex-grow-1"></div>
+          <div>
+            <label class="form-label mb-1">Grafik Tipi:</label>
+            <select id="chartType" class="form-select form-select-sm w-auto" style="min-width:130px">
               <option value="bar">📊 Sütun Grafik</option>
               <option value="line">📈 Çizgi Grafik</option>
               <option value="pie">🥧 Pasta Grafik</option>
@@ -177,11 +199,13 @@
               <option value="radar">🎯 Radar Grafik</option>
             </select>
           </div>
-          <div class="chart-container">
-            <canvas id="chartArea"></canvas>
-          </div>
         </div>
-        {% endif %}
+        <div class="chart-container">
+          <canvas id="chartArea"></canvas>
+        </div>
+      </div>
+      {% endif %}
+
         {% endif %}
       </div>
     </div>
@@ -189,131 +213,159 @@
 
   <!-- Chart.js and Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  {% if result and result["columns"][0] != "Hata" %}
-  <script>
-    
-    const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
-    const columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
-    let chartInstance = null;
+{% if result and result["columns"][0] != "Hata" %}
+<script>
+const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
+const columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
+let chartInstance = null;
 
-    function generateColors(count) {
-        const colors = [];
-        const baseColors = [
-            '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1',
-            '#20c997', '#fd7e14', '#e83e8c', '#6c757d', '#17a2b8'
-        ];
-        
-        for (let i = 0; i < count; i++) {
-            if (i < baseColors.length) {
-                colors.push(baseColors[i]);
-            } else {
-                const hue = (i * 360 / count) % 360;
-                colors.push(`hsl(${hue}, 65%, 60%)`);
-            }
+function generateColors(count) {
+    const colors = [];
+    const baseColors = [
+        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1',
+        '#20c997', '#fd7e14', '#e83e8c', '#6c757d', '#17a2b8'
+    ];
+    for (let i = 0; i < count; i++) {
+        if (i < baseColors.length) {
+            colors.push(baseColors[i]);
+        } else {
+            const hue = (i * 360 / count) % 360;
+            colors.push(`hsl(${hue}, 65%, 60%)`);
         }
-        return colors;
+    }
+    return colors;
+}
+
+// Sütunları dropdownlara yerleştir
+function populateColumnDropdowns() {
+    const labelDropdown = document.getElementById("labelColumn");
+    const valueDropdown = document.getElementById("valueColumn");
+    if (!labelDropdown || !valueDropdown) return;
+
+    labelDropdown.innerHTML = "";
+    valueDropdown.innerHTML = "";
+    columns.forEach((col, i) => {
+        let opt1 = document.createElement("option");
+        opt1.value = i;
+        opt1.text = col;
+        labelDropdown.appendChild(opt1);
+
+        let opt2 = document.createElement("option");
+        opt2.value = i;
+        opt2.text = col;
+        valueDropdown.appendChild(opt2);
+    });
+    labelDropdown.selectedIndex = 0;
+    valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0;
+}
+
+// Grafik çizimi (dropdown seçimlerine göre)
+function drawChart() {
+    const type = document.getElementById("chartType").value;
+    const labelIdx = parseInt(document.getElementById("labelColumn").value);
+    const valueIdx = parseInt(document.getElementById("valueColumn").value);
+
+    const labels = [];
+    const values = [];
+    for (let i = 0; i < rows.length; i++) {
+        const label = rows[i][labelIdx];
+        const raw = rows[i][valueIdx];
+        const value = parseFloat(String(raw).replace(/[^\d.-]/g, ""));
+        if (!isNaN(value)) {
+            labels.push(label);
+            values.push(value);
+        }
     }
 
-    function drawChart() {
-        const type = document.getElementById("chartType").value;
-        const labels = [];
-        const values = [];
+    // Grafik oluşturulacaksa önceki varsa sil
+    if (chartInstance) chartInstance.destroy();
 
-        for (let i = 0; i < rows.length; i++) {
-            const label = rows[i][0];
-            const raw = rows[i][1];
-            const value = parseFloat(String(raw).replace(/[^\d.-]/g, ""));
-            if (!isNaN(value)) {
-                labels.push(label);
-                values.push(value);
-            }
-        }
-
-        if (labels.length > 0 && values.length > 0) {
-            if (chartInstance) chartInstance.destroy();
-
-            const ctx = document.getElementById("chartArea").getContext("2d");
-            const isXY = (type === "bar" || type === "line");
-
-            chartInstance = new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: columns[1],
-                        data: values,
-                        backgroundColor: generateColors(labels.length),
-                        borderColor: generateColors(labels.length),
-                        borderWidth: 2,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: "Grafiksel Görselleştirme",
-                            font: { size: 16, weight: 'bold' }
-                        },
-                        legend: {
-                            position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
-                            labels: { usePointStyle: true }
-                        }
+    if (labels.length > 0 && values.length > 0) {
+        const ctx = document.getElementById("chartArea").getContext("2d");
+        chartInstance = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: columns[valueIdx],
+                    data: values,
+                    backgroundColor: generateColors(labels.length),
+                    borderColor: generateColors(labels.length),
+                    borderWidth: 2,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "Grafiksel Görselleştirme",
+                        font: { size: 16, weight: 'bold' }
                     },
-                    ...(isXY && {
+                    legend: {
+                        position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
+                        labels: { usePointStyle: true }
+                    }
+                },
+                // Eksende sayılar vs. için
+                ...(type === "bar" || type === "line"
+                    ? {
                         scales: {
-                            x: { 
-                                ticks: { color: '#6c757d' },
-                                grid: { color: '#e9ecef' }
-                            },
-                            y: { 
-                                ticks: { color: '#6c757d' },
-                                grid: { color: '#e9ecef' }
-                            }
+                            x: { ticks: { color: '#6c757d' }, grid: { color: '#e9ecef' } },
+                            y: { ticks: { color: '#6c757d' }, grid: { color: '#e9ecef' } }
                         }
-                    })
-                }
-            });
-        }
-    }
-
-    function downloadResult(format) {
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> İndiriliyor...';
-        btn.disabled = true;
-
-        fetch("/download", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rows: rows, columns: columns, format: format })
-        })
-        .then(response => response.blob())
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = format === "xlsx" ? "sonuc.xlsx" : "sonuc.csv";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        })
-        .finally(() => {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+                    }
+                    : {}
+                )
+            }
         });
     }
+}
 
-    // Initialize chart when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(drawChart, 500);
+// Sayfa açılınca ve seçim değişince güncelle
+document.addEventListener('DOMContentLoaded', function() {
+    populateColumnDropdowns();
+    drawChart();
+
+    // Grafik tipi ve sütun dropdownları değişince tekrar çiz
+    document.getElementById("chartType").addEventListener("change", drawChart);
+    document.getElementById("labelColumn").addEventListener("change", drawChart);
+    document.getElementById("valueColumn").addEventListener("change", drawChart);
+});
+
+// CSV/XLSX indir fonksiyonu
+function downloadResult(format) {
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> İndiriliyor...';
+    btn.disabled = true;
+
+    fetch("/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows: rows, columns: columns, format: format })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = format === "xlsx" ? "sonuc.xlsx" : "sonuc.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     });
-    
-  </script>
-  {% endif %}
+}
+</script>
+{% endif %}
+
   {% endif %}
 </div>
 
@@ -632,7 +684,59 @@ html[data-bs-theme="dark"] .chart-container {
     position: static;
     margin-top: 1rem;
   }
+  #db-summary-box .d-flex { flex-wrap: wrap; }
+  #db-summary-text { flex-grow: 1; min-width: 0; max-width: 80vw; white-space: pre-line; word-break: break-word; }
+@media (max-width: 576px) {
+  #db-summary-box .d-flex { flex-direction: column; align-items: stretch; }
+  #db-summary-text { max-width: 100%; margin-bottom: 8px; }
 }
+
+}
+.db-summary-bubble {
+  background: #f8f9fa;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(16, 42, 90, 0.10), 0 1.5px 6px rgba(80,80,130,0.09);
+  border: 1.5px solid #e2e6ea;
+  padding: 1.7rem 2.2rem 3.5rem 2.2rem;
+  min-height: 120px;
+  position: relative;
+}
+
+html[data-bs-theme="dark"] .db-summary-bubble {
+  background: #232833;
+  border-color: #32364c;
+  color: #e0e6ef;
+}
+
+#db-summary-text {
+  font-size: 1.07rem;
+  line-height: 1.7;
+  color: #35373b;
+}
+
+html[data-bs-theme="dark"] #db-summary-text {
+  color: #dbe8fa;
+}
+
+/* Butonun baloncuk içinde, sağ alt köşede görünmesini garantile */
+#toggle-summary-btn {
+  z-index: 2;
+  /* Optional: */
+  min-width: 165px;
+}
+
+/* Responsive uyarlama */
+@media (max-width: 600px) {
+  .db-summary-bubble {
+    padding: 1.2rem 1rem 3.3rem 1rem;
+  }
+  #toggle-summary-btn {
+    min-width: 120px;
+    font-size: 0.94rem;
+    margin-bottom: 0.3rem !important;
+  }
+}
+
 </style>
 {% endblock %}
 
@@ -734,5 +838,37 @@ function copySql() {
     }, 2000);
   });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  let mode = "short";
+  const btn = document.getElementById("toggle-summary-btn");
+  if (btn) {
+    btn.onclick = function() {
+      btn.disabled = true;
+      btn.textContent = "Yükleniyor...";
+      let db_filename = document.getElementById("current-db-filename").value;
+      fetch("/db_summary", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({db_filename: db_filename, mode: (mode === "short" ? "detail" : "short")})
+      })
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById("db-summary-text").textContent = data.summary;
+        mode = (mode === "short" ? "detail" : "short");
+        btn.textContent = (mode === "short" ? "Daha ayrıntılı göster" : "Daha az göster");
+        btn.disabled = false;
+      })
+      .catch(() => {
+        btn.textContent = "Hata oluştu";
+        setTimeout(() => {
+          btn.textContent = (mode === "short" ? "Daha ayrıntılı göster" : "Daha az göster");
+          btn.disabled = false;
+        }, 1500);
+      });
+    };
+  }
+});
+
 </script>
 {% endblock %}
