@@ -194,6 +194,18 @@ html[data-bs-theme="dark"] .alert-danger {
     padding: 0.8rem 1.5rem;
   }
 }
+.map-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  height: 180px;
+  max-width: 100%;
+}
+
+.map-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 </style>
 {% endblock %}
 
@@ -207,6 +219,7 @@ html[data-bs-theme="dark"] .alert-danger {
     </div>
 
     <div class="row g-4">
+
       <!-- Contact Info -->
       <div class="col-lg-5">
         <div class="content-card h-100">
@@ -221,8 +234,24 @@ html[data-bs-theme="dark"] .alert-danger {
               <span><strong>GitHub:</strong> <a href="https://github.com/AleksDulda/DataSage" target="_blank">Proje Sayfası</a></span>
             </li>
           </ul>
+
+         <!-- Harita ve Adres -->
+        <div class="mt-4">
+          <div class="map-wrapper mb-3 shadow-sm">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3067.012272468002!2d29.1270323!3d40.1873917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ca3eb7d9f8aba7%3A0x127e405711993447!2sBursa%20Teknik%20%C3%9Cniversitesi!5e0!3m2!1str!2str!4v1718465000000!5m2!1str!2str"
+              allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+          <p class="mb-0 text-muted">
+            <i class="bi bi-geo-alt-fill me-2"></i><strong>Adres:</strong> Bursa Teknik Üniversitesi, Yıldırım/Bursa
+          </p>
+        </div>
+
         </div>
       </div>
+
+
 
       <!-- Contact Form -->
       <div class="col-lg-7">

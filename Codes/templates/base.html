@@ -29,7 +29,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Ana Sayfa</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('features') }}">Özellikler</a></li>
+        <a class="nav-link" href="{{ url_for('index') }}#features">Özellikler</a>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">Hakkımızda</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('contact') }}">İletişim</a></li>
         {% if session.username %}
@@ -102,7 +102,7 @@
         <div class="social-links">
           <a href="#" class="text-muted me-3"><i class="bi bi-twitter"></i></a>
           <a href="#" class="text-muted me-3"><i class="bi bi-linkedin"></i></a>
-          <a href="#" class="text-muted"><i class="bi bi-github"></i></a>
+          <a href="https://github.com/AleksDulda/DataSage" class="text-muted"><i class="bi bi-github"></i></a>
         </div>
       </div>
     </div>
@@ -218,6 +218,24 @@ body * {
     transition: all 0.3s ease;
 }
 
+body {
+  padding-top: 60px; /* Navbar yüksekliğine göre ayarla */
+}
+
+#main-navbar {
+  position: relative;
+  z-index: 2000;
+}
+
+.dropdown-menu {
+  position: absolute !important;
+  z-index: 2100 !important;
+}
+
+#features {
+  scroll-margin-top: 50px; /* Navbar’ın yüksekliğine göre ayarla */
+}
+
 #page-content-wrapper {
     flex-grow: 1;
     flex-shrink: 0;
@@ -228,6 +246,15 @@ footer {
 }
 
 /* Navbar Efektleri */
+#main-navbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  width: 100%;
+}
+
 .navbar {
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.95) !important;
