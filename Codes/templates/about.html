@@ -1,267 +1,401 @@
 {% extends "base.html" %}
 {% block title %}Hakkımızda - DATASAGE{% endblock %}
 
-{% block styles %}
-<style>
-/* About Section */
-.about-section {
-  padding: 100px 0;
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Dark Mode */
-html[data-bs-theme="dark"] .about-section {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.15) 0%, rgba(20, 20, 20, 0.95) 100%);
-}
-
-/* Content Cards */
-.content-card {
-  background: white;
-  border-radius: 16px;
-  padding: 2.5rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 123, 255, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  margin-bottom: 2rem;
-}
-
-.content-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-html[data-bs-theme="dark"] .content-card {
-  background: #1e1e1e;
-  border-color: rgba(0, 123, 255, 0.2);
-  color: #d9d9d9;
-}
-
-/* Team Cards */
-.team-card {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 123, 255, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.team-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-.team-card img {
-  border: 2px solid var(--bs-primary);
-  transition: transform 0.3s ease;
-}
-
-.team-card:hover img {
-  transform: scale(1.1);
-}
-
-html[data-bs-theme="dark"] .team-card {
-  background: #1e1e1e;
-  border-color: rgba(0, 123, 255, 0.2);
-}
-
-/* Typography */
-.section-title {
-  font-size: 2.8rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 50px;
-  height: 4px;
-  background: var(--bs-primary);
-}
-
-.sub-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #2c2c2c;
-  margin-bottom: 1.5rem;
-}
-
-html[data-bs-theme="dark"] .section-title,
-html[data-bs-theme="dark"] .sub-title {
-  color: #ffffff;
-}
-
-/* Icons */
-.content-card i.bi {
-  font-size: 1.4rem;
-  color: var(--bs-primary);
-  margin-right: 0.5rem;
-}
-
-.list-icon {
-  color: var(--bs-success);
-  margin-right: 0.75rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .about-section {
-    padding: 60px 0;
-  }
-
-  .section-title {
-    font-size: 2.2rem;
-  }
-
-  .sub-title {
-    font-size: 1.4rem;
-  }
-
-  .content-card,
-  .team-card {
-    padding: 1.5rem;
-  }
-
-  .team-card img {
-    width: 80px !important;
-    height: 80px !important;
-  }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<section class="about-section">
+<!-- Hero -->
+<section class="hero-about">
   <div class="container">
-    <!-- About Us -->
-    <div class="text-center mb-5" data-aos="fade-up">
-      <h2 class="section-title">Hakkımızda</h2>
-      <p class="lead text-muted">DATASAGE ile veri analizini herkes için basit ve güçlü hale getiriyoruz.</p>
+    <div class="hero-content" data-aos="fade-up">
+      <h1 class="hero-title">
+        <span class="text-gradient">Veriyi</span> Herkes İçin<br>
+        <span class="text-primary">Erişilebilir Kılıyoruz</span>
+      </h1>
+      <p class="hero-subtitle">
+        SQL bilgisi gerektirmeden, doğal dil ile güçlü veri analizi.<br>
+        Teknoloji ile insanı buluşturan yenilikçi platform.
+      </p>
     </div>
-    
-    <div class="content-card" data-aos="fade-up" data-aos-delay="100">
-      <p><i class="bi bi-rocket-takeoff"></i> <strong>DATASAGE</strong>, SQL bilgisi gerektirmeden veritabanı sorgularını herkesin yapabileceği bir platformdur. Veri analizini sadeleştirerek, işletmelerin ve bireylerin verilerinden maksimum fayda sağlamasını hedefliyoruz.</p>
-      <p><i class="bi bi-code-slash"></i> Flask tabanlı sistemimiz, doğal dil işleme, veritabanı yönetimi ve otomatik görselleştirme teknolojilerini birleştiriyor. SQLite veritabanınızı yükleyin, doğal dilde sorular sorun ve saniyeler içinde sonuç alın.</p>
-    </div>
+  </div>
+</section>
 
-    <!-- Vision -->
-    <div class="mb-5">
-      <h4 class="sub-title" data-aos="fade-up">Vizyonumuz</h4>
-      <div class="content-card" data-aos="fade-up" data-aos-delay="200">
-        <p><i class="bi bi-globe"></i> Verinin gücünü herkesin eline teslim etmek. Kullanıcı dostu ve akıllı çözümlerle, bilgiye erişimi demokratikleştiriyor ve veri odaklı bir geleceği şekillendiriyoruz.</p>
-      </div>
-    </div>
-
-    <!-- Mission -->
-    <div class="mb-5">
-      <h4 class="sub-title" data-aos="fade-up">Misyonumuz</h4>
-      <div class="content-card" data-aos="fade-up" data-aos-delay="300">
-        <ul class="list-unstyled mb-0">
-          <li class="mb-2"><i class="bi bi-check-circle-fill list-icon"></i> Kullanıcı odaklı veri analiz platformları sunmak</li>
-          <li class="mb-2"><i class="bi bi-check-circle-fill list-icon"></i> Yapay zeka ile sorguları herkes için erişilebilir kılmak</li>
-          <li class="mb-2"><i class="bi bi-check-circle-fill list-icon"></i> Açık kaynak teknolojilerle yenilikçi çözümler üretmek</li>
-          <li><i class="bi bi-check-circle-fill list-icon"></i> Veri gizliliğine ve estetik tasarıma öncelik vermek</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Team -->
-    <div class="mb-5">
-      <h4 class="sub-title text-center" data-aos="fade-up">Ekibimiz</h4>
-      <div class="content-card mb-4 text-center" data-aos="fade-up" data-aos-delay="400">
-        <p><i class="bi bi-people-fill"></i> DATASAGE, <strong>Bursa Teknik Üniversitesi</strong> Bilgisayar Mühendisliği öğrencileri tarafından 2025 yılında geliştirildi. Tutkuyla çalışan ekibimizle tanışın:</p>
+<!-- About Cards -->
+<section class="about-cards">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Vision -->
+      <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+        <div class="about-card vision">
+          <div class="card-icon">
+            <i class="bi bi-eye"></i>
+          </div>
+          <div class="card-content">
+            <h3>Vizyonumuz</h3>
+            <p>Verinin gücünü demokratikleştirmek. Her kullanıcının, teknik bilgi olmadan da karmaşık analizler yapabileceği bir dünya yaratmak.</p>
+          </div>
+        </div>
       </div>
 
-      <!-- Team Members -->
-      <div class="row g-4">
-        <!-- Aleks -->
-        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
-          <div class="team-card d-flex align-items-center">
-            <img src="{{ url_for('static', filename='team/aleks.jpg') }}" alt="Aleks Dulda"
-                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-            <div>
-              <h5 class="mb-1">Aleks Dulda</h5>
-              <p class="mb-1 text-muted small">Full Stack Developer / İletişim Sorumlusu</p>
-              <p class="mb-0">
-                <a href="https://github.com/AleksDulda" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
-                <a href="https://www.linkedin.com/in/aleks-dulda-47435b221/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
-              </p>
-            </div>
+      <!-- Mission -->
+      <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="about-card mission">
+          <div class="card-icon">
+            <i class="bi bi-rocket-takeoff"></i>
           </div>
-        </div>
-
-        <!-- Murat -->
-        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
-          <div class="team-card d-flex align-items-center">
-            <img src="{{ url_for('static', filename='team/murat.jpg') }}" alt="Murat Demirbaş"
-                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-            <div>
-              <h5 class="mb-1">Murat Demirbaş</h5>
-              <p class="mb-1 text-muted small">Backend & Security</p>
-              <p class="mb-0">
-                <a href="https://github.com/demirbas1436" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
-                <a href="https://www.linkedin.com/in/muratdemirbas1436/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Emin -->
-        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="700">
-          <div class="team-card d-flex align-items-center">
-            <img src="{{ url_for('static', filename='team/emin.jpg') }}" alt="M. Emin Alantepe"
-                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-            <div>
-              <h5 class="mb-1">M. Emin Alantepe</h5>
-              <p class="mb-1 text-muted small">Frontend Developer</p>
-              <p class="mb-0">
-                <a href="https://github.com/alantepeemin" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
-                <a href="https://www.linkedin.com/in/m-emin-alantepe/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Enes -->
-        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="800">
-          <div class="team-card d-flex align-items-center">
-            <img src="{{ url_for('static', filename='team/enes.jpg') }}" alt="Enes Malik Altınpınar"
-                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-            <div>
-              <h5 class="mb-1">Enes Malik Altınpınar</h5>
-              <p class="mb-1 text-muted small">Mobile Developer</p>
-              <p class="mb-0">
-                <a href="https://github.com/malikaltinpinar" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
-                <a href="https://www.linkedin.com/in/enes-malik-alt%C4%B1np%C4%B1nar/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Kaan -->
-        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="900">
-          <div class="team-card d-flex align-items-center">
-            <img src="{{ url_for('static', filename='team/kaan.jpg') }}" alt="Kaan Çardak"
-                 class="rounded-circle me-4" style="width: 90px; height: 90px; object-fit: cover;">
-            <div>
-              <h5 class="mb-1">Kaan Çardak</h5>
-              <p class="mb-1 text-muted small">UI/UX Designer</p>
-              <p class="mb-0">
-                <a href="https://github.com/kaancardak" class="me-2 link-primary" target="_blank"><i class="bi bi-github"></i></a>
-                <a href="https://www.linkedin.com/in/kaan-%C3%A7ardak-82a155175/" class="link-primary" target="_blank"><i class="bi bi-linkedin"></i></a>
-              </p>
-            </div>
+          <div class="card-content">
+            <h3>Misyonumuz</h3>
+            <p>AI destekli platformumuzla veri analizini basitleştirip, işletmelerin ve bireylerin hızlı, doğru kararlar almasını sağlamak.</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Team -->
+<section class="team-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2>Ekibimiz</h2>
+      <p>Bursa Teknik Üniversitesi Bilgisayar Mühendisliği öğrencileri</p>
+    </div>
+
+    <div class="team-grid">
+      <div class="team-member" data-aos="fade-up" data-aos-delay="100">
+        <div class="member-avatar">
+          <img src="{{ url_for('static', filename='team/aleks.jpg') }}" alt="Aleks Dulda">
+        </div>
+        <div class="member-info">
+          <h4>Aleks Dulda</h4>
+          <p>Full Stack & İletişim</p>
+          <div class="member-links">
+            <a href="https://github.com/AleksDulda" target="_blank"><i class="bi bi-github"></i></a>
+            <a href="https://www.linkedin.com/in/aleks-dulda-47435b221/" target="_blank"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member" data-aos="fade-up" data-aos-delay="300">
+        <div class="member-avatar">
+          <img src="{{ url_for('static', filename='team/emin.jpg') }}" alt="M. Emin Alantepe">
+        </div>
+        <div class="member-info">
+          <h4>M. Emin Alantepe</h4>
+          <p>Frontend Developer</p>
+          <div class="member-links">
+            <a href="https://github.com/alantepeemin" target="_blank"><i class="bi bi-github"></i></a>
+            <a href="https://www.linkedin.com/in/m-emin-alantepe/" target="_blank"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member" data-aos="fade-up" data-aos-delay="500">
+        <div class="member-avatar">
+          <img src="{{ url_for('static', filename='team/kaan.jpg') }}" alt="Kaan Çardak">
+        </div>
+        <div class="member-info">
+          <h4>Kaan Çardak</h4>
+          <p>UI/UX Designer</p>
+          <div class="member-links">
+            <a href="https://github.com/kaancardak" target="_blank"><i class="bi bi-github"></i></a>
+            <a href="https://www.linkedin.com/in/kaan-%C3%A7ardak-82a155175/" target="_blank"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+
+      
+
+      <div class="team-member" data-aos="fade-up" data-aos-delay="400">
+        <div class="member-avatar">
+          <img src="{{ url_for('static', filename='team/enes.jpg') }}" alt="Enes Malik Altınpınar">
+        </div>
+        <div class="member-info">
+          <h4>Enes Malik Altınpınar</h4>
+          <p>Mobile Developer</p>
+          <div class="member-links">
+            <a href="https://github.com/malikaltinpinar" target="_blank"><i class="bi bi-github"></i></a>
+            <a href="https://www.linkedin.com/in/enes-malik-alt%C4%B1np%C4%B1nar/" target="_blank"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member" data-aos="fade-up" data-aos-delay="200">
+        <div class="member-avatar">
+          <img src="{{ url_for('static', filename='team/murat.jpg') }}" alt="Murat Demirbaş">
+        </div>
+        <div class="member-info">
+          <h4>Murat Demirbaş</h4>
+          <p>Backend & Security</p>
+          <div class="member-links">
+            <a href="https://github.com/demirbas1436" target="_blank"><i class="bi bi-github"></i></a>
+            <a href="https://www.linkedin.com/in/muratdemirbas1436/" target="_blank"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block styles %}
+<style>
+/* Text Gradient */
+.text-gradient {
+  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero About */
+.hero-about {
+  padding: 60px 0 40px;
+  background: linear-gradient(135deg, #f8fafe 0%, #e8efff 100%);
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  color: #6c757d;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* About Cards */
+.about-cards {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #e8efff 0%, #ffffff 100%); /* Matching gradient direction and colors */
+}
+
+.about-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  height: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.about-card.vision::before { background: linear-gradient(90deg, #ffc107, #fd7e14); }
+.about-card.mission::before { background: linear-gradient(90deg, #28a745, #20c997); }
+
+.about-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.about-card:hover::before {
+  opacity: 1;
+}
+
+.card-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.vision .card-icon { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+.mission .card-icon { background: linear-gradient(135deg, #28a745, #20c997); }
+
+.card-content h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.card-content p {
+  color: #6c757d;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Team */
+.team-section {
+  padding: 40px 0;
+  background: white;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.section-header p {
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.team-member {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.team-member:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.member-avatar {
+  margin-bottom: 1.5rem;
+}
+
+.member-avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--bs-primary);
+  transition: transform 0.3s ease;
+}
+
+.team-member:hover .member-avatar img {
+  transform: scale(1.1);
+}
+
+.member-info h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.member-info p {
+  color: #6c757d;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.member-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.member-links a {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bs-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.member-links a:hover {
+  background: #0056b3;
+  transform: scale(1.1);
+}
+
+/* Dark Mode */
+html[data-bs-theme="dark"] .hero-about {
+  background: linear-gradient(135deg, #23272f 0%, #181c22 100%);
+}
+
+html[data-bs-theme="dark"] .hero-title,
+html[data-bs-theme="dark"] .section-header h2 {
+  color: #f4f7fa;
+}
+
+html[data-bs-theme="dark"] .hero-subtitle,
+html[data-bs-theme="dark"] .section-header p {
+  color: #a9b5c7;
+}
+
+html[data-bs-theme="dark"] .about-cards {
+  background: linear-gradient(315deg, #23272f 0%, #181c22 100%);
+}
+
+html[data-bs-theme="dark"] .team-section {
+  background: #15171d;
+}
+
+html[data-bs-theme="dark"] .about-card,
+html[data-bs-theme="dark"] .team-member {
+  background: #1e2329;
+  border-color: #2d3748;
+}
+
+html[data-bs-theme="dark"] .card-content h3,
+html[data-bs-theme="dark"] .member-info h4 {
+  color: #f7fafc;
+}
+
+html[data-bs-theme="dark"] .card-content p,
+html[data-bs-theme="dark"] .member-info p {
+  color: #a0aec0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .about-card,
+  .team-member {
+    padding: 1.5rem;
+  }
+  
+  .team-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+</style>
 {% endblock %}

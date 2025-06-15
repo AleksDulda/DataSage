@@ -6,199 +6,119 @@
 /* Contact Section */
 .contact-section {
   padding: 80px 0;
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.03) 0%, rgba(255, 255, 255, 1) 100%);
+  background: linear-gradient(135deg, #f8fafe 0%, #e8efff 100%);
   min-height: calc(100vh - 100px);
 }
 
-/* Dark Mode */
-html[data-bs-theme="dark"] .contact-section {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.08) 0%, rgba(18, 18, 18, 1) 100%);
-}
-
-/* Content Cards */
 .content-card {
   background: white;
-  border-radius: 14px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 123, 255, 0.08);
-  transition: box-shadow 0.3s ease;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 123, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
 }
 
 .content-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
 }
 
-html[data-bs-theme="dark"] .content-card {
-  background: #1c1c1c;
-  border-color: rgba(0, 123, 255, 0.12);
-  color: #e6e6e6;
-}
-
-/* Form Styling */
+/* Form Controls */
 .form-control {
   border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 0.9rem 1.2rem;
+  border: 2px solid #e9ecef;
+  padding: 16px 20px;
   font-size: 1rem;
-  background: #f9f9f9;
-  transition: border-color 0.3s ease, background 0.3s ease;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
 }
 
 .form-control:focus {
+  outline: none;
   border-color: var(--bs-primary);
   background: white;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-html[data-bs-theme="dark"] .form-control {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: #2a2a2a;
-  color: #e6e6e6;
-}
-
-html[data-bs-theme="dark"] .form-control:focus {
-  background: #2a2a2a;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-}
-
 .form-label {
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: #333;
-  margin-bottom: 0.4rem;
-}
-
-html[data-bs-theme="dark"] .form-label {
-  color: #d9d9d9;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
 }
 
 .btn-primary {
   border-radius: 12px;
-  padding: 0.9rem 2rem;
-  font-weight: 500;
-  font-size: 1rem;
-  background: var(--bs-primary);
-  border: none;
-  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  padding: 16px 32px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: var(--bs-primary-dark);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
 }
 
 /* Typography */
 .section-title {
-  font-size: 2.4rem;
+  font-size: 3rem;
   font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
 }
 
 .sub-title {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #2c2c2c;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
   margin-bottom: 1.5rem;
 }
 
-html[data-bs-theme="dark"] .section-title,
-html[data-bs-theme="dark"] .sub-title {
-  color: #f5f5f5;
-}
-
-/* Contact List */
-.contact-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.contact-list li {
+/* Contact Info */
+.contact-item {
   display: flex;
   align-items: center;
-  padding: 0.8rem 0;
-  font-size: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f3f4;
 }
 
-.contact-list i.bi {
-  font-size: 1.3rem;
+.contact-item:last-child {
+  border-bottom: none;
+}
+
+.contact-item i {
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
   color: var(--bs-primary);
-  margin-right: 0.8rem;
+  margin-right: 1rem;
 }
 
-.contact-list a {
+.contact-item a {
   color: var(--bs-primary);
   text-decoration: none;
+  font-weight: 500;
   transition: color 0.3s ease;
 }
 
-.contact-list a:hover {
-  color: var(--bs-primary-dark);
+.contact-item a:hover {
+  color: #0056b3;
 }
 
-/* Alerts */
-.alert {
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-  border: none;
-}
-
-.alert-success {
-  background: #e6f4ea;
-  color: #2e7d32;
-}
-
-.alert-danger {
-  background: #fce4ec;
-  color: #d81b60;
-}
-
-html[data-bs-theme="dark"] .alert-success {
-  background: #1b3a22;
-  color: #66bb6a;
-}
-
-html[data-bs-theme="dark"] .alert-danger {
-  background: #3f1c25;
-  color: #f06292;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .contact-section {
-    padding: 50px 0;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-
-  .sub-title {
-    font-size: 1.3rem;
-  }
-
-  .content-card {
-    padding: 1.5rem;
-  }
-
-  .form-control {
-    padding: 0.8rem 1rem;
-  }
-
-  .btn-primary {
-    padding: 0.8rem 1.5rem;
-  }
-}
+/* Map */
 .map-wrapper {
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  height: 180px;
-  max-width: 100%;
+  height: 200px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
 }
 
 .map-wrapper iframe {
@@ -206,64 +126,146 @@ html[data-bs-theme="dark"] .alert-danger {
   height: 100%;
   border: 0;
 }
+
+/* Alerts */
+.alert {
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  border: none;
+  font-weight: 500;
+}
+
+.alert-success {
+  background: #d1edcc;
+  color: #155724;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Dark Mode */
+html[data-bs-theme="dark"] .contact-section {
+  background: linear-gradient(135deg, #181c22 0%, #15171d 100%);
+}
+
+html[data-bs-theme="dark"] .content-card {
+  background: #1e2329;
+  border-color: #2d3748;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+html[data-bs-theme="dark"] .form-control {
+  background: #2d3748;
+  border-color: #4a5568;
+  color: #e2e8f0;
+}
+
+html[data-bs-theme="dark"] .form-control:focus {
+  background: #2d3748;
+  border-color: #4c8cff;
+  box-shadow: 0 0 0 3px rgba(76, 140, 255, 0.2);
+}
+
+html[data-bs-theme="dark"] .form-label {
+  color: #e2e8f0;
+}
+
+html[data-bs-theme="dark"] .section-title,
+html[data-bs-theme="dark"] .sub-title {
+  color: #f7fafc;
+}
+
+html[data-bs-theme="dark"] .contact-item {
+  border-bottom-color: #2d3748;
+}
+
+html[data-bs-theme="dark"] .contact-item i {
+  background: rgba(76, 140, 255, 0.15);
+  color: #4c8cff;
+}
+
+html[data-bs-theme="dark"] .alert-success {
+  background: #1b3a22;
+  color: #68d391;
+}
+
+html[data-bs-theme="dark"] .alert-danger {
+  background: #3f1c25;
+  color: #f56565;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contact-section { padding: 50px 0; }
+  .section-title { font-size: 2.5rem; }
+  .content-card { padding: 2rem; }
+  .form-control { padding: 14px 16px; }
+  .btn-primary { padding: 14px 24px; font-size: 1rem; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <section class="contact-section">
   <div class="container">
-    <!-- Contact Header -->
-    <div class="text-center mb-5">
+    <div class="text-center mb-5" data-aos="fade-up">
       <h2 class="section-title">Bize Ulaşın</h2>
       <p class="lead text-muted">Fikirlerinizi, sorularınızı veya önerilerinizi paylaşın, hemen yanıtlayalım!</p>
     </div>
 
     <div class="row g-4">
-
       <!-- Contact Info -->
-      <div class="col-lg-5">
-        <div class="content-card h-100">
+      <div class="col-lg-5" data-aos="fade-right">
+        <div class="content-card">
           <h4 class="sub-title">İletişim Bilgileri</h4>
-          <ul class="contact-list">
-            <li>
-              <i class="bi bi-envelope-fill"></i>
-              <span><strong>E-posta:</strong> <a href="mailto:datasagecontact@gmail.com">datasagecontact@gmail.com</a></span>
-            </li>
-            <li>
-              <i class="bi bi-github"></i>
-              <span><strong>GitHub:</strong> <a href="https://github.com/AleksDulda/DataSage" target="_blank">Proje Sayfası</a></span>
-            </li>
-          </ul>
-
-         <!-- Harita ve Adres -->
-        <div class="mt-4">
-          <div class="map-wrapper mb-3 shadow-sm">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3067.012272468002!2d29.1270323!3d40.1873917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ca3eb7d9f8aba7%3A0x127e405711993447!2sBursa%20Teknik%20%C3%9Cniversitesi!5e0!3m2!1str!2str!4v1718465000000!5m2!1str!2str"
-              allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
+          
+          <div class="contact-item">
+            <i class="bi bi-envelope-fill"></i>
+            <div>
+              <strong>E-posta</strong><br>
+              <a href="mailto:datasagecontact@gmail.com">datasagecontact@gmail.com</a>
+            </div>
           </div>
-          <p class="mb-0 text-muted">
-            <i class="bi bi-geo-alt-fill me-2"></i><strong>Adres:</strong> Bursa Teknik Üniversitesi, Yıldırım/Bursa
-          </p>
-        </div>
 
+          <div class="contact-item">
+            <i class="bi bi-github"></i>
+            <div>
+              <strong>GitHub</strong><br>
+              <a href="https://github.com/AleksDulda/DataSage" target="_blank">Proje Sayfası</a>
+            </div>
+          </div>
+
+          <!-- Map -->
+          <div class="mt-4">
+            <div class="map-wrapper">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3067.012272468002!2d29.1270323!3d40.1873917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ca3eb7d9f8aba7%3A0x127e405711993447!2sBursa%20Teknik%20%C3%9Cniversitesi!5e0!3m2!1str!2str!4v1718465000000!5m2!1str!2str"
+                allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+            <p class="text-muted mb-0">
+              <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+              <strong>Bursa Teknik Üniversitesi</strong>, Yıldırım/Bursa
+            </p>
+          </div>
         </div>
       </div>
 
-
-
       <!-- Contact Form -->
-      <div class="col-lg-7">
-        <div class="content-card h-100">
+      <div class="col-lg-7" data-aos="fade-left">
+        <div class="content-card">
           <h4 class="sub-title">Mesaj Gönder</h4>
+          
           {% if success %}
-          <div class="alert alert-success" role="alert">
+          <div class="alert alert-success">
             <i class="bi bi-check-circle-fill me-2"></i>Mesajınız başarıyla gönderildi!
           </div>
           {% elif error %}
-          <div class="alert alert-danger" role="alert">
-            <i class="bi bi-exclamation-circle-fill me-2"></i>Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>Mesaj gönderilirken bir hata oluştu.
           </div>
           {% endif %}
 
@@ -272,14 +274,17 @@ html[data-bs-theme="dark"] .alert-danger {
               <label for="name" class="form-label">Adınız</label>
               <input type="text" name="name" class="form-control" id="name" placeholder="Adınızı yazın" required>
             </div>
+            
             <div class="mb-3">
               <label for="email" class="form-label">E-posta Adresiniz</label>
               <input type="email" name="email" class="form-control" id="email" placeholder="E-posta adresinizi yazın" required>
             </div>
-            <div class="mb-3">
+            
+            <div class="mb-4">
               <label for="message" class="form-label">Mesajınız</label>
               <textarea name="message" class="form-control" id="message" rows="5" placeholder="Mesajınızı buraya yazın" required></textarea>
             </div>
+            
             <div class="text-end">
               <button type="submit" class="btn btn-primary">
                 <i class="bi bi-send-fill me-2"></i>Gönder

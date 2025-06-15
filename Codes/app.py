@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for, send_file, jsonify
-import os
+import os, zipfile
 import sqlite3
 from auth import auth
 from models import init_db
@@ -120,9 +120,11 @@ def ask():
     # Sorgu geçmişine kaydet
     conn = sqlite3.connect("database.sqlite")
     conn.execute(
-        "INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
-        (user_id, question, result["sql"], str(result["rows"]))
+    "INSERT INTO query_history (user_id, question, sql_query, result, columns, db_filename) VALUES (?, ?, ?, ?, ?, ?)",
+    (user_id, question, result["sql"], str(result["rows"]), str(result["columns"]), filename)
     )
+
+
     conn.commit()
     conn.close()
 
@@ -157,35 +159,97 @@ def dashboard():
     query_filter = request.args.get("query_filter", "")
     sort_order = request.args.get("sort_order", "desc").lower()
 
+    # --- Sorgu geçmişi sayfalama ---
+    try:
+        page = int(request.args.get("page", 1))
+        per_page = int(request.args.get("per_page", 10))
+        if per_page not in [10, 15, 20]:
+            per_page = 10
+    except:
+        page = 1
+        per_page = 10
+
+    # --- Veritabanı uploads için sayfalama ---
+    try:
+        uploads_page = int(request.args.get("uploads_page", 1))
+        uploads_per_page = int(request.args.get("uploads_per_page", 10))
+        if uploads_per_page not in [10, 15, 20]:
+            uploads_per_page = 10
+    except:
+        uploads_page = 1
+        uploads_per_page = 10
+
     if sort_order not in ["asc", "desc"]:
         sort_order = "desc"
 
     conn = sqlite3.connect("database.sqlite")
     conn.row_factory = sqlite3.Row
 
+    # --- Uploads ile ilgili kısım ---
+    uploads_count = conn.execute(
+        "SELECT COUNT(*) FROM db_uploads WHERE user_id = ?", (user_id,)
+    ).fetchone()[0]
+    uploads_offset = (uploads_page - 1) * uploads_per_page
+    uploads_total_pages = (uploads_count + uploads_per_page - 1) // uploads_per_page
+
     uploads = conn.execute("""
         SELECT * FROM db_uploads 
         WHERE user_id = ? 
         ORDER BY uploaded_at DESC
-    """, (user_id,)).fetchall()
+        LIMIT ? OFFSET ?
+    """, (user_id, uploads_per_page, uploads_offset)).fetchall()
 
-    history_query = """
-        SELECT * FROM query_history
-        WHERE user_id = ?
-    """
+    uploads_start_page = max(1, uploads_page - 2)
+    uploads_end_page = min(uploads_page + 2, uploads_total_pages)
+
+    # --- Sorgu geçmişi ile ilgili kısım ---
+    history_query = "SELECT * FROM query_history WHERE user_id = ?"
     params = [user_id]
-
     if query_filter:
         history_query += " AND LOWER(question) LIKE ?"
         params.append(f"%{query_filter.lower()}%")
-
     history_query += f" ORDER BY timestamp {sort_order.upper()}"
 
-    history = conn.execute(history_query, params).fetchall()
-    conn.close()
+    # Toplam kayıt sayısı (sayfalama için)
+    count_query = "SELECT COUNT(*) FROM query_history WHERE user_id = ?"
+    count_params = [user_id]
+    if query_filter:
+        count_query += " AND LOWER(question) LIKE ?"
+        count_params.append(f"%{query_filter.lower()}%")
+    total_queries = conn.execute(count_query, count_params).fetchone()[0]
 
-    indexed_history = list(enumerate(history, 1))
-    return render_template("dashboard.html", uploads=uploads, history=indexed_history)
+    # Sayfalama parametreleri
+    offset = (page - 1) * per_page
+    history_query += " LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+    history = conn.execute(history_query, params).fetchall()
+
+    indexed_history = list(enumerate(history, offset + 1))
+    total_pages = (total_queries + per_page - 1) // per_page  # yukarı yuvarlama
+
+    start_page = max(1, page - 2)
+    end_page = min(page + 2, total_pages)
+
+    conn.close()
+    return render_template(
+        "dashboard.html",
+        # uploads (veritabanı dosyaları)
+        uploads=uploads,
+        uploads_page=uploads_page,
+        uploads_per_page=uploads_per_page,
+        uploads_count=uploads_count,
+        uploads_total_pages=uploads_total_pages,
+        uploads_start_page=uploads_start_page,
+        uploads_end_page=uploads_end_page,
+        # sorgu geçmişi (history)
+        history=indexed_history,
+        page=page,
+        per_page=per_page,
+        total_queries=total_queries,
+        total_pages=total_pages,
+        start_page=start_page,
+        end_page=end_page,
+    )
 
 
 @app.route("/download_db/<filename>")
@@ -218,24 +282,50 @@ def delete_upload(upload_id):
     conn.close()
     return redirect(url_for("dashboard"))
 
-@app.route("/download_query/<int:query_id>")
-def download_query(query_id):
+@app.route("/download_query/<int:query_id>/<format>")
+def download_query(query_id, format):
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
     conn = sqlite3.connect("database.sqlite")
     conn.row_factory = sqlite3.Row
-    query = conn.execute("SELECT * FROM query_history WHERE id = ? AND user_id = ?", (query_id, session["user_id"])).fetchone()
+    query = conn.execute(
+        "SELECT * FROM query_history WHERE id = ? AND user_id = ?",
+        (query_id, session["user_id"])
+    ).fetchone()
     conn.close()
 
     if not query:
         return "Sorgu bulunamadı", 404
 
-    df = pd.DataFrame(eval(query["result"]))
+    rows = eval(query["result"])
+    # YENİ EKLENDİ:
+    if "columns" in query.keys() and query["columns"]:
+        columns = eval(query["columns"])
+        df = pd.DataFrame(rows, columns=columns)
+    else:
+        df = pd.DataFrame(rows)
+
     buffer = io.BytesIO()
-    df.to_csv(buffer, index=False)
+    if format == "xlsx":
+        df.to_excel(buffer, index=False, engine="openpyxl")
+        mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ext = "xlsx"
+    else:
+        df.to_csv(buffer, index=False)
+        mimetype = "text/csv"
+        ext = "csv"
     buffer.seek(0)
-    return send_file(buffer, as_attachment=True, download_name=f"query_{query_id}.csv", mimetype="text/csv")
+    filename = f"query_{query_id}.{ext}"
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype=mimetype
+    )
+
+
 
 @app.route("/delete_query/<int:query_id>")
 def delete_query(query_id):
@@ -533,6 +623,107 @@ def update_profile():
     conn.close()
     flash("Profil bilgileri başarıyla güncellendi.", "success")
     return redirect(url_for("profile"))
+
+@app.route("/download_all_dbs")
+@login_required
+def download_all_dbs():
+    user_id = session["user_id"]
+    conn = sqlite3.connect("database.sqlite")
+    conn.row_factory = sqlite3.Row
+    uploads = conn.execute(
+        "SELECT * FROM db_uploads WHERE user_id = ?", (user_id,)
+    ).fetchall()
+    conn.close()
+
+    if not uploads:
+        return "Hiçbir veritabanı bulunamadı.", 404
+
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        for db in uploads:
+            file_path = os.path.join("db_files", db["filename"])
+            if os.path.exists(file_path):
+                zf.write(file_path, arcname=db["filename"])
+    memory_file.seek(0)
+    return send_file(memory_file, as_attachment=True, download_name="veritabanlari.zip", mimetype="application/zip")
+
+@app.route("/delete_all_uploads")
+@login_required
+def delete_all_uploads():
+    user_id = session["user_id"]
+    conn = sqlite3.connect("database.sqlite")
+    conn.row_factory = sqlite3.Row
+    uploads = conn.execute(
+        "SELECT * FROM db_uploads WHERE user_id = ?", (user_id,)
+    ).fetchall()
+    for db in uploads:
+        file_path = os.path.join("db_files", db["filename"])
+        if os.path.exists(file_path):
+            os.remove(file_path)
+    conn.execute("DELETE FROM db_uploads WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("dashboard"))
+
+import pandas as pd
+
+@app.route("/download_all_queries_zip/<format>")
+@login_required
+def download_all_queries_zip(format):
+    user_id = session["user_id"]
+    conn = sqlite3.connect("database.sqlite")
+    conn.row_factory = sqlite3.Row
+    queries = conn.execute(
+        "SELECT * FROM query_history WHERE user_id = ?", (user_id,)
+    ).fetchall()
+    conn.close()
+    if not queries:
+        return "Hiçbir sorgu bulunamadı.", 404
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for idx, query in enumerate(queries, 1):
+            try:
+                rows = eval(query["result"])
+                columns = eval(query["columns"]) if query["columns"] else []
+                if not isinstance(rows, list):
+                    rows = []
+                df = pd.DataFrame(rows, columns=columns)
+            except Exception as e:
+                df = pd.DataFrame([{"Hata": str(e)}])
+
+            if format == "csv":
+                file_buffer = df.to_csv(index=False).encode("utf-8")
+                file_name = f"sorgu_{idx}.csv"
+            elif format == "xlsx":
+                excel_buffer = io.BytesIO()
+                df.to_excel(excel_buffer, index=False, engine="openpyxl")
+                excel_buffer.seek(0)
+                file_buffer = excel_buffer.read()
+                file_name = f"sorgu_{idx}.xlsx"
+            else:
+                return "Desteklenmeyen format.", 400
+
+            zf.writestr(file_name, file_buffer)
+
+    zip_buffer.seek(0)
+    return send_file(
+        zip_buffer,
+        as_attachment=True,
+        download_name=f"tum_sorgu_sonuclari_{format}.zip",
+        mimetype="application/zip"
+    )
+
+
+@app.route("/delete_all_queries")
+@login_required
+def delete_all_queries():
+    user_id = session["user_id"]
+    conn = sqlite3.connect("database.sqlite")
+    conn.execute("DELETE FROM query_history WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("dashboard"))
 
 
 if __name__ == "__main__":

@@ -18,8 +18,7 @@ def init_db():
         profile_picture TEXT
     )
     """)
-
-    # Sorgu geçmişi tablosu
+# Sorgu geçmişi tablosu (GÜNCEL)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS query_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,10 +26,14 @@ def init_db():
         question TEXT,
         sql_query TEXT,
         result TEXT,
+        columns TEXT,         -- EKLENDİ!
+        db_filename TEXT,     -- YENİ: Sorgunun çalıştığı veritabanı dosya adı
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
     """)
+
+
 
     # Yüklenen veritabanı geçmişi
     cursor.execute("""

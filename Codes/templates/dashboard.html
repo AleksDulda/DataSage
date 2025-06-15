@@ -1,408 +1,351 @@
 {% extends "base.html" %}
 {% block title %}Kontrol Paneli - DATASAGE{% endblock %}
 
-{% block styles %}
-<style>
-/* Dashboard Section */
-.dashboard-section {
-  padding: 80px 0;
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.03) 0%, rgba(255, 255, 255, 1) 100%);
-  min-height: calc(100vh - 100px);
-}
-
-/* Dark Mode */
-html[data-bs-theme="dark"] .dashboard-section {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.08) 0%, rgba(18, 18, 18, 1) 100%);
-}
-
-/* Content Cards */
-.content-card {
-  background: white;
-  border-radius: 14px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 123, 255, 0.08);
-  transition: box-shadow 0.3s ease;
-}
-
-.content-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-html[data-bs-theme="dark"] .content-card {
-  background: #1c1c1c;
-  border-color: rgba(0, 123, 255, 0.12);
-  color: #e6e6e6;
-}
-
-/* Typography */
-.section-title {
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
-}
-
-.sub-title {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #2c2c2c;
-  margin-bottom: 1.5rem;
-}
-
-html[data-bs-theme="dark"] .section-title,
-html[data-bs-theme="dark"] .sub-title {
-  color: #f5f5f5;
-}
-
-/* Table Styling */
-.table {
-  border-radius: 10px;
-  overflow: hidden;
-  background: white;
-  border: 1px solid rgba(0, 123, 255, 0.08);
-}
-
-.table thead {
-  background: #f1f5f9;
-}
-
-html[data-bs-theme="dark"] .table {
-  background: #1c1c1c;
-  border-color: rgba(0, 123, 255, 0.12);
-}
-
-html[data-bs-theme="dark"] .table thead {
-  background: #2a2a2a;
-  color: #e6e6e6;
-}
-
-.table th, .table td {
-  padding: 0.9rem;
-  vertical-align: middle;
-}
-
-.table .btn {
-  border-radius: 8px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
-}
-
-.btn-outline-success {
-  border-color: #2ecc71;
-  color: #2ecc71;
-}
-
-.btn-outline-success:hover {
-  background: #2ecc71;
-  color: white;
-}
-
-.btn-outline-danger {
-  border-color: #e74c3c;
-  color: #e74c3c;
-}
-
-.btn-outline-danger:hover {
-  background: #e74c3c;
-  color: white;
-}
-
-/* Form Styling */
-.form-control, .form-select {
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 0.8rem 1rem;
-  font-size: 0.95rem;
-  background: #f9f9f9;
-  transition: border-color 0.3s ease, background 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-  border-color: var(--bs-primary);
-  background: white;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-
-html[data-bs-theme="dark"] .form-control,
-html[data-bs-theme="dark"] .form-select {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: #2a2a2a;
-  color: #e6e6e6;
-}
-
-html[data-bs-theme="dark"] .form-control:focus,
-html[data-bs-theme="dark"] .form-select:focus {
-  background: #2a2a2a;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-}
-
-.form-label {
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: #333;
-  margin-bottom: 0.4rem;
-}
-
-html[data-bs-theme="dark"] .form-label {
-  color: #d9d9d9;
-}
-
-.btn-primary {
-  border-radius: 10px;
-  padding: 0.8rem 1.5rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  background: var(--bs-primary);
-  border: none;
-  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-}
-
-.btn-primary:hover {
-  background: var(--bs-primary-dark);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-/* Chart Styling */
-.chart-container {
-  position: relative;
-  max-height: 350px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .dashboard-section {
-    padding: 50px 0;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-
-  .sub-title {
-    font-size: 1.3rem;
-  }
-
-  .content-card {
-    padding: 1.5rem;
-  }
-
-  .table th, .table td {
-    padding: 0.7rem;
-  }
-
-  .form-control, .form-select {
-    padding: 0.7rem 0.9rem;
-  }
-
-  .btn-primary {
-    padding: 0.7rem 1.2rem;
-  }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<section class="dashboard-section">
+<section>
   <div class="container">
-    <!-- Header -->
-    <div class="text-center mb-5">
-      <h2 class="section-title">Merhaba, {{ session.username }}</h2>
+
+    <!-- Kullanıcı Selamlama -->
+    <div class="text-center mb-4">
+      <h2>Merhaba, {{ session.username }}</h2>
       <p class="lead text-muted">Veritabanı dosyalarınızı ve sorgu istatistiklerinizi burada yönetebilirsiniz.</p>
     </div>
 
-    <!-- Uploaded Databases -->
+    <!-- Yüklenen Veritabanları -->
     <div class="mb-5">
-      <h4 class="sub-title">Yüklenen Veritabanları</h4>
-      <div class="content-card">
-        <table class="table table-bordered table-sm">
+      <h4>Yüklenen Veritabanları</h4>
+       <div>
+          <a href="{{ url_for('download_all_dbs') }}" class="btn btn-sm btn-outline-success me-2" {% if uploads|length == 0 %}disabled{% endif %}>
+            Tümünü İndir
+          </a>
+          <a href="{{ url_for('delete_all_uploads') }}" class="btn btn-sm btn-outline-danger" 
+            onclick="return confirm('Tüm veritabanlarını silmek istediğinize emin misiniz?')" {% if uploads|length == 0 %}disabled{% endif %}>
+            Tümünü Sil
+          </a>
+        </div>
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm align-middle">
           <thead>
             <tr>
-              <th scope="col">Dosya Adı</th>
-              <th scope="col">Yükleme Tarihi</th>
-              <th scope="col">İşlem</th>
+              <th style="width: 36px;">#</th>
+              <th style="max-width: 180px; min-width: 100px;">Dosya Adı</th>
+              <th style="width: 150px;">Yükleme Tarihi</th>
+              <th style="width: 125px;">İşlem</th>
             </tr>
           </thead>
           <tbody>
             {% for db in uploads %}
             <tr>
-              <td>{{ db.filename }}</td>
+              <td>{{ loop.index }}</td>
+              <td style="overflow-wrap:anywhere;">{{ db.filename }}</td>
               <td>{{ db.uploaded_at }}</td>
               <td>
-                <a href="{{ url_for('download_db', filename=db.filename) }}" class="btn btn-sm btn-outline-success">
-                  <i class="bi bi-download me-1"></i>İndir
-                </a>
-                <a href="{{ url_for('delete_upload', upload_id=db.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bu dosyayı silmek istediğinize emin misiniz?')">
-                  <i class="bi bi-trash-fill me-1"></i>Sil
-                </a>
+                <a href="{{ url_for('download_db', filename=db.filename) }}" class="btn btn-sm btn-success">İndir</a>
+                <a href="{{ url_for('delete_upload', upload_id=db.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Bu dosyayı silmek istediğinize emin misiniz?')">Sil</a>
               </td>
             </tr>
             {% else %}
-            <tr><td colspan="3" class="text-center">Henüz veritabanı yüklenmemiş.</td></tr>
+            <tr>
+              <td colspan="4" class="text-center">Henüz veritabanı yüklenmemiş.</td>
+            </tr>
             {% endfor %}
           </tbody>
         </table>
+           <nav aria-label="Veritabanı dosyaları sayfalama">
+      <ul class="pagination justify-content-center">
+        <!-- İlk sayfa -->
+        <li class="page-item {% if uploads_page == 1 %}disabled{% endif %}">
+          <a class="page-link" href="?uploads_page=1&uploads_per_page={{ uploads_per_page }}">İlk</a>
+        </li>
+        <!-- Önceki -->
+        <li class="page-item {% if uploads_page == 1 %}disabled{% endif %}">
+          <a class="page-link" href="?uploads_page={{ uploads_page-1 }}&uploads_per_page={{ uploads_per_page }}">«</a>
+        </li>
+        {% for p in range(uploads_start_page, uploads_end_page+1) %}
+          <li class="page-item {% if p == uploads_page %}active{% endif %}">
+            <a class="page-link" href="?uploads_page={{ p }}&uploads_per_page={{ uploads_per_page }}">{{ p }}</a>
+          </li>
+        {% endfor %}
+        <!-- Sonraki -->
+        <li class="page-item {% if uploads_page == uploads_total_pages %}disabled{% endif %}">
+          <a class="page-link" href="?uploads_page={{ uploads_page+1 }}&uploads_per_page={{ uploads_per_page }}">»</a>
+        </li>
+        <!-- Son sayfa -->
+        <li class="page-item {% if uploads_page == uploads_total_pages %}disabled{% endif %}">
+          <a class="page-link" href="?uploads_page={{ uploads_total_pages }}&uploads_per_page={{ uploads_per_page }}">Son</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <form method="get" class="d-inline-block">
+        <label for="uploads_per_page" class="me-2">Sayfa başı:</label>
+        <select name="uploads_per_page" id="uploads_per_page" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+          <option value="10" {% if uploads_per_page == 10 %}selected{% endif %}>10</option>
+          <option value="15" {% if uploads_per_page == 15 %}selected{% endif %}>15</option>
+          <option value="20" {% if uploads_per_page == 20 %}selected{% endif %}>20</option>
+        </select>
+        <input type="hidden" name="uploads_page" value="1">
+      </form>
+      <span class="text-muted">Toplam: {{ uploads_count }} dosya</span>
+    </div>
+
+      </div>
+    </div>
+ 
+    <!-- Grafik/İstatistik Bölümü: Sadece placeholder bırakıldı -->
+    <div class="mb-5">
+      <h4>Sorgu İstatistikleri</h4>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div>
+            <label>Sol Grafik (Kaldırıldı)</label>
+            <div style="height: 200px; background: #f4f4f4; display: flex; align-items: center; justify-content: center;">Grafik Buraya</div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div>
+            <label>Sağ Grafik (Kaldırıldı)</label>
+            <div style="height: 200px; background: #f4f4f4; display: flex; align-items: center; justify-content: center;">Grafik Buraya</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Query Statistics -->
+    <!-- Sorgu Geçmişi -->
     <div class="mb-5">
-      <h4 class="sub-title">Sorgu İstatistikleri</h4>
-      <div class="row g-4">
-        <div class="col-md-6">
-          <div class="content-card">
-            <label for="chartTypeLeft" class="form-label">Sol Grafik</label>
-            <select id="chartTypeLeft" class="form-select mb-3">
-              <option value="status">Sorgu Başarı Durumu</option>
-              <option value="daily">Günlük Sorgu Sayısı</option>
-              <option value="keywords">En Sık Anahtar Kelimeler</option>
-              <option value="usage">Veritabanı Kullanım Oranı</option>
-            </select>
-            <div class="chart-container">
-              <canvas id="chartLeft"></canvas>
-            </div>
-          </div>
+      <h4>Sorgu Geçmişi</h4>
+      <div class="dropdown d-inline-block me-2">
+          <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" {% if total_queries == 0 %}disabled{% endif %}>
+            Tümünü İndir
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{{ url_for('download_all_queries_zip', format='csv') }}">CSV (ZIP)</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('download_all_queries_zip', format='xlsx') }}">XLSX (ZIP)</a>
+            </li>
+          </ul>
         </div>
-        <div class="col-md-6">
-          <div class="content-card">
-            <label for="chartTypeRight" class="form-label">Sağ Grafik</label>
-            <select id="chartTypeRight" class="form-select mb-3">
-              <option value="status">Sorgu Başarı Durumu</option>
-              <option value="daily">Günlük Sorgu Sayısı</option>
-              <option value="keywords">En Sık Anahtar Kelimeler</option>
-              <option value="usage">Veritabanı Kullanım Oranı</option>
-            </select>
-            <div class="chart-container">
-              <canvas id="chartRight"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <a href="{{ url_for('delete_all_queries') }}" class="btn btn-sm btn-outline-danger"
+          onclick="return confirm('Tüm sorguları silmek istediğinize emin misiniz?')" {% if total_queries == 0 %}disabled{% endif %}>
+          Tümünü Sil
+        </a>
 
-    <!-- Query History -->
-    <div class="mb-5">
-      <h4 class="sub-title">Sorgu Geçmişi</h4>
-      <div class="content-card mb-4">
-        <form method="get" class="row g-3">
-          <div class="col-md-6">
+      <div class="mb-4">
+        <form method="get" class="row">
+          <div class="col-md-6 mb-2">
             <input type="text" class="form-control" name="query_filter" placeholder="Sorgularda ara..." value="{{ request.args.get('query_filter', '') }}">
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4 mb-2">
             <select name="sort_order" class="form-select">
               <option value="desc" {% if request.args.get('sort_order', 'desc') == 'desc' %}selected{% endif %}>Yeni → Eski</option>
               <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>Eski → Yeni</option>
             </select>
           </div>
-          <div class="col-md-2">
+          <div class="col-md-2 mb-2">
             <button class="btn btn-primary w-100" type="submit">Uygula</button>
           </div>
         </form>
       </div>
-      <div class="content-card">
-        <table class="table table-bordered table-sm">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Soru</th>
-              <th scope="col">SQL</th>
-              <th scope="col">Sonuç</th>
-              <th scope="col">Tarih</th>
-              <th scope="col">İşlem</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for index, q in history %}
-            <tr>
-              <td>{{ index }}</td>
-              <td>{{ q.question }}</td>
-              <td><code>{{ q.sql_query }}</code></td>
-              <td><pre style="white-space: pre-wrap; font-size: 0.9rem;">{{ q.result }}</pre></td>
-              <td>{{ q.timestamp }}</td>
-              <td>
-                <a href="{{ url_for('download_query', query_id=q.id) }}" class="btn btn-sm btn-outline-primary">
-                  <i class="bi bi-download me-1"></i>İndir
-                </a>
-                <a href="{{ url_for('delete_query', query_id=q.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bu sorguyu silmek istediğinize emin misiniz?')">
-                  <i class="bi bi-trash-fill me-1"></i>Sil
-                </a>
-              </td>
-            </tr>
-            {% else %}
-            <tr><td colspan="6" class="text-center">Henüz sorgu yok.</td></tr>
+      <div class="table-responsive">
+          <table class="table table-bordered table-sm align-middle">
+            <thead>
+              <tr>
+                <th style="width: 36px;">#</th>
+                <th style="width:140px;">Veritabanı</th>
+                <th style="max-width: 180px; min-width: 100px;">Soru</th>
+                <th style="max-width: 220px; min-width: 120px;">SQL</th>
+                <th style="max-width: 240px; min-width: 120px;">Sonuç</th>
+                <th style="width: 120px;">Tarih</th>
+                <th style="width: 125px;">İşlem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for index, q in history %}
+              <tr>
+                <td>{{ index }}</td>
+                <td style="overflow-wrap:anywhere; vertical-align:top;">
+                  {{ q.db_filename or "Bilinmiyor" }}
+                </td>
+                <td style="overflow-wrap:anywhere; vertical-align:top;">
+                  <div class="question-short">
+                    {{ q.question[:110] }}{% if q.question|length > 110 %}...{% endif %}
+                  </div>
+                  {% if q.question|length > 110 %}
+                    <a href="#" class="show-more-link" onclick="toggleShowMoreGeneric(this, 'question'); return false;">Devamını gör</a>
+                    <div class="question-full" style="display:none;">{{ q.question }}</div>
+                  {% endif %}
+                </td>
+                <!-- SQL Sütunu (Devamını Gör) -->
+                <td style="overflow-wrap:anywhere; vertical-align:top;">
+                  <span class="sql-short">
+                    {{ q.sql_query[:200] }}{% if q.sql_query|length > 200 %}...{% endif %}
+                  </span>{% if q.sql_query|length > 200 %}
+                    <a href="#" class="show-more-link" onclick="toggleShowMoreGeneric(this, 'sql'); return false;">Devamını gör</a>
+                    <span class="sql-full" style="display:none;">{{ q.sql_query }}</span>
+                  {% endif %}
+                </td>
+                <!-- Sonuç Sütunu (Devamını Gör) -->
+                <td style="overflow-wrap:anywhere; vertical-align:top;">
+                  <span class="result-short">
+                    {{ q.result[:200] }}{% if q.result|length > 200 %}...{% endif %}
+                  </span>{% if q.result|length > 200 %}
+                    <a href="#" class="show-more-link" onclick="toggleShowMoreGeneric(this, 'result'); return false;">Devamını gör</a>
+                    <span class="result-full" style="display:none;">{{ q.result }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ q.timestamp }}</td>
+                <td>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      İndir
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li>
+                        <a class="dropdown-item" href="{{ url_for('download_query', query_id=q.id, format='csv') }}">CSV</a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="{{ url_for('download_query', query_id=q.id, format='xlsx') }}">Excel (XLSX)</a>
+                      </li>
+                    </ul>
+                    <a href="{{ url_for('delete_query', query_id=q.id) }}" class="btn btn-sm btn-danger"
+                      onclick="return confirm('Bu sorguyu silmek istediğinize emin misiniz?')">Sil</a>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="7" class="text-center">Henüz sorgu yok.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+       <nav aria-label="Sorgu geçmişi sayfalama">
+          <ul class="pagination justify-content-center">
+            <!-- İlk sayfa -->
+            <li class="page-item {% if page == 1 %}disabled{% endif %}">
+              <a class="page-link" href="?page=1&per_page={{ per_page }}&query_filter={{ request.args.get('query_filter','') }}&sort_order={{ request.args.get('sort_order','desc') }}">İlk</a>
+            </li>
+            <!-- Önceki -->
+            <li class="page-item {% if page == 1 %}disabled{% endif %}">
+              <a class="page-link" href="?page={{ page-1 }}&per_page={{ per_page }}&query_filter={{ request.args.get('query_filter','') }}&sort_order={{ request.args.get('sort_order','desc') }}">«</a>
+            </li>
+            <!-- ---- BURAYA EKLE ---- -->
+            {% for p in range(start_page, end_page+1) %}
+              <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="?page={{ p }}&per_page={{ per_page }}&query_filter={{ request.args.get('query_filter','') }}&sort_order={{ request.args.get('sort_order','desc') }}">{{ p }}</a>
+              </li>
             {% endfor %}
-          </tbody>
-        </table>
+            <!-- Sonraki -->
+            <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+              <a class="page-link" href="?page={{ page+1 }}&per_page={{ per_page }}&query_filter={{ request.args.get('query_filter','') }}&sort_order={{ request.args.get('sort_order','desc') }}">»</a>
+            </li>
+            <!-- Son sayfa -->
+            <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+              <a class="page-link" href="?page={{ total_pages }}&per_page={{ per_page }}&query_filter={{ request.args.get('query_filter','') }}&sort_order={{ request.args.get('sort_order','desc') }}">Son</a>
+            </li>
+          </ul>
+        </nav>
+
+
       </div>
     </div>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+  <div>
+      <form method="get" class="d-inline-block">
+        <label for="per_page" class="me-2">Sayfa başı:</label>
+        <select name="per_page" id="per_page" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+          <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+          <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
+          <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+        </select>
+        <input type="hidden" name="page" value="1">
+        <!-- Sorgu filtresi, sort vs. korunması için -->
+        <input type="hidden" name="query_filter" value="{{ request.args.get('query_filter', '') }}">
+        <input type="hidden" name="sort_order" value="{{ request.args.get('sort_order', 'desc') }}">
+      </form>
+    </div>
+    <div>
+      <span class="text-muted">Toplam: {{ total_queries }} kayıt</span>
+    </div>
+  </div>
+
+
   </div>
 </section>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block styles %}
+<style>
+.show-more-link {
+  color: #007bff;
+  font-size: 0.91rem;
+  cursor: pointer;
+  margin-left: 4px;
+  padding-left: 0;
+  display: inline;
+}
+.show-more-link:hover {
+  text-decoration: underline;
+}
+
+.question-short, .sql-short, .result-short,
+.question-full, .sql-full, .result-full {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  background: none !important;
+  border: none !important;
+  color: #20232a !important;
+  padding: 0 !important;
+  font-size: 0.96em;
+  display: inline;
+}
+
+td, th {
+  vertical-align: top;
+}
+
+.table td, .table th {
+  padding: 0.55rem 0.65rem;
+}
+
+.table-responsive {
+  margin-bottom: 0;
+}
+
+.pagination .page-item.disabled .page-link {
+  pointer-events: none;
+  opacity: 0.55;
+}
+.pagination .page-item.active .page-link {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+
+</style>
+{% endblock %}
+
+{% block scripts %}
 <script>
-let chartLeftInstance = null;
-let chartRightInstance = null;
-
-function renderChart(canvasId, chartData, instanceRefName) {
-  const ctx = document.getElementById(canvasId).getContext("2d");
-  if (instanceRefName === 'left' && chartLeftInstance) {
-    chartLeftInstance.destroy();
+function toggleShowMoreGeneric(link, type) {
+  let container = link.parentElement;
+  let shortElem = container.querySelector('.' + type + '-short');
+  let fullElem = container.querySelector('.' + type + '-full');
+  if (fullElem.style.display === "none" || fullElem.style.display === "") {
+    shortElem.style.display = "none";
+    fullElem.style.display = "inline";
+    link.textContent = "Daha az göster";
+  } else {
+    shortElem.style.display = "inline";
+    fullElem.style.display = "none";
+    link.textContent = "Devamını gör";
   }
-  if (instanceRefName === 'right' && chartRightInstance) {
-    chartRightInstance.destroy();
-  }
-
-  const newChart = new Chart(ctx, {
-    type: chartData.chartType,
-    data: {
-      labels: chartData.labels,
-      datasets: [{
-        label: chartData.label,
-        data: chartData.data,
-        backgroundColor: chartData.colors || ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c']
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        title: { display: true, text: chartData.title, font: { size: 16, weight: '600' } },
-        legend: { display: chartData.chartType !== "bar", position: 'top' }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(0, 0, 0, 0.05)' }
-        },
-        x: {
-          grid: { display: false }
-        }
-      }
-    }
-  });
-
-  if (instanceRefName === 'left') chartLeftInstance = newChart;
-  if (instanceRefName === 'right') chartRightInstance = newChart;
 }
-
-function loadChart(selectId, canvasId, refName) {
-  const selected = document.getElementById(selectId).value;
-  fetch(`/stats?type=${selected}`)
-    .then(res => res.json())
-    .then(data => renderChart(canvasId, data, refName));
-}
-
-document.getElementById("chartTypeLeft").addEventListener("change", () => {
-  loadChart("chartTypeLeft", "chartLeft", "left");
-});
-document.getElementById("chartTypeRight").addEventListener("change", () => {
-  loadChart("chartTypeRight", "chartRight", "right");
-});
-
-window.addEventListener("DOMContentLoaded", () => {
-  loadChart("chartTypeLeft", "chartLeft", "left");
-  loadChart("chartTypeRight", "chartRight", "right");
-});
 </script>
 {% endblock %}
