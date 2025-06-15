@@ -1,2 +1,31 @@
+# Sanal ortamlar
 venv/
-.env
+.env/
+*.pyc
+__pycache__/
+
+# IDE / Editör dosyaları
+.vscode/
+.idea/
+
+# MacOS / Linux / Windows sistem dosyaları
+.DS_Store
+Thumbs.db
+
+# Loglar / çıktılar
+*.log
+
+# Geçici dosyalar
+*.tmp
+*.bak
+
+# SQLite dosyası dışındaki büyük veriler
+*.sqlite3-journal
+
+# Çıktı dosyaları
+*.csv
+*.xlsx
+*.pdf
+
+# Flask secret key dosyaları
+instance/
