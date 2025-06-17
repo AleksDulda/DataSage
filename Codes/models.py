@@ -12,13 +12,15 @@ def init_db():
         password TEXT NOT NULL,
         first_name TEXT,
         last_name TEXT,
-        email TEXT,
+        email TEXT UNIQUE,       -- Artık aynı e-posta tekrar kullanılamaz
         gender TEXT,
         birth_date TEXT,
-        profile_picture TEXT
+        profile_picture TEXT,
+        role TEXT DEFAULT 'user' -- Yeni: kullanıcı rolü ('user' veya 'admin')
     )
     """)
-# Sorgu geçmişi tablosu (GÜNCEL)
+
+    # Sorgu geçmişi tablosu
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS query_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,14 +28,12 @@ def init_db():
         question TEXT,
         sql_query TEXT,
         result TEXT,
-        columns TEXT,         -- EKLENDİ!
-        db_filename TEXT,     -- YENİ: Sorgunun çalıştığı veritabanı dosya adı
+        columns TEXT,
+        db_filename TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
     """)
-
-
 
     # Yüklenen veritabanı geçmişi
     cursor.execute("""

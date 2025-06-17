@@ -13,42 +13,65 @@ def get_db_connection():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username'].lower()  # lowercase
+        username = request.form['username'].lower()
         password = request.form['password']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
-        email = request.form['email']
+        email = request.form['email'].lower()
         gender = request.form.get('gender')
+        role = request.form.get('role', 'user').lower()  # default: user
 
         hashed_pw = generate_password_hash(password)
 
         conn = sqlite3.connect("database.sqlite")
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        try:
-            cursor.execute("""
-                INSERT INTO users (username, password, first_name, last_name, email, gender)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (username, hashed_pw, first_name, last_name, email, gender))
-            conn.commit()
+        # ❌ Eğer admin kaydı yapılmak isteniyor ve zaten admin varsa, engelle
+        if role == "admin":
+            existing_admin = cursor.execute(
+                "SELECT id FROM users WHERE role = 'admin'"
+            ).fetchone()
+            if existing_admin:
+                flash("Zaten bir admin hesabı mevcut. Yeni bir admin oluşturamazsınız.", "danger")
+                conn.close()
+                return redirect(url_for("auth.register"))
 
-            # Otomatik giriş için ekle
-            user_id = cursor.lastrowid
-            session["user_id"] = user_id
-            session["username"] = username
-
-        except sqlite3.IntegrityError:
-            flash("Bu kullanıcı adı zaten kayıtlı.", "danger")
-            return redirect(url_for("auth.register"))
-        finally:
+        # ❌ Aynı e-posta kayıtlı mı?
+        existing_email = cursor.execute(
+            "SELECT id FROM users WHERE email = ?", (email,)
+        ).fetchone()
+        if existing_email:
+            flash("Bu e-posta adresi zaten kayıtlı.", "danger")
             conn.close()
+            return redirect(url_for("auth.register"))
 
-        flash("Kayıt başarılı, hoş geldiniz!", "success")
-        return redirect(url_for("ask"))  # veya dashboard
+        # ❌ Aynı kullanıcı adı kayıtlı mı?
+        existing_username = cursor.execute(
+            "SELECT id FROM users WHERE username = ?", (username,)
+        ).fetchone()
+        if existing_username:
+            flash("Bu kullanıcı adı zaten alınmış.", "danger")
+            conn.close()
+            return redirect(url_for("auth.register"))
+
+        # ✅ Kayıt işlemi
+        cursor.execute("""
+            INSERT INTO users (username, password, first_name, last_name, email, gender, role)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (username, hashed_pw, first_name, last_name, email, gender, role))
+        conn.commit()
+
+        user_id = cursor.lastrowid
+        session["user_id"] = user_id
+        session["username"] = username
+        session["role"] = role
+
+        flash("Kayıt başarılı. Hoş geldiniz!", "success")
+        conn.close()
+        return redirect(url_for("ask"))
 
     return render_template("register.html")
-
-
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():

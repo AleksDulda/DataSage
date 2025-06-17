@@ -9,9 +9,6 @@ load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 def call_openrouter(prompt, model="openai/gpt-3.5-turbo"):
-    """
-    Her türlü doğal dil işleme ve özetleme işlerinde kullanılabilir.
-    """
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
@@ -19,12 +16,14 @@ def call_openrouter(prompt, model="openai/gpt-3.5-turbo"):
     }
     data = {
         "model": model,
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 2000# <--- BU SATIRI EKLEDİK
     }
     response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
     if response.status_code != 200:
         raise Exception(f"OpenRouter API Hatası: {response.text}")
     return response.json()['choices'][0]['message']['content'].strip()
+
 
 def generate_sql(schema, question):
     prompt = f"""
