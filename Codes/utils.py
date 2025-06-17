@@ -17,7 +17,7 @@ def call_openrouter(prompt, model="openai/gpt-3.5-turbo"):
     data = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 2000# <--- BU SATIRI EKLEDİK
+        "max_tokens": 4096# <--- BU SATIRI EKLEDİK
     }
     response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
     if response.status_code != 200:
@@ -115,4 +115,40 @@ daha teknik ama anlaşılır ve uzun bir dille (en fazla 6-8 cümle ile) açıkl
 Açıklaman:
 """
 
+    return call_openrouter(prompt)
+
+
+def summarize_schema(schema_text, mode="short"):
+    """
+    schema_text: get_mysql_schema() veya get_postgres_schema() çıktısı (metin)
+    mode: "short" = kullanıcıya dost kısa özet, "detail" = teknik açıklama
+    """
+
+    if mode == "short":
+        prompt = f"""
+Aşağıda bir SQL veritabanının tablo ve sütun yapıları listelenmiştir:
+
+{schema_text}
+
+Bu veritabanının genel amacı nedir? Hangi tür verileri işler? Gerçek hayatta hangi senaryoda kullanılır? 
+Teknik terimlere girmeden, sade bir dille, en fazla 2-3 cümlelik kullanıcı dostu bir açıklama yap.
+
+Cevap:
+"""
+    else:
+        prompt = f"""
+Aşağıda bir SQL veritabanının tablo yapıları listelenmiştir:
+
+{schema_text}
+
+Bu veritabanı hakkında:
+- Hangi iş/alan için tasarlanmış olabilir?
+- Ana tablolar ne işe yarar?
+- Olası ilişkiler nelerdir?
+- Kullanım şekli nasıldır?
+
+Bunları teknik ama kullanıcı dostu bir dille, en fazla 6-8 cümlede açıklayın. Tablo isimlerinden bahsedebilirsin.
+
+Açıklama:
+"""
     return call_openrouter(prompt)

@@ -1,19 +1,25 @@
-from flask import Flask, render_template, request, session, redirect, url_for, send_file, jsonify
-import os, zipfile
-import sqlite3
-from auth import auth
-from models import init_db
-from utils import generate_sql
-import pandas as pd
-import io
-from collections import Counter
-from datetime import datetime
-from flask_mail import Mail, Message
+from flask import Flask, render_template, request, session, redirect, url_for, flash, send_file, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
 from functools import wraps
 
+import os
+import io
+import sqlite3
+import pymysql
+import psycopg2
+import zipfile
+import pandas as pd
+import traceback
+from datetime import datetime
+from collections import Counter
+
+from flask_mail import Mail, Message
+
+from auth import auth
+from models import init_db
+from utils import generate_sql
+from utils import summarize_schema
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"
@@ -26,7 +32,6 @@ os.makedirs(PROFILE_PIC_FOLDER, exist_ok=True)
 
 
 init_db()
-
 def get_schema(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -40,6 +45,39 @@ def get_schema(db_path):
         for col in cols:
             schema += f" - {col[1]} ({col[2]})\n"
     conn.close()
+    return schema
+
+def get_mysql_schema(conn):
+    cursor = conn.cursor()
+    cursor.execute("SHOW TABLES")
+    tables = cursor.fetchall()
+    schema = ""
+    for (table,) in tables:
+        cursor.execute(f"DESCRIBE {table}")
+        columns = cursor.fetchall()
+        schema += f"Table: {table}\n"
+        for col in columns:
+            schema += f" - {col[0]} ({col[1]})\n"
+    return schema
+
+def get_postgres_schema(conn):
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT table_name FROM information_schema.tables 
+        WHERE table_schema = 'public'
+    """)
+    tables = cursor.fetchall()
+    schema = ""
+    for (table,) in tables:
+        cursor.execute(f"""
+            SELECT column_name, data_type
+            FROM information_schema.columns 
+            WHERE table_name = '{table}'
+        """)
+        columns = cursor.fetchall()
+        schema += f"Table: {table}\n"
+        for col in columns:
+            schema += f" - {col[0]} ({col[1]})\n"
     return schema
 
 @app.route("/", methods=["GET"])
@@ -64,29 +102,104 @@ def ask():
 
     user_id = session["user_id"]
 
-    # --- GET: Soru ekranı açıldığında, varsa seçili db özetle beraber göster ---
     if request.method == "GET":
         last_db = session.get("current_db")
-        db_summary = summarize_db(os.path.join(DB_UPLOAD_FOLDER, last_db)) if last_db else None
-        return render_template("ask.html", last_db=last_db, db_summary=db_summary)
+        return render_template("ask.html", last_db=last_db)
 
-    # --- POST: Soru gönderildiğinde ---
     question = request.form.get("question", "").strip()
-    db_file = request.files.get("database")
+    db_type = request.form.get("db_type", "").strip().lower()
 
+    db_summary = None
+    sql_query = None
+    last_db = None
+    result = {}
+
+    # Canlı bağlantı (MySQL/Postgres)
+    if db_type in ["mysql", "postgres"]:
+        host = request.form.get("host", "").strip()
+        port_str = request.form.get("port", "").strip()
+        user = request.form.get("user", "").strip()
+        password = request.form.get("password") or ""
+        database = request.form.get("database", "").strip()
+
+        try:
+            port = int(port_str) if port_str else (3306 if db_type == "mysql" else 5432)
+        except ValueError:
+            result = {
+                "rows": [["Geçersiz port numarası girdiniz."]],
+                "columns": ["Hata"],
+                "sql": "Port hatalı"
+            }
+            return render_template("ask.html", result=result, last_db=None, sql_query=result["sql"])
+
+        try:
+            conn = None
+            schema = ""
+
+            if db_type == "mysql":
+                conn = pymysql.connect(
+                    host=host,
+                    port=port,
+                    user=user,
+                    password=password,
+                    database=database,
+                    connect_timeout=5,
+                    charset='utf8mb4',
+                    cursorclass=pymysql.cursors.Cursor
+                )
+                schema = get_mysql_schema(conn)
+
+            elif db_type == "postgres":
+                conn = psycopg2.connect(
+                    host=host,
+                    port=port,
+                    user=user,
+                    password=password,
+                    dbname=database
+                )
+                schema = get_postgres_schema(conn)
+
+            sql_query = generate_sql(schema, question)
+
+            cursor = conn.cursor()
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+            conn.close()
+
+            result = {"rows": rows, "columns": columns, "sql": sql_query}
+            db_summary = summarize_schema(schema, mode="short")  # canlı bağlantıda detaylı şema gösterimi
+
+            # geçmişe kaydet
+            conn2 = sqlite3.connect("database.sqlite")
+            conn2.execute(
+                "INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
+                (user_id, question, sql_query, str(rows))
+            )
+            conn2.commit()
+            conn2.close()
+
+        except Exception as e:
+            traceback.print_exc()
+            result = {
+                "rows": [[f"Hata: {e}"]],
+                "columns": ["Hata"],
+                "sql": "Bağlantı hatası"
+            }
+
+        return render_template("ask.html", result=result, sql_query=sql_query, last_db=None, db_summary=db_summary)
+
+    # SQLite işlemleri
+    db_file = request.files.get("database")
     if not question:
         flash("Lütfen bir soru girin.", "warning")
-        last_db = session.get("current_db")
-        db_summary = summarize_db(os.path.join(DB_UPLOAD_FOLDER, last_db)) if last_db else None
-        return render_template("ask.html", last_db=last_db, db_summary=db_summary)
+        return render_template("ask.html", last_db=session.get("current_db"))
 
-    # Eğer yeni veritabanı dosyası yüklenmişse...
     if db_file and db_file.filename:
         filename = f"user{user_id}_{db_file.filename}"
         filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
         db_file.save(filepath)
 
-        # Veritabanı kaydı
         conn = sqlite3.connect("database.sqlite")
         conn.execute("INSERT INTO db_uploads (user_id, filename) VALUES (?, ?)", (user_id, filename))
         conn.commit()
@@ -94,56 +207,42 @@ def ask():
 
         session["current_db"] = filename
     else:
-        # Yeni veritabanı yüklenmediyse, daha önceki yüklü dosya var mı kontrol et
         if "current_db" not in session:
             flash("Lütfen önce bir veritabanı yükleyin.", "danger")
             return render_template("ask.html")
         filename = session["current_db"]
         filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
 
-    # Şema çıkarımı ve SQL üretimi
     schema = get_schema(filepath)
-    sql = generate_sql(schema, question)
-
-    print("== Soru:", question)
-    print("== SQL:", sql)
+    sql_query = generate_sql(schema, question)
+    db_summary = summarize_db(filepath, mode="short")  # <-- BURASI GÜNCELLENDİ
+    last_db = filename
 
     try:
         userdb = sqlite3.connect(filepath)
         cursor = userdb.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql_query)
         rows = cursor.fetchall()
         columns = [desc[0] for desc in cursor.description]
         userdb.close()
-        result = {"rows": rows, "columns": columns, "sql": sql}
+        result = {"rows": rows, "columns": columns, "sql": sql_query}
     except Exception as e:
-        print("[!] SQL çalıştırma hatası:", str(e))
+        traceback.print_exc()
         result = {
-            "rows": [["Hata: " + str(e)]],
+            "rows": [[f"Hata: {e}"]],
             "columns": ["Hata"],
-            "sql": sql[:500]
+            "sql": sql_query[:500]
         }
 
-    # Sorgu geçmişine kaydet
     conn = sqlite3.connect("database.sqlite")
     conn.execute(
-        "INSERT INTO query_history (user_id, question, sql_query, result, columns, db_filename) VALUES (?, ?, ?, ?, ?, ?)",
-        (user_id, question, result["sql"], str(result["rows"]), str(result["columns"]), filename)
+        "INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
+        (user_id, question, sql_query, str(result["rows"]))
     )
     conn.commit()
     conn.close()
 
-    # --- HER POST SONUNDA: Aktif veritabanı özetini üret ---
-    db_summary = summarize_db(filepath)
-
-    # Sonucu ve özet ile template'e gönder
-    return render_template(
-        "ask.html",
-        result=result,
-        last_db=filename,
-        sql_query=result["sql"],
-        db_summary=db_summary
-    )
+    return render_template("ask.html", result=result, sql_query=sql_query, last_db=last_db, db_summary=db_summary)
 
 @app.route("/download", methods=["POST"])
 def download():
@@ -223,7 +322,7 @@ def dashboard():
         params.append(f"%{query_filter.lower()}%")
     history_query += f" ORDER BY timestamp {sort_order.upper()}"
 
-    # Toplam kayıt sayısı (sayfalama için)
+    # Toplam sorgu sayısı (sayfalama için)
     count_query = "SELECT COUNT(*) FROM query_history WHERE user_id = ?"
     count_params = [user_id]
     if query_filter:
@@ -231,15 +330,26 @@ def dashboard():
         count_params.append(f"%{query_filter.lower()}%")
     total_queries = conn.execute(count_query, count_params).fetchone()[0]
 
+    # Başarılı sorguların sayısı
+    successful_queries = conn.execute("""
+        SELECT COUNT(*) FROM query_history 
+        WHERE user_id = ? AND result NOT LIKE '%Hata%'
+    """, (user_id,)).fetchone()[0]
+
+    # Doğruluk oranı (%)
+    if total_queries > 0:
+        success_rate = round((successful_queries / total_queries) * 100)
+    else:
+        success_rate = 0
+
     # Sayfalama parametreleri
     offset = (page - 1) * per_page
     history_query += " LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
     history = conn.execute(history_query, params).fetchall()
-
     indexed_history = list(enumerate(history, offset + 1))
-    total_pages = (total_queries + per_page - 1) // per_page  # yukarı yuvarlama
 
+    total_pages = (total_queries + per_page - 1) // per_page
     start_page = max(1, page - 2)
     end_page = min(page + 2, total_pages)
 
@@ -262,8 +372,10 @@ def dashboard():
         total_pages=total_pages,
         start_page=start_page,
         end_page=end_page,
+        # başarı oranları
+        successful_queries=successful_queries,
+        success_rate=success_rate,
     )
-
 
 @app.route("/download_db/<filename>")
 def download_db(filename):
@@ -652,7 +764,7 @@ def download_all_dbs():
         return "Hiçbir veritabanı bulunamadı.", 404
 
     memory_file = io.BytesIO()
-    with zipfile.ZipFile(memory_file, 'w') as zf:
+    with zipfile.zipfile(memory_file, 'w') as zf:
         for db in uploads:
             file_path = os.path.join("db_files", db["filename"])
             if os.path.exists(file_path):
