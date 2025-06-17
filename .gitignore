@@ -29,3 +29,4 @@ Thumbs.db
 
 # Flask secret key dosyaları
 instance/
+Codes/.env
