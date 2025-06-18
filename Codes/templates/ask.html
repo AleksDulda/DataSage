@@ -26,25 +26,44 @@
       
       <!-- Query Form Card -->
       <div class="query-card glass-card" data-aos="fade-up" data-aos-delay="200">
+<<<<<<< Updated upstream
         
         <!-- Active Database Alert -->
         {% if last_db %}
         <div class="db-alert" data-aos="fade-down">
+=======
+
+        <!-- Birleşik Aktif Veritabanı Bölümü -->
+        <div id="dbAlert" class="db-alert {% if last_db and last_db != 'None' and last_db.strip() != '' %}show{% endif %}" data-aos="fade-down" style="{% if not last_db or last_db == 'None' or last_db.strip() == '' %}display: none;{% endif %}">
+>>>>>>> Stashed changes
           <div class="db-alert-icon">
             <i class="bi bi-database-check"></i>
           </div>
           <div class="db-alert-content">
             <div class="db-alert-title">Aktif veritabanı</div>
+<<<<<<< Updated upstream
             <div class="db-alert-subtitle">{{ last_db.split('_', 1)[1] if '_' in last_db else last_db }}</div>
+=======
+            <div class="db-alert-subtitle" id="activeDbName">{{ (last_db.split('_', 1)[1] if '_' in last_db else last_db) if last_db and last_db != 'None' and last_db.strip() != '' else '' }}</div>
+>>>>>>> Stashed changes
             <small class="db-alert-note">Yeni bir veritabanı yüklersen, bu veritabanının yerine geçer.</small>
           </div>
+          <button type="button" class="file-remove-btn" id="removeFile">
+            <i class="bi bi-x"></i>
+          </button>
         </div>
         {% endif %}
 
+<<<<<<< Updated upstream
         <!-- Database Summary -->
         {% if db_summary %}
         <input type="hidden" id="current-db-filename" value="{{ last_db }}">
         <div class="db-summary-container">
+=======
+        <!-- Veritabanı Özeti Alanı: Sadece özet varsa gösterilir -->
+        <input type="hidden" id="current-db-filename" value="{{ last_db if last_db and last_db != 'None' and last_db.strip() != '' else '' }}">
+        <div id="dbSummaryContainer" class="db-summary-container" style="{% if not db_summary %}display: none;{% endif %}">
+>>>>>>> Stashed changes
           <div class="db-summary-header">
             <i class="bi bi-info-circle"></i>
             <span>Veritabanı Özeti</span>
@@ -64,6 +83,7 @@
           
           <!-- Database Upload Section -->
           <div class="form-section">
+<<<<<<< Updated upstream
             <div class="section-header">
               <div class="section-icon">
                 <i class="bi bi-database"></i>
@@ -71,6 +91,9 @@
               <div class="section-title">Veritabanı Dosyası</div>
             </div>
             
+=======
+
+>>>>>>> Stashed changes
             <div class="upload-zone" id="uploadArea">
               <input type="file" name="database" class="upload-input" id="databaseFile" accept=".db,.sqlite,.sqlite3">
               <div class="upload-content">
@@ -81,6 +104,7 @@
                 <div class="upload-formats">Desteklenen formatlar: .db, .sqlite, .sqlite3</div>
               </div>
             </div>
+<<<<<<< Updated upstream
             
             <div class="file-preview" id="fileInfo">
               <div class="file-preview-icon">
@@ -91,6 +115,8 @@
                 <i class="bi bi-x"></i>
               </button>
             </div>
+=======
+>>>>>>> Stashed changes
           </div>
 
           <!-- Question Section -->
@@ -226,7 +252,11 @@
       </div>
       {% endif %}
 
+<<<<<<< Updated upstream
       <!-- Results Section -->
+=======
+      <!-- Sonuçlar Bölümü -->
+>>>>>>> Stashed changes
       {% if result %}
       <div class="result-card data-result-card" data-aos="fade-up" data-aos-delay="400">
         {% if result["columns"][0] == "Hata" %}
@@ -335,12 +365,25 @@
 
 <!-- Chart.js and Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<<<<<<< Updated upstream
 {% if result and result["columns"][0] != "Hata" %}
 <script>
 const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
 const columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
 let chartInstance = null;
 
+=======
+<script>
+// Chart.js ile ilgili fonksiyonlar
+{% if result and result["columns"][0] != "Hata" %}
+const rows = {{ result["rows"] | tojson }};
+const columns = {{ result["columns"] | tojson }};
+let chartInstance = null;
+
+/**
+ * Belirtilen sayıda renk oluşturur.
+ */
+>>>>>>> Stashed changes
 function generateColors(count) {
     const baseColors = [
         '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1',
@@ -373,6 +416,10 @@ function populateColumnDropdowns() {
         opt2.text = col;
         valueDropdown.appendChild(opt2);
     });
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
     labelDropdown.selectedIndex = 0;
     valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0;
 }
@@ -384,6 +431,10 @@ function drawChart() {
 
     const labels = [];
     const values = [];
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
     for (let i = 0; i < rows.length; i++) {
         const label = rows[i][labelIdx];
         const raw = rows[i][valueIdx];
@@ -439,6 +490,7 @@ function drawChart() {
     }
 }
 
+<<<<<<< Updated upstream
 document.addEventListener('DOMContentLoaded', function() {
     populateColumnDropdowns();
     drawChart();
@@ -448,6 +500,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("valueColumn").addEventListener("change", drawChart);
 });
 
+=======
+/**
+ * Sorgu sonuçlarını CSV veya Excel olarak indirir.
+ */
+>>>>>>> Stashed changes
 function downloadResult(format) {
     const btn = event.target.closest('button');
     const originalText = btn.innerHTML;
@@ -475,6 +532,232 @@ function downloadResult(format) {
         btn.disabled = false;
     });
 }
+<<<<<<< Updated upstream
+=======
+
+// Grafik başlatma
+document.addEventListener("DOMContentLoaded", function() {
+    populateColumnDropdowns();
+    drawChart();
+    
+    // Grafik kontrol olay dinleyicileri
+    document.getElementById("chartType").addEventListener("change", drawChart);
+    document.getElementById("labelColumn").addEventListener("change", drawChart);
+    document.getElementById("valueColumn").addEventListener("change", drawChart);
+});
+
+{% endif %}
+
+// Genel sayfa etkileşimleri
+document.addEventListener("DOMContentLoaded", function () {
+  const toggleBtn = document.getElementById("toggle-summary-btn");
+  const summaryBox = document.getElementById("db-summary-text");
+  const dbFilenameInput = document.getElementById("current-db-filename");
+  const dbSummaryContainer = document.getElementById("dbSummaryContainer");
+  const uploadArea = document.getElementById("uploadArea");
+  const databaseFile = document.getElementById("databaseFile");
+  const removeFileBtn = document.getElementById("removeFile");
+  const dbAlert = document.getElementById("dbAlert");
+  const activeDbName = document.getElementById("activeDbName");
+  const queryForm = document.getElementById("queryForm");
+
+  let isDetailed = false;
+
+  // Veritabanı Özeti Açma/Kapatma İşlevi
+  if (toggleBtn && summaryBox && dbFilenameInput) {
+    toggleBtn.addEventListener("click", async function () {
+      const dbFilename = dbFilenameInput.value;
+      if (!dbFilename) return;
+
+      toggleBtn.disabled = true;
+      toggleBtn.innerHTML = `<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>`;
+
+      try {
+        const mode = isDetailed ? "short" : "detail";
+        const response = await fetch(`/get-db-summary?filename=${encodeURIComponent(dbFilename)}&mode=${mode}`);
+        const data = await response.json();
+
+        if (data.summary) {
+          summaryBox.textContent = data.summary;
+        } else {
+          summaryBox.textContent = "❌ Özet alınamadı.";
+        }
+
+        if (isDetailed) {
+          toggleBtn.innerHTML = '<span>Daha ayrıntılı göster</span> <i class="bi bi-chevron-right"></i>';
+        } else {
+          toggleBtn.innerHTML = '<span>Daha kısa göster</span> <i class="bi bi-chevron-up"></i>';
+        }
+
+        isDetailed = !isDetailed;
+      } catch (e) {
+        console.error("Veritabanı özeti getirilirken hata:", e);
+        summaryBox.textContent = "❌ Özet getirilirken bir hata oluştu.";
+        toggleBtn.innerHTML = '<span>Tekrar dene</span> <i class="bi bi-arrow-clockwise"></i>';
+      } finally {
+        toggleBtn.disabled = false;
+      }
+    });
+  }
+
+  // Aktif veritabanı uyarı ve özetini günceller
+  async function updateDbDisplay(filename, showAlert = true) {
+      if (filename && filename !== 'None' && filename.trim() !== '') {
+          activeDbName.textContent = filename.split('_', 1)[1] || filename;
+          if (showAlert) {
+              dbAlert.style.display = "flex";
+              dbAlert.classList.add("show");
+          }
+          uploadArea.style.display = "none";
+
+          dbSummaryContainer.style.display = "block";
+          dbFilenameInput.value = filename;
+          await fetchDbSummary(filename, "short");
+      } else {
+          dbAlert.style.display = "none";
+          dbAlert.classList.remove("show");
+          uploadArea.style.display = "block";
+          dbSummaryContainer.style.display = "none";
+          dbFilenameInput.value = "";
+      }
+  }
+
+  async function fetchDbSummary(filename, mode) {
+      const summaryBox = document.getElementById("db-summary-text");
+      const toggleBtn = document.getElementById("toggle-summary-btn");
+
+      if (!summaryBox || !toggleBtn) return;
+
+      summaryBox.textContent = "Veritabanı özeti yükleniyor...";
+      toggleBtn.disabled = true;
+      toggleBtn.innerHTML = `<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>`;
+
+      try {
+          const response = await fetch(`/get-db-summary?filename=${encodeURIComponent(filename)}&mode=${mode}`);
+          const data = await response.json();
+          if (data.summary) {
+              summaryBox.textContent = data.summary;
+          } else {
+              summaryBox.textContent = "❌ Özet alınamadı.";
+          }
+          toggleBtn.innerHTML = '<span>Daha ayrıntılı göster</span> <i class="bi bi-chevron-right"></i>';
+          isDetailed = false;
+      } catch (e) {
+          console.error("Veritabanı özeti getirilirken hata:", e);
+          summaryBox.textContent = "❌ Özet getirilirken bir hata oluştu.";
+          toggleBtn.innerHTML = '<span>Tekrar dene</span> <i class="bi bi-arrow-clockwise"></i>';
+      } finally {
+          toggleBtn.disabled = false;
+      }
+  }
+
+  // Sayfa başlangıcında mevcut veritabanını kontrol et
+  const initialLastDb = "{{ last_db }}";
+  if (initialLastDb && initialLastDb.trim() !== '' && initialLastDb !== 'None') {
+      updateDbDisplay(initialLastDb, true);
+  } else {
+      dbAlert.style.display = "none";
+      uploadArea.style.display = "block";
+      dbSummaryContainer.style.display = "none";
+      dbFilenameInput.value = "";
+  }
+
+  // Dosya seçimi
+  databaseFile.addEventListener("change", function () {
+    if (this.files.length > 0) {
+      const filename = this.files[0].name;
+      updateDbDisplay(filename);
+    } else {
+      updateDbDisplay(null);
+    }
+  });
+
+  // Dosya kaldırma
+  removeFileBtn.addEventListener("click", function () {
+    databaseFile.value = "";
+    updateDbDisplay(null);
+  });
+
+  // Drag-and-drop
+  uploadArea.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    this.classList.add("dragover");
+  });
+
+  uploadArea.addEventListener("dragleave", function (e) {
+    e.preventDefault();
+    this.classList.remove("dragover");
+  });
+
+  uploadArea.addEventListener("drop", function (e) {
+    e.preventDefault();
+    this.classList.remove("dragover");
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      databaseFile.files = files;
+      const event = new Event('change');
+      databaseFile.dispatchEvent(event);
+    }
+  });
+
+  // Submit butonu animasyonu
+  queryForm.addEventListener("submit", function() {
+    const submitBtn = this.querySelector(".submit-btn");
+    submitBtn.classList.add("loading");
+    submitBtn.disabled = true;
+  });
+
+  // Sonuçlara kaydırma
+  const resultsSection = document.getElementById('results-section');
+  if (resultsSection) {
+    setTimeout(() => {
+      const navbar = document.getElementById('main-navbar');
+      const navbarHeight = navbar ? navbar.offsetHeight : 0;
+      const targetScrollPosition = resultsSection.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 20;
+
+      window.scrollTo({
+        top: targetScrollPosition,
+        behavior: 'smooth'
+      });
+    }, 100);
+  }
+});
+
+function setSuggestion(buttonElement) {
+    const questionInput = document.querySelector('.question-input');
+    if (questionInput) {
+        questionInput.value = buttonElement.textContent.trim();
+    }
+}
+
+function copySql() {
+    const sqlQueryElement = document.querySelector('.sql-query code');
+    if (sqlQueryElement) {
+        const sqlText = sqlQueryElement.textContent;
+        copyTextToClipboardLegacy(sqlText);
+    }
+}
+
+function copyTextToClipboardLegacy(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    textArea.style.top = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        const successful = document.execCommand('copy');
+        const msg = successful ? 'başarılı' : 'başarısız';
+        console.log('Kopyalama ' + msg);
+    } catch (err) {
+        console.error('Fallback kopyalama hatası:', err);
+    }
+    document.body.removeChild(textArea);
+}
+
+>>>>>>> Stashed changes
 </script>
 {% endif %}
 
