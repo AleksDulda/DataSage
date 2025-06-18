@@ -2,9 +2,6 @@
 {% block title %}Sorgu - DATASAGE{% endblock %}
 {% block content %}
 
-<<<<<<< Updated upstream
-<!-- Hero Section -->
-=======
 <style>
 /* Conditional visibility classes */
 .db-alert.hidden {
@@ -17,7 +14,6 @@
 </style>
 
 <!-- Hero Section: Sayfanın üst kısmındaki başlık ve tanıtım alanı -->
->>>>>>> Stashed changes
 <section class="query-hero">
   <div class="hero-background"></div>
   <div class="container position-relative">
@@ -34,19 +30,10 @@
   </div>
 </section>
 
-<!-- Main Content -->
+<!-- Main Content: Sayfanın ana içeriğini barındıran kapsayıcı -->
 <div class="container main-container">
   <div class="row justify-content-center">
     <div class="col-lg-10">
-<<<<<<< Updated upstream
-      
-      <!-- Query Form Card -->
-      <div class="query-card glass-card" data-aos="fade-up" data-aos-delay="200">
-        
-        <!-- Active Database Alert -->
-        {% if last_db %}
-        <div class="db-alert" data-aos="fade-down">
-=======
 
       <!-- Kullanıcı token bilgisi varsa gösterilir -->
       {% if tokens is not none %}
@@ -77,35 +64,22 @@
 
         <!-- Birleşik Aktif Veritabanı Bölümü -->
         <div id="dbAlert" class="db-alert {% if not last_db or last_db == 'None' or last_db.strip() == '' %}hidden{% else %}show{% endif %}" data-aos="fade-down">
->>>>>>> Stashed changes
           <div class="db-alert-icon">
             <i class="bi bi-database-check"></i>
           </div>
           <div class="db-alert-content">
             <div class="db-alert-title">Aktif veritabanı</div>
-<<<<<<< Updated upstream
-            <div class="db-alert-subtitle">{{ last_db.split('_', 1)[1] if '_' in last_db else last_db }}</div>
-=======
             <div class="db-alert-subtitle" id="activeDbName">{{ (last_db.split('_', 1)[1] if '_' in last_db else last_db) if last_db and last_db != 'None' and last_db.strip() != '' else '' }}</div>
->>>>>>> Stashed changes
             <small class="db-alert-note">Yeni bir veritabanı yüklersen, bu veritabanının yerine geçer.</small>
           </div>
           <button type="button" class="file-remove-btn" id="removeFile">
             <i class="bi bi-x"></i>
           </button>
         </div>
-        {% endif %}
 
-<<<<<<< Updated upstream
-        <!-- Database Summary -->
-        {% if db_summary %}
-        <input type="hidden" id="current-db-filename" value="{{ last_db }}">
-        <div class="db-summary-container">
-=======
         <!-- Veritabanı Özeti Alanı: Sadece özet varsa gösterilir -->
         <input type="hidden" id="current-db-filename" value="{{ last_db if last_db and last_db != 'None' and last_db.strip() != '' else '' }}">
         <div id="dbSummaryContainer" class="db-summary-container {% if not db_summary %}hidden{% endif %}">
->>>>>>> Stashed changes
           <div class="db-summary-header">
             <i class="bi bi-info-circle"></i>
             <span>Veritabanı Özeti</span>
@@ -118,23 +92,12 @@
             </button>
           </div>
         </div>
-        {% endif %}
 
-        <!-- Query Form -->
-        <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form">
-          
-          <!-- Database Upload Section -->
+        <!-- Sorgu Formu -->
+        <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form" id="queryForm">
+
+          <!-- Veritabanı Yükleme Bölümü -->
           <div class="form-section">
-<<<<<<< Updated upstream
-            <div class="section-header">
-              <div class="section-icon">
-                <i class="bi bi-database"></i>
-              </div>
-              <div class="section-title">Veritabanı Dosyası</div>
-            </div>
-            
-=======
->>>>>>> Stashed changes
             <div class="upload-zone" id="uploadArea">
               <input type="file" name="database" class="upload-input" id="databaseFile" accept=".db,.sqlite,.sqlite3">
               <div class="upload-content">
@@ -145,22 +108,9 @@
                 <div class="upload-formats">Desteklenen formatlar: .db, .sqlite, .sqlite3</div>
               </div>
             </div>
-<<<<<<< Updated upstream
-            
-            <div class="file-preview" id="fileInfo">
-              <div class="file-preview-icon">
-                <i class="bi bi-file-earmark-check"></i>
-              </div>
-              <div class="file-preview-name" id="fileName"></div>
-              <button type="button" class="file-remove-btn" id="removeFile">
-                <i class="bi bi-x"></i>
-              </button>
-            </div>
-=======
->>>>>>> Stashed changes
           </div>
 
-          <!-- Question Section -->
+          <!-- Soru Bölümü -->
           <div class="form-section">
             <div class="section-header">
               <div class="section-icon">
@@ -168,14 +118,14 @@
               </div>
               <div class="section-title">Sorunuz</div>
             </div>
-            
+
             <div class="question-container">
               <div class="question-input-wrapper">
-                <input type="text" name="question" class="question-input" 
+                <input type="text" name="question" class="question-input"
                        placeholder="Örn: En uzun film nedir?" required>
                 <div class="input-focus-ring"></div>
               </div>
-              
+
               <div class="suggestions-container">
                 <div class="suggestions-label">Örnek sorular:</div>
                 <div class="suggestions-grid">
@@ -193,14 +143,14 @@
             </div>
           </div>
 
-          <!-- Live Database Connection -->
+          <!-- Canlı Veritabanı Bağlantısı Bölümü -->
           <div class="form-section">
             <div class="section-divider">
               <span>veya</span>
             </div>
-            
+
             <div class="collapsible-section">
-              <button type="button" class="collapsible-header" data-bs-toggle="collapse" 
+              <button type="button" class="collapsible-header" data-bs-toggle="collapse"
                       data-bs-target="#liveDBCollapse" aria-expanded="false">
                 <div class="collapsible-icon">
                   <i class="bi bi-plug-fill"></i>
@@ -210,11 +160,11 @@
                   <i class="bi bi-chevron-down"></i>
                 </div>
               </button>
-              
+
               <div class="collapse" id="liveDBCollapse">
                 <div class="collapsible-content">
                   <div class="db-connection-form">
-                    
+
                     <div class="form-group">
                       <label class="form-label">Veritabanı Türü</label>
                       <select name="db_type" class="form-select custom-select">
@@ -256,7 +206,7 @@
             </div>
           </div>
 
-          <!-- Submit Button -->
+          <!-- Gönder Butonu -->
           <div class="submit-section">
             <button type="submit" class="submit-btn primary-btn">
               <div class="btn-content">
@@ -272,7 +222,7 @@
         </form>
       </div>
 
-      <!-- SQL Query Display -->
+      <!-- SQL Sorgu Görüntüleme Alanı -->
       {% if sql_query %}
       <div class="result-card sql-result-card" data-aos="fade-up" data-aos-delay="300">
         <div class="result-header">
@@ -293,15 +243,11 @@
       </div>
       {% endif %}
 
-<<<<<<< Updated upstream
-      <!-- Results Section -->
-=======
       <!-- Sonuçlar Bölümü -->
->>>>>>> Stashed changes
       {% if result %}
-      <div class="result-card data-result-card" data-aos="fade-up" data-aos-delay="400">
+      <div id="results-section" class="result-card data-result-card" data-aos="fade-up" data-aos-delay="400">
         {% if result["columns"][0] == "Hata" %}
-        <!-- Error Display -->
+        <!-- Hata Görüntüleme -->
         <div class="error-display">
           <div class="error-header">
             <div class="error-icon">
@@ -314,7 +260,7 @@
           </div>
         </div>
         {% else %}
-        <!-- Success Results -->
+        <!-- Başarılı Sonuçlar -->
         <div class="result-header">
           <div class="result-header-content">
             <div class="result-icon success">
@@ -336,7 +282,7 @@
             </button>
           </div>
         </div>
-        
+
         <div class="table-wrapper">
           <div class="table-container">
             <table class="results-table">
@@ -360,7 +306,7 @@
           </div>
         </div>
 
-        <!-- Chart Section -->
+        <!-- Grafik Bölümü -->
         {% if result["columns"]|length >= 2 and result["rows"]|length > 0 %}
         <div class="chart-section">
           <div class="chart-header">
@@ -369,7 +315,7 @@
               <span>Grafiksel Görselleştirme</span>
             </div>
           </div>
-          
+
           <div class="chart-controls">
             <div class="control-group">
               <label class="control-label">X Eksen</label>
@@ -390,7 +336,7 @@
               </select>
             </div>
           </div>
-          
+
           <div class="chart-container">
             <canvas id="chartArea"></canvas>
           </div>
@@ -412,12 +358,9 @@ const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
 const columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
 let chartInstance = null;
 
-<<<<<<< Updated upstream
-=======
 /**
  * Belirtilen sayıda renk oluşturur.
  */
->>>>>>> Stashed changes
 function generateColors(count) {
     const baseColors = [
         '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1',
@@ -432,6 +375,9 @@ function generateColors(count) {
     return colors;
 }
 
+/**
+ * X ve Y eksen dropdown'larını veritabanı sütunlarıyla doldurur.
+ */
 function populateColumnDropdowns() {
     const labelDropdown = document.getElementById("labelColumn");
     const valueDropdown = document.getElementById("valueColumn");
@@ -439,6 +385,7 @@ function populateColumnDropdowns() {
 
     labelDropdown.innerHTML = "";
     valueDropdown.innerHTML = "";
+
     columns.forEach((col, i) => {
         let opt1 = document.createElement("option");
         opt1.value = i;
@@ -450,14 +397,14 @@ function populateColumnDropdowns() {
         opt2.text = col;
         valueDropdown.appendChild(opt2);
     });
-<<<<<<< Updated upstream
-=======
     
->>>>>>> Stashed changes
     labelDropdown.selectedIndex = 0;
     valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0;
 }
 
+/**
+ * Seçilen verilere ve grafik tipine göre grafiği çizer.
+ */
 function drawChart() {
     const type = document.getElementById("chartType").value;
     const labelIdx = parseInt(document.getElementById("labelColumn").value);
@@ -465,10 +412,7 @@ function drawChart() {
 
     const labels = [];
     const values = [];
-<<<<<<< Updated upstream
-=======
     
->>>>>>> Stashed changes
     for (let i = 0; i < rows.length; i++) {
         const label = rows[i][labelIdx];
         const raw = rows[i][valueIdx];
@@ -524,21 +468,9 @@ function drawChart() {
     }
 }
 
-<<<<<<< Updated upstream
-document.addEventListener('DOMContentLoaded', function() {
-    populateColumnDropdowns();
-    drawChart();
-
-    document.getElementById("chartType").addEventListener("change", drawChart);
-    document.getElementById("labelColumn").addEventListener("change", drawChart);
-    document.getElementById("valueColumn").addEventListener("change", drawChart);
-});
-
-=======
 /**
  * Sorgu sonuçlarını CSV veya Excel olarak indirir.
  */
->>>>>>> Stashed changes
 function downloadResult(format) {
     const btn = event.target.closest('button');
     const originalText = btn.innerHTML;
@@ -566,8 +498,6 @@ function downloadResult(format) {
         btn.disabled = false;
     });
 }
-<<<<<<< Updated upstream
-=======
 
 // Grafik başlatma
 document.addEventListener("DOMContentLoaded", function() {
@@ -808,10 +738,7 @@ function copyTextToClipboardLegacy(text) {
     }
     document.body.removeChild(textArea);
 }
->>>>>>> Stashed changes
 </script>
-{% endif %}
-
 {% endblock %}
 
 {% block styles %}
@@ -825,12 +752,12 @@ function copyTextToClipboardLegacy(text) {
   --info-color: #17a2b8;
   --warning-color: #ffc107;
   --danger-color: #dc3545;
-  
+
   /* Gradient Colors */
   --primary-gradient: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
   --secondary-gradient: linear-gradient(135deg, #6610f2 0%, #007bff 100%);
   --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-  
+
   /* Light Theme Colors */
   --text-primary: #2c3e50;
   --text-secondary: #6c757d;
@@ -843,25 +770,25 @@ function copyTextToClipboardLegacy(text) {
   --table-header-bg: rgba(255,255,255,0.9);
   --table-row-even: rgba(0,0,0,0.02);
   --table-row-hover: rgba(0,123,255,0.05);
-  
+
   /* Spacing */
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  
+
   /* Borders */
   --border-radius: 12px;
   --border-radius-lg: 20px;
   --border-radius-xl: 24px;
-  
+
   /* Shadows */
   --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
   --shadow-md: 0 8px 25px rgba(0,0,0,0.15);
   --shadow-lg: 0 15px 35px rgba(0,0,0,0.1);
   --shadow-glow: 0 0 20px rgba(102,16,242,0.3);
-  
+
   /* Animations */
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -873,21 +800,21 @@ html[data-bs-theme="dark"] {
   --text-primary: #e8eaed;
   --text-secondary: #c3c4c7;
   --text-muted: #9aa0a6;
-  
+
   /* Daha okunaklı arka planlar */
   --bg-main: #0f1419;
   --bg-overlay: rgba(21, 23, 29, 0.95);
   --bg-blur: rgba(30, 32, 38, 0.85);
   --input-bg: rgba(45, 47, 53, 0.8);
-  
+
   /* Daha net border'lar */
   --border-color: rgba(255,255,255,0.15);
-  
+
   /* Tablo renkleri - daha okunaklı */
   --table-header-bg: rgba(40, 42, 48, 0.9);
   --table-row-even: rgba(255,255,255,0.03);
   --table-row-hover: rgba(0,123,255,0.15);
-  
+
   /* Daha soft shadow'lar */
   --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
   --shadow-md: 0 8px 25px rgba(0,0,0,0.5);
@@ -976,7 +903,7 @@ html[data-bs-theme="dark"] .glass-card {
 html[data-bs-theme="dark"] .glass-card:hover {
   background: rgba(21, 23, 29, 0.98);
   border-color: rgba(0,123,255,0.3);
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0,0,0,0.4),
     0 0 20px rgba(0,123,255,0.15);
 }
@@ -1001,8 +928,8 @@ html[data-bs-theme="dark"] .upload-zone {
 }
 
 html[data-bs-theme="dark"] .upload-zone:hover {
-  background: linear-gradient(135deg, 
-    rgba(0,123,255,0.1) 0%, 
+  background: linear-gradient(135deg,
+    rgba(0,123,255,0.1) 0%,
     rgba(102,16,242,0.1) 100%
   );
   border-color: var(--primary-color);
@@ -1010,8 +937,8 @@ html[data-bs-theme="dark"] .upload-zone:hover {
 
 /* Alert ve notification'lar */
 html[data-bs-theme="dark"] .db-alert {
-  background: linear-gradient(135deg, 
-    rgba(40,167,69,0.15) 0%, 
+  background: linear-gradient(135deg,
+    rgba(40,167,69,0.15) 0%,
     rgba(40,167,69,0.08) 100%
   );
   border-color: rgba(40,167,69,0.3);
@@ -1049,8 +976,8 @@ html[data-bs-theme="dark"] .collapsible-header:hover {
 }
 
 html[data-bs-theme="dark"] .collapsible-header[aria-expanded="true"] {
-  background: linear-gradient(135deg, 
-    rgba(102,16,242,0.2) 0%, 
+  background: linear-gradient(135deg,
+    rgba(102,16,242,0.2) 0%,
     rgba(0,123,255,0.2) 100%
   );
 }
@@ -1107,6 +1034,7 @@ html[data-bs-theme="dark"] .sql-content::-webkit-scrollbar-thumb:hover {
 /* Firefox scrollbar */
 html[data-bs-theme="dark"] .table-container,
 html[data-bs-theme="dark"] .sql-content {
+  scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.2) rgba(30, 32, 38, 0.5);
 }
 
@@ -1140,8 +1068,8 @@ html[data-bs-theme="dark"] *:focus {
 
 /* File preview */
 html[data-bs-theme="dark"] .file-preview {
-  background: linear-gradient(135deg, 
-    rgba(40,167,69,0.15) 0%, 
+  background: linear-gradient(135deg,
+    rgba(40,167,69,0.15) 0%,
     rgba(40,167,69,0.08) 100%
   );
   border-color: rgba(40,167,69,0.3);
@@ -1152,7 +1080,7 @@ html[data-bs-theme="dark"] .file-preview {
   html[data-bs-theme="dark"] .glass-card {
     background: rgba(21, 23, 29, 0.98);
   }
-  
+
   html[data-bs-theme="dark"] .query-card {
     background: rgba(15, 20, 25, 0.95);
   }
@@ -1279,16 +1207,16 @@ html[data-bs-theme="dark"] .file-preview {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.1) 50%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
     transparent 100%
   );
 }
 
 .glass-card:hover {
   transform: translateY(-2px); /* Daha yumuşak hareket */
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.08),
     0 0 15px rgba(0, 123, 255, 0.08); /* Daha soft glow */
   border-color: rgba(0, 123, 255, 0.15); /* Daha subtle border */
@@ -1310,7 +1238,14 @@ html[data-bs-theme="dark"] .file-preview {
   border: 1px solid rgba(40,167,69,0.2);
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-lg);
-  transition: var(--transition-smooth);
+  transition: all 0.3s ease-out; /* Sadece başlangıçta görünür olması için animasyon */
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.db-alert.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .db-alert:hover {
@@ -1799,11 +1734,6 @@ html[data-bs-theme="dark"] .file-preview {
   box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 
-.submit-btn:hover::before {
-  left: 100%;
-  transition: left 0.5s ease;
-}
-
 .submit-btn:active {
   transform: translateY(-1px);
 }
@@ -1859,8 +1789,8 @@ html[data-bs-theme="dark"] .file-preview {
 
 .result-card:hover {
   transform: translateY(-5px);
-  box-shadow: 
-    var(--shadow-lg), 
+  box-shadow:
+    var(--shadow-lg),
     0 0 20px rgba(0, 123, 255, 0.15);
   border-color: rgba(0, 123, 255, 0.2);
 }
@@ -2149,75 +2079,75 @@ html[data-bs-theme="dark"] .query-hero {
   :root {
     --spacing-xl: 2rem;
   }
-  
+
   .hero-title {
     font-size: 2.5rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1.1rem;
   }
-  
+
   .query-card {
     padding: var(--spacing-lg);
     margin: 0 var(--spacing-sm);
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
   }
-  
+
   .upload-zone {
     padding: var(--spacing-lg);
   }
-  
+
   .upload-icon {
     font-size: 2.5rem;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .suggestions-grid {
     flex-direction: column;
   }
-  
+
   .suggestion-pill {
     text-align: center;
     white-space: normal;
   }
-  
+
   .result-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
   }
-  
+
   .result-actions {
     width: 100%;
     justify-content: center;
   }
-  
+
   .chart-controls {
     grid-template-columns: 1fr;
   }
-  
+
   .chart-container {
     height: 300px;
   }
-  
+
   .db-alert {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .collapsible-header {
     padding: var(--spacing-sm) var(--spacing-md);
   }
-  
+
   .collapsible-title {
     font-size: 0.95rem;
   }
@@ -2228,12 +2158,12 @@ html[data-bs-theme="dark"] .query-hero {
   .query-card {
     margin: 0 var(--spacing-md);
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: var(--spacing-sm);
   }
-  
+
   .chart-controls {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2244,19 +2174,19 @@ html[data-bs-theme="dark"] .query-hero {
   .suggestions-grid {
     justify-content: flex-start;
   }
-  
+
   .chart-controls {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .result-header {
     padding: var(--spacing-xl);
   }
-  
+
   .table-wrapper {
     padding: var(--spacing-xl);
   }
-  
+
   .chart-section {
     padding: var(--spacing-xl);
   }
@@ -2393,17 +2323,17 @@ html[data-bs-theme="dark"] .chart-container {
   .chart-controls {
     display: none !important;
   }
-  
+
   .result-card {
     box-shadow: none;
     border: 1px solid #ddd;
     break-inside: avoid;
   }
-  
+
   .results-table {
     border-collapse: collapse;
   }
-  
+
   .results-table th,
   .results-table td {
     border: 1px solid #ddd;
@@ -2444,7 +2374,7 @@ select:focus {
     --text-muted: #666;
     --bg-blur: rgba(255,255,255,0.9);
   }
-  
+
   .glass-card {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -2452,7 +2382,7 @@ select:focus {
   }
 
   .glass-card:hover {
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.3),
     0 0 15px rgba(0, 123, 255, 0.12);
   }
@@ -2467,7 +2397,7 @@ select:focus {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   .hero-icon,
   .hero-decoration::after,
   .loading-spinner {
@@ -2477,7 +2407,7 @@ select:focus {
     .glass-card {
     transition: none;
   }
-  
+
   .glass-card:hover {
     transform: none;
   }
