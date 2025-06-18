@@ -1,5 +1,8 @@
-# auth.py
 import sqlite3
+import uuid
+from datetime import datetime, timedelta
+from flask_mail import Message
+
 from flask import Blueprint, request, redirect, session, render_template, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -23,8 +26,7 @@ def register():
 
         hashed_pw = generate_password_hash(password)
 
-        conn = sqlite3.connect("database.sqlite")
-        conn.row_factory = sqlite3.Row
+        conn = get_db_connection()
         cursor = conn.cursor()
 
         # ❌ Eğer admin kaydı yapılmak isteniyor ve zaten admin varsa, engelle
@@ -55,11 +57,25 @@ def register():
             conn.close()
             return redirect(url_for("auth.register"))
 
-        # ✅ Kayıt işlemi
+        # ✅ Kayıt işlemi + token başlangıç verisi
         cursor.execute("""
-            INSERT INTO users (username, password, first_name, last_name, email, gender, role)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (username, hashed_pw, first_name, last_name, email, gender, role))
+            INSERT INTO users (
+                username, password, first_name, last_name, email, gender, role,
+                tokens, last_token_reset
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            username,
+            hashed_pw,
+            first_name,
+            last_name,
+            email,
+            gender,
+            role,
+            10,
+            datetime.utcnow().isoformat()
+        ))
+
         conn.commit()
 
         user_id = cursor.lastrowid
@@ -86,8 +102,9 @@ def login():
         if user and check_password_hash(user["password"], password):
             session["user_id"] = user["id"]
             session["username"] = user["username"]
+            session["role"] = user["role"]
             flash("Giriş başarılı!", "success")
-            return redirect(url_for("ask"))  # Ana sayfa vs. yönlendirmesi
+            return redirect(url_for("ask"))
         else:
             flash("Hatalı kullanıcı adı veya şifre.", "danger")
 
@@ -98,3 +115,58 @@ def logout():
     session.clear()
     flash("Oturum sonlandırıldı.", "info")
     return redirect(url_for("auth.login"))
+
+@auth.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        identifier = request.form.get("identifier", "").strip().lower()
+        conn = get_db_connection()
+        user = conn.execute("SELECT * FROM users WHERE username = ? OR email = ?", (identifier, identifier)).fetchone()
+        
+        if user:
+            token = str(uuid.uuid4())
+            expiry = datetime.utcnow() + timedelta(hours=1)
+            conn.execute("UPDATE users SET reset_token = ?, reset_expiry = ? WHERE id = ?", (token, expiry.isoformat(), user["id"]))
+            conn.commit()
+            reset_link = url_for("auth.reset_password", token=token, _external=True)
+
+            msg = Message("Şifre Sıfırlama - DataSage",
+                          recipients=[user["email"]],
+                          body=f"Merhaba {user['first_name']},\n\nŞifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:\n{reset_link}\n\nBağlantı 1 saat boyunca geçerlidir.")
+            from app import mail
+            mail.send(msg)
+
+            flash("Eğer bilgiler doğruysa şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", "info")
+        else:
+            flash("Eğer bilgiler doğruysa şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", "info")
+
+        conn.close()
+    return render_template("forgot_password.html")
+
+@auth.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE reset_token = ?", (token,)).fetchone()
+
+    if not user or datetime.utcnow() > datetime.fromisoformat(user["reset_expiry"]):
+        flash("Bu bağlantı geçersiz veya süresi dolmuş.", "danger")
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        new_password = request.form.get("new_password")
+        confirm = request.form.get("confirm_password")
+
+        print("DEBUG:", new_password, confirm)  # GEÇİCİ
+
+        if new_password != confirm:
+            flash("Şifreler eşleşmiyor.", "warning")
+        else:
+            hashed = generate_password_hash(new_password)
+            conn.execute("UPDATE users SET password = ?, reset_token = NULL, reset_expiry = NULL WHERE id = ?", (hashed, user["id"]))
+            conn.commit()
+            flash("Şifreniz başarıyla sıfırlandı. Giriş yapabilirsiniz.", "success")
+            return redirect(url_for("auth.login"))
+
+    conn.close()
+    return render_template("reset_password.html", token=token)
+

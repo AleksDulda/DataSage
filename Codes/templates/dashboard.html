@@ -17,13 +17,13 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-[data-theme="dark"] {
-  --card-bg: rgba(45, 55, 72, 0.95);
-  --card-border: rgba(255, 255, 255, 0.1);
+html[data-bs-theme="dark"] {
+  --card-bg: #1e2329;
+  --card-border: #2d3748; 
   --text-primary: #f7fafc;
-  --text-secondary: #a0aec0;
-  --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.4);
+  --text-secondary: #e2e8f0; 
+  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.4); 
 }
 
 body {
@@ -37,10 +37,17 @@ body {
   background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
   border-radius: 0 0 30px 30px;
   backdrop-filter: blur(20px);
-  border: 1px solid var(--card-border);
   margin-bottom: 2rem;
   padding: 2rem;
   transition: var(--transition);
+}
+
+html[data-bs-theme="dark"] .welcome-section {
+  background: linear-gradient(135deg, #181c22 0%, #15171d 100%);
+}
+
+html[data-bs-theme="dark"] .stat-card {
+  background: linear-gradient(135deg, #181c22 0%, #15171d 100%);
 }
 
 .welcome-section:hover {
@@ -89,7 +96,7 @@ body {
 .stat-card {
   background: var(--card-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--card-border);
+
   border-radius: var(--border-radius);
   padding: 1.5rem;
   text-align: center;
@@ -162,13 +169,12 @@ body {
   transition: var(--transition);
 }
 
-
 .tab-nav {
   display: flex;
   background: rgba(0, 0, 0, 0.05);
 }
 
-[data-theme="dark"] .tab-nav {
+html[data-bs-theme="dark"] .tab-nav {
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -319,7 +325,7 @@ body {
   vertical-align: middle;
 }
 
-[data-theme="dark"] .table-modern tbody td {
+html[data-bs-theme="dark"] .table-modern tbody td {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -339,8 +345,8 @@ body {
   margin-bottom: 1.5rem;
 }
 
-[data-theme="dark"] .search-container {
-  background: rgba(45, 55, 72, 0.8);
+html[data-bs-theme="dark"] .search-container {
+  background: #1e2329; /* contact.html ile uyumlu */
 }
 
 .form-control-modern {
@@ -357,15 +363,15 @@ body {
   background: white;
 }
 
-[data-theme="dark"] .form-control-modern {
-  background: rgba(45, 55, 72, 0.9);
+html[data-bs-theme="dark"] .form-control-modern {
+  background: #2d3748; /* contact.html ile uyumlu */
   color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: #4a5568; /* contact.html ile uyumlu */
 }
 
-[data-theme="dark"] .form-control-modern:focus {
-  background: rgba(45, 55, 72, 1);
-  border-color: #007bff;
+html[data-bs-theme="dark"] .form-control-modern:focus {
+  background: #2d3748; /* contact.html ile uyumlu */
+  border-color: #4c8cff; /* contact.html ile uyumlu */
 }
 
 /* Pagination */
@@ -383,6 +389,10 @@ body {
   backdrop-filter: blur(10px);
   transition: var(--transition);
   margin: 0 2px;
+}
+
+html[data-bs-theme="dark"] .pagination-modern .page-item .page-link {
+  background: #2d3748; /* contact.html ile uyumlu */
 }
 
 .pagination-modern .page-item .page-link:hover {
@@ -413,9 +423,17 @@ body {
   transition: var(--transition);
 }
 
+html[data-bs-theme="dark"] .show-more-link {
+  color: #4c8cff; /* contact.html ile uyumlu */
+}
+
 .show-more-link:hover {
   color: #0056b3;
   text-decoration: underline;
+}
+
+html[data-bs-theme="dark"] .show-more-link:hover {
+  color: #4c8cff; /* contact.html ile uyumlu */
 }
 
 /* Responsive Design */
@@ -485,41 +503,12 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Dark Theme Toggle */
-.theme-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--card-border);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: var(--transition);
-  z-index: 1000;
-  box-shadow: var(--shadow-soft);
-}
-
-.theme-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: var(--shadow-hover);
-}
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Theme Toggle -->
-<button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
-  <i class="fas fa-moon" id="theme-icon"></i>
-</button>
 
 <div class="container py-4">
-  <!-- Welcome Section -->
   <section class="welcome-section" data-aos="fade-down">
     <div class="text-center">
       <h1 class="hero-title">
@@ -554,7 +543,6 @@ body {
       <div class="stat-number">{{ success_rate }}%</div>
       <div class="stat-label">Doğruluk Oranı</div>
     </div>
-
   </section>
 
   <!-- Tab System -->
@@ -868,197 +856,151 @@ body {
 <!-- AOS Animation Library -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Initialize AOS
-AOS.init({
-  duration: 800,
-  easing: 'ease-out-cubic',
-  once: true,
-  offset: 100
-});
+document.addEventListener('DOMContentLoaded', function () {
+  const htmlEl = document.documentElement;
+  const toggleBtn = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById("theme-icon");
+  const navbarLogo = document.getElementById("navbar-logo");
 
-// Tab System
-function switchTab(tabName) {
-  // Remove active class from all tabs and content
-  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-  
-  // Add active class to clicked tab and corresponding content
-  document.getElementById(tabName + '-tab').classList.add('active');
-  document.getElementById(tabName + '-content').classList.add('active');
-  
-  // Add loading effect
-  const content = document.getElementById(tabName + '-content');
-  content.classList.add('loading');
-  setTimeout(() => {
-    content.classList.remove('loading');
-  }, 300);
-}
-
-// Show More/Less functionality
-function toggleShowMoreGeneric(link, type) {
-  let container = link.parentElement;
-  let shortElem = container.querySelector('.' + type + '-short');
-  let fullElem = container.querySelector('.' + type + '-full');
-  
-  if (fullElem.style.display === "none" || fullElem.style.display === "") {
-    shortElem.style.display = "none";
-    fullElem.style.display = "inline";
-    link.textContent = "Daha az göster";
-    link.innerHTML = '<i class="fas fa-chevron-up me-1"></i>Daha az göster';
-  } else {
-    shortElem.style.display = "inline";
-    fullElem.style.display = "none";
-    link.innerHTML = '<i class="fas fa-chevron-down me-1"></i>Devamını gör';
+  // Tema simgesi ve logo güncelleme fonksiyonu
+  function updateTheme(theme) {
+    if (theme === "dark") {
+      if (themeIcon) themeIcon.className = "bi bi-moon-stars-fill";
+      if (navbarLogo) navbarLogo.src = "/static/images/logo-navbar-dark.png";
+    } else {
+      if (themeIcon) themeIcon.className = "bi bi-sun-fill";
+      if (navbarLogo) navbarLogo.src = "/static/images/logo-navbar.png";
+    }
   }
-}
 
-// Theme Toggle
-function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-  
-  const icon = document.getElementById('theme-icon');
-  icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-}
+  // Kayıtlı temayı yükle
+  const savedTheme = localStorage.getItem("theme") || "light";
+  htmlEl.setAttribute("data-bs-theme", savedTheme);
+  updateTheme(savedTheme);
 
-// Initialize theme from localStorage
-document.addEventListener('DOMContentLoaded', function() {
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  
-  const icon = document.getElementById('theme-icon');
-  icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-});
-
-// Add smooth scroll behavior
-document.documentElement.style.scrollBehavior = 'smooth';
-
-// Enhanced table row interactions
-document.querySelectorAll('.table-modern tbody tr').forEach(row => {
-  row.addEventListener('mouseenter', function() {
-    this.style.transform = 'translateX(5px)';
+  // Tema değiştirme
+  toggleBtn?.addEventListener("click", function () {
+    const current = htmlEl.getAttribute("data-bs-theme") || "light";
+    const newTheme = current === "dark" ? "light" : "dark";
+    htmlEl.setAttribute("data-bs-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    updateTheme(newTheme);
   });
-  
-  row.addEventListener('mouseleave', function() {
-    this.style.transform = 'translateX(0)';
-  });
-});
 
-// Button loading states
-document.querySelectorAll('.btn-modern').forEach(btn => {
-  btn.addEventListener('click', function(e) {
-    if (!this.classList.contains('disabled') && !this.hasAttribute('onclick')) {
-      this.classList.add('loading');
-      setTimeout(() => {
-        this.classList.remove('loading');
-      }, 1000);
-    }
-  });
-});
+  // Aktif tabı yükle
+  const savedTab = sessionStorage.getItem('activeTab') || 'databases';
+  switchTab(savedTab);
 
-// Form validation and enhancement
-document.querySelectorAll('form').forEach(form => {
-  form.addEventListener('submit', function(e) {
-    const submitBtn = this.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.classList.add('loading');
-      submitBtn.disabled = true;
-      
-      setTimeout(() => {
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-      }, 2000);
-    }
-  });
-});
+  // Scroll pozisyonunu yükle
+  const savedScroll = sessionStorage.getItem('scrollY');
+  if (savedScroll !== null) {
+    window.scrollTo(0, parseInt(savedScroll));
+    sessionStorage.removeItem('scrollY');
+  }
 
-// Enhanced search functionality
-const searchInput = document.querySelector('input[name="query_filter"]');
-if (searchInput) {
-  let searchTimeout;
-  searchInput.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    this.style.borderColor = '#007bff';
-    
-    searchTimeout = setTimeout(() => {
-      this.style.borderColor = '';
-    }, 1000);
+  // Pagination ve per_page tıklamalarında scroll'ı kaydet
+  document.querySelectorAll('.pagination a.page-link').forEach(link => {
+    link.addEventListener('click', () => {
+      sessionStorage.setItem('scrollY', window.scrollY);
+    });
   });
-}
+  const perPageSelect = document.querySelector('select[name="per_page"]');
+  if (perPageSelect) {
+    perPageSelect.addEventListener('change', () => {
+      sessionStorage.setItem('scrollY', window.scrollY);
+    });
+  }
 
-// Auto-hide alerts after 5 seconds
-document.querySelectorAll('.alert').forEach(alert => {
-  setTimeout(() => {
-    alert.style.opacity = '0';
-    alert.style.transform = 'translateY(-20px)';
+  // Scroll restoration
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  // AOS animasyonları
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 100
+  });
+
+  // Tab sistemini başlat
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.id.replace('-tab', '');
+      switchTab(tabName);
+    });
+  });
+
+  // Tooltipler
+  document.querySelectorAll('[title]').forEach(element => {
+    element.addEventListener('mouseenter', function () {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip-custom';
+      tooltip.textContent = this.getAttribute('title');
+      tooltip.style.cssText = `
+        position: absolute;
+        background: var(--text-primary);
+        color: white;
+        padding: 0.5rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+      `;
+      document.body.appendChild(tooltip);
+      const rect = this.getBoundingClientRect();
+      tooltip.style.left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
+      tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+      setTimeout(() => tooltip.style.opacity = '1', 100);
+      this.addEventListener('mouseleave', () => tooltip.remove(), { once: true });
+    });
+  });
+
+  // Uyarıları 5 saniyede kaldır
+  document.querySelectorAll('.alert').forEach(alert => {
     setTimeout(() => {
-      alert.remove();
-    }, 300);
-  }, 5000);
-});
+      alert.style.opacity = '0';
+      alert.style.transform = 'translateY(-20px)';
+      setTimeout(() => alert.remove(), 300);
+    }, 5000);
+  });
 
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  // Ctrl/Cmd + 1: Switch to Databases tab
-  if ((e.ctrlKey || e.metaKey) && e.key === '1') {
-    e.preventDefault();
-    switchTab('databases');
+  // Arama kutusu animasyonu
+  const searchInput = document.querySelector('input[name="query_filter"]');
+  if (searchInput) {
+    let searchTimeout;
+    searchInput.addEventListener('input', function () {
+      clearTimeout(searchTimeout);
+      this.style.borderColor = '#007bff';
+      searchTimeout = setTimeout(() => this.style.borderColor = '', 1000);
+    });
   }
-  
-  // Ctrl/Cmd + 2: Switch to Queries tab
-  if ((e.ctrlKey || e.metaKey) && e.key === '2') {
-    e.preventDefault();
-    switchTab('queries');
-  }
-  
-  // Ctrl/Cmd + D: Toggle dark theme
-  if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-    e.preventDefault();
-    toggleTheme();
-  }
-});
 
-// Add tooltips to buttons
-document.querySelectorAll('[title]').forEach(element => {
-  element.addEventListener('mouseenter', function() {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip-custom';
-    tooltip.textContent = this.getAttribute('title');
-    tooltip.style.cssText = `
-      position: absolute;
-      background: var(--text-primary);
-      color: white;
-      padding: 0.5rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      z-index: 1000;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-    `;
-    
-    document.body.appendChild(tooltip);
-    
-    const rect = this.getBoundingClientRect();
-    tooltip.style.left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
-    tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
-    
-    setTimeout(() => tooltip.style.opacity = '1', 100);
-    
-    this.addEventListener('mouseleave', function() {
-      tooltip.remove();
-    }, { once: true });
+  // Kısayol tuşları
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+      e.preventDefault();
+      switchTab('databases');
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+      e.preventDefault();
+      switchTab('queries');
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+      e.preventDefault();
+      toggleBtn?.click();
+    }
   });
 });
 
+// Tab geçiş fonksiyonu (global)
 function switchTab(tabName) {
   document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
@@ -1069,47 +1011,12 @@ function switchTab(tabName) {
   if (tabBtn && tabContent) {
     tabBtn.classList.add('active');
     tabContent.classList.add('active');
-    sessionStorage.setItem('activeTab', tabName);  // ❗ local değil sessionStorage
+    sessionStorage.setItem('activeTab', tabName);
     tabContent.classList.add('loading');
     setTimeout(() => {
       tabContent.classList.remove('loading');
     }, 300);
   }
 }
-
-
-document.addEventListener('DOMContentLoaded', function () {
-  // 1. Tab'ı sessionStorage'tan yükle
-  const savedTab = sessionStorage.getItem('activeTab') || 'databases';
-  switchTab(savedTab);
-
-  // 2. Scroll pozisyonunu yükle
-  const savedScroll = sessionStorage.getItem('scrollY');
-  if (savedScroll !== null) {
-    window.scrollTo(0, parseInt(savedScroll));
-    sessionStorage.removeItem('scrollY');
-  }
-
-  // 3. Pagination ve per_page tıklamalarında scroll'ı kaydet
-  document.querySelectorAll('.pagination a.page-link').forEach(link => {
-    link.addEventListener('click', () => {
-      sessionStorage.setItem('scrollY', window.scrollY);
-    });
-  });
-
-  const perPageSelect = document.querySelector('select[name="per_page"]');
-  if (perPageSelect) {
-    perPageSelect.addEventListener('change', () => {
-      sessionStorage.setItem('scrollY', window.scrollY);
-    });
-  }
-
-  // 4. Scroll Restoration
-  if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-  }
-});
-
-
 </script>
 {% endblock %}

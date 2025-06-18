@@ -1,3 +1,7 @@
+from flask_mail import Message
+import uuid
+from datetime import datetime, timedelta  
+
 from flask import Flask, render_template, request, session, redirect, url_for, flash, send_file, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -20,6 +24,7 @@ from auth import auth
 from models import init_db
 from utils import generate_sql
 from utils import summarize_schema
+from utils import reset_tokens_if_needed, get_token_status , decrement_token_if_success
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"
@@ -102,19 +107,36 @@ def ask():
 
     user_id = session["user_id"]
 
+    # Token yenileme kontrolü (24 saatte bir)
+    reset_tokens_if_needed(user_id)
+
+    # Token sayısı ve kalan süreyi al
+    tokens, remaining_timedelta = get_token_status(user_id)
+   # Eğer hiç token düşmemişse ve tüm haklar duruyorsa, kalan süreyi gizle
+    if tokens == 10 and remaining_timedelta.total_seconds() > 23 * 3600:
+        remaining_timedelta = None
+
+    # Sayfa ilk açıldığında
     if request.method == "GET":
         last_db = session.get("current_db")
-        return render_template("ask.html", last_db=last_db)
+        return render_template("ask.html", last_db=last_db, tokens=tokens, remaining_timedelta=remaining_timedelta)
 
+    # Token hakkı yoksa işlem engellenir
+    if tokens <= 0:
+        flash("Sorgu hakkınız tükendi. Lütfen 24 saat sonra tekrar deneyin.", "danger")
+        return render_template("ask.html", last_db=session.get("current_db"), tokens=0, remaining_timedelta=remaining_timedelta)
+
+    # Form verileri
     question = request.form.get("question", "").strip()
     db_type = request.form.get("db_type", "").strip().lower()
-
     db_summary = None
     sql_query = None
     last_db = None
     result = {}
 
-    # Canlı bağlantı (MySQL/Postgres)
+    # =======================
+    # Canlı DB (MySQL/PostgreSQL)
+    # =======================
     if db_type in ["mysql", "postgres"]:
         host = request.form.get("host", "").strip()
         port_str = request.form.get("port", "").strip()
@@ -130,7 +152,7 @@ def ask():
                 "columns": ["Hata"],
                 "sql": "Port hatalı"
             }
-            return render_template("ask.html", result=result, last_db=None, sql_query=result["sql"])
+            return render_template("ask.html", result=result, sql_query="Port hatalı", tokens=tokens, remaining_timedelta=remaining_timedelta)
 
         try:
             conn = None
@@ -160,7 +182,6 @@ def ask():
                 schema = get_postgres_schema(conn)
 
             sql_query = generate_sql(schema, question)
-
             cursor = conn.cursor()
             cursor.execute(sql_query)
             rows = cursor.fetchall()
@@ -168,9 +189,11 @@ def ask():
             conn.close()
 
             result = {"rows": rows, "columns": columns, "sql": sql_query}
-            db_summary = summarize_schema(schema, mode="short")  # canlı bağlantıda detaylı şema gösterimi
+            db_summary = summarize_schema(schema, mode="short")
 
-            # geçmişe kaydet
+            decrement_token_if_success(user_id, result)
+
+            # Sorgu geçmişine kaydet
             conn2 = sqlite3.connect("database.sqlite")
             conn2.execute(
                 "INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
@@ -187,14 +210,18 @@ def ask():
                 "sql": "Bağlantı hatası"
             }
 
-        return render_template("ask.html", result=result, sql_query=sql_query, last_db=None, db_summary=db_summary)
+        return render_template("ask.html", result=result, sql_query=sql_query, last_db=None, db_summary=db_summary, tokens=tokens, remaining_timedelta=remaining_timedelta)
 
+    # =======================
     # SQLite işlemleri
+    # =======================
     db_file = request.files.get("database")
+
     if not question:
         flash("Lütfen bir soru girin.", "warning")
-        return render_template("ask.html", last_db=session.get("current_db"))
+        return render_template("ask.html", last_db=session.get("current_db"), tokens=tokens, remaining_timedelta=remaining_timedelta)
 
+    # Yeni veritabanı yüklendiyse
     if db_file and db_file.filename:
         filename = f"user{user_id}_{db_file.filename}"
         filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
@@ -207,15 +234,17 @@ def ask():
 
         session["current_db"] = filename
     else:
+        # Daha önce yüklenmiş veritabanı
         if "current_db" not in session:
             flash("Lütfen önce bir veritabanı yükleyin.", "danger")
-            return render_template("ask.html")
+            return render_template("ask.html", tokens=tokens, remaining_timedelta=remaining_timedelta)
         filename = session["current_db"]
         filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
 
+    # Sorguyu çalıştır
     schema = get_schema(filepath)
     sql_query = generate_sql(schema, question)
-    db_summary = summarize_db(filepath, mode="short")  # <-- BURASI GÜNCELLENDİ
+    db_summary = summarize_db(filepath, mode="short")
     last_db = filename
 
     try:
@@ -225,7 +254,9 @@ def ask():
         rows = cursor.fetchall()
         columns = [desc[0] for desc in cursor.description]
         userdb.close()
+
         result = {"rows": rows, "columns": columns, "sql": sql_query}
+
     except Exception as e:
         traceback.print_exc()
         result = {
@@ -234,6 +265,11 @@ def ask():
             "sql": sql_query[:500]
         }
 
+   # HER ZAMAN kontrol et: başarılıysa token düş
+    if result.get("columns") and result["columns"][0] != "Hata":
+        decrement_token_if_success(user_id, result)
+
+    # Sorgu geçmişine kaydet
     conn = sqlite3.connect("database.sqlite")
     conn.execute(
         "INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
@@ -242,7 +278,8 @@ def ask():
     conn.commit()
     conn.close()
 
-    return render_template("ask.html", result=result, sql_query=sql_query, last_db=last_db, db_summary=db_summary)
+    return render_template("ask.html", result=result, sql_query=sql_query, last_db=last_db, db_summary=db_summary, tokens=tokens, remaining_timedelta=remaining_timedelta)
+
 
 @app.route("/download", methods=["POST"])
 def download():
@@ -858,6 +895,47 @@ def db_summary():
     db_path = os.path.join(DB_UPLOAD_FOLDER, db_filename)
     summary = summarize_db(db_path, mode)
     return jsonify({"summary": summary})
+
+
+@app.route("/get-db-summary")
+def get_db_summary():
+    from utils import summarize_db
+    filename = request.args.get("filename")
+    mode = request.args.get("mode", "short")
+
+    if not filename:
+        return jsonify({"summary": "❌ Dosya adı belirtilmedi."})
+
+    filepath = os.path.join("uploads", filename)
+    if not os.path.exists(filepath):
+        return jsonify({"summary": "❌ Dosya bulunamadı."})
+
+    try:
+        summary = summarize_db(filepath, mode=mode)
+        return jsonify({"summary": summary})
+    except Exception as e:
+        return jsonify({"summary": f"❌ Hata: {str(e)}"})
+
+@app.route("/db_summary", methods=["POST"])
+def db_summary_post():
+    data = request.get_json()
+    filename = data.get("db_filename")
+    mode = data.get("mode", "short")
+
+    if not filename:
+        return jsonify({"summary": "❌ Dosya adı belirtilmedi."})
+
+    filepath = os.path.join("uploads", filename)
+    if not os.path.exists(filepath):
+        return jsonify({"summary": "❌ Dosya bulunamadı."})
+
+    try:
+        summary = summarize_db(filepath, mode=mode)
+        return jsonify({"summary": summary})
+    except Exception as e:
+        return jsonify({"summary": f"❌ Hata: {str(e)}"})
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

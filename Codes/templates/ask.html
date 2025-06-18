@@ -1,275 +1,363 @@
 {% extends "base.html" %}
 {% block title %}Sorgu - DATASAGE{% endblock %}
 {% block content %}
+
 <!-- Hero Section -->
-<section class="query-hero py-5 mb-5">
-  <div class="container">
+<section class="query-hero">
+  <div class="hero-background"></div>
+  <div class="container position-relative">
     <div class="row justify-content-center">
       <div class="col-lg-10 text-center" data-aos="fade-up">
-        <h1 class="display-4 fw-bold mb-3">
-          <i class="bi bi-search text-primary me-3"></i>Akıllı Sorgu
-        </h1>
-        <p class="lead text-muted mb-4">Veritabanınızı yükleyin ve doğal dilde sorularınızı sorun</p>
+        <div class="hero-icon-wrapper mb-4">
+          <i class="bi bi-search hero-icon"></i>
+        </div>
+        <h1 class="hero-title">Akıllı Sorgu</h1>
+        <p class="hero-subtitle">Veritabanınızı yükleyin ve doğal dilde sorularınızı sorun</p>
+        <div class="hero-decoration"></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Query Form -->
-<div class="container">
+<!-- Main Content -->
+<div class="container main-container">
   <div class="row justify-content-center">
     <div class="col-lg-10">
-      <div class="query-card" data-aos="fade-up" data-aos-delay="200">
+      
+      {% if tokens is not none %}
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="alert alert-info text-center">
+            Kalan sorgu hakkınız: <strong>{{ tokens }}</strong><br>
+
+            {% if remaining_timedelta %}
+              {% set total_seconds = remaining_timedelta.total_seconds()|int %}
+              {% set hours = total_seconds // 3600 %}
+              {% set minutes = (total_seconds % 3600) // 60 %}
+              {% set seconds = total_seconds % 60 %}
+
+              {% if tokens == 0 %}
+                Yeni haklarınız <strong>{{ hours }} saat {{ minutes }} dakika {{ seconds }} saniye</strong> sonra yüklenecektir.
+              {% elif tokens < 10 %}
+                Token haklarınız <strong>{{ hours }} saat {{ minutes }} dakika {{ seconds }} saniye</strong> sonra yenilenecek.
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    
+      <!-- Query Form Card -->
+      <div class="query-card glass-card" data-aos="fade-up" data-aos-delay="200">
         
         <!-- Active Database Alert -->
         {% if last_db %}
-        <div class="alert alert-info d-flex align-items-center mb-4" data-aos="fade-down">
-          <i class="bi bi-database-check text-info me-3 fs-4"></i>
-          <div>
-            <strong>Aktif veritabanı:</strong> {{ last_db.split('_', 1)[1] if '_' in last_db else last_db }}<br>
-            <small class="text-muted">Yeni bir veritabanı yüklersen, bu veritabanının yerine geçer.</small>
+        <div class="db-alert" data-aos="fade-down">
+          <div class="db-alert-icon">
+            <i class="bi bi-database-check"></i>
+          </div>
+          <div class="db-alert-content">
+            <div class="db-alert-title">Aktif veritabanı</div>
+            <div class="db-alert-subtitle">{{ last_db.split('_', 1)[1] if '_' in last_db else last_db }}</div>
+            <small class="db-alert-note">Yeni bir veritabanı yüklersen, bu veritabanının yerine geçer.</small>
           </div>
         </div>
         {% endif %}
+
+        <!-- Database Summary -->
         {% if db_summary %}
         <input type="hidden" id="current-db-filename" value="{{ last_db }}">
-
-        <div class="db-summary-bubble position-relative my-4">
-          <strong class="d-block mb-2">Veritabanı Özeti:</strong>
-          <div id="db-summary-text" class="mb-4" style="white-space: pre-line;">{{ db_summary }}</div>
-          <button id="toggle-summary-btn" class="btn btn-sm btn-outline-primary position-absolute end-0 bottom-0 m-3">
-            Daha ayrıntılı göster
-          </button>
-          <input type="hidden" id="current-db-filename" value="{{ last_db }}">
+        <div class="db-summary-container">
+          <div class="db-summary-header">
+            <i class="bi bi-info-circle"></i>
+            <span>Veritabanı Özeti</span>
+          </div>
+          <div class="db-summary-content">
+            <div id="db-summary-text">{{ db_summary }}</div>
+            <button id="toggle-summary-btn" class="summary-toggle-btn">
+              <span>Daha ayrıntılı göster</span>
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
         </div>
-
         {% endif %}
 
-
+        <!-- Query Form -->
         <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form">
           
-          <!-- Database Upload -->
-          <div class="upload-section mb-4">
-            <label class="form-label fw-semibold mb-3">
-              <i class="bi bi-database me-2 text-primary"></i>Veritabanı Dosyası
-            </label>
-            <div class="upload-area" id="uploadArea">
-              <input type="file" name="database" class="form-control d-none" id="databaseFile" accept=".db,.sqlite,.sqlite3">
+          <!-- Database Upload Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="bi bi-database"></i>
+              </div>
+              <div class="section-title">Veritabanı Dosyası</div>
+            </div>
+            
+            <div class="upload-zone" id="uploadArea">
+              <input type="file" name="database" class="upload-input" id="databaseFile" accept=".db,.sqlite,.sqlite3">
               <div class="upload-content">
-                <i class="bi bi-cloud-upload upload-icon"></i>
-                <p class="upload-text mb-2">SQLite dosyanızı sürükleyin veya tıklayın</p>
-                <small class="text-muted">Desteklenen formatlar: .db, .sqlite, .sqlite3</small>
+                <div class="upload-icon-wrapper">
+                  <i class="bi bi-cloud-upload upload-icon"></i>
+                </div>
+                <div class="upload-text">SQLite dosyanızı sürükleyin veya tıklayın</div>
+                <div class="upload-formats">Desteklenen formatlar: .db, .sqlite, .sqlite3</div>
               </div>
             </div>
-            <div class="file-info d-none" id="fileInfo">
-              <i class="bi bi-file-earmark-check text-success me-2"></i>
-              <span id="fileName"></span>
-              <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="removeFile">
+            
+            <div class="file-preview" id="fileInfo">
+              <div class="file-preview-icon">
+                <i class="bi bi-file-earmark-check"></i>
+              </div>
+              <div class="file-preview-name" id="fileName"></div>
+              <button type="button" class="file-remove-btn" id="removeFile">
                 <i class="bi bi-x"></i>
               </button>
             </div>
           </div>
 
-          <!-- Question Input -->
-          <div class="question-section mb-4">
-            <label class="form-label fw-semibold mb-3">
-              <i class="bi bi-chat-dots me-2 text-success"></i>Sorunuz
-            </label>
-            <div class="question-input-container">
-              <input type="text" name="question" class="form-control question-input" 
-                     placeholder="Örn: En uzun film nedir?" required>
-              <div class="question-suggestions">
-                <small class="text-muted">Örnekler:</small>
-                <div class="suggestion-pills mt-2">
-                  <span class="suggestion-pill" onclick="setSuggestion(this)">En çok satan ürün nedir?</span>
-                  <span class="suggestion-pill" onclick="setSuggestion(this)">Toplam müşteri sayısı kaç?</span>
-                  <span class="suggestion-pill" onclick="setSuggestion(this)">En yüksek fiyatlı ürün hangisi?</span>
+          <!-- Question Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="bi bi-chat-dots"></i>
+              </div>
+              <div class="section-title">Sorunuz</div>
+            </div>
+            
+            <div class="question-container">
+              <div class="question-input-wrapper">
+                <input type="text" name="question" class="question-input" 
+                       placeholder="Örn: En uzun film nedir?" required>
+                <div class="input-focus-ring"></div>
+              </div>
+              
+              <div class="suggestions-container">
+                <div class="suggestions-label">Örnek sorular:</div>
+                <div class="suggestions-grid">
+                  <button type="button" class="suggestion-pill" onclick="setSuggestion(this)">
+                    En çok satan ürün nedir?
+                  </button>
+                  <button type="button" class="suggestion-pill" onclick="setSuggestion(this)">
+                    Toplam müşteri sayısı kaç?
+                  </button>
+                  <button type="button" class="suggestion-pill" onclick="setSuggestion(this)">
+                    En yüksek fiyatlı ürün hangisi?
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Live DB Connection Section -->
-          <div class="live-db-section mb-4">
-            <hr class="my-4">
-
-            <h5 class="fw-semibold mb-3">
-              <i class="bi bi-plug-fill text-warning me-2"></i>
-              <a class="text-decoration-none" data-bs-toggle="collapse" href="#liveDBCollapse" role="button" aria-expanded="false" aria-controls="liveDBCollapse">
-                Canlı Veritabanı ile Bağlantı Kur
-              </a>
-            </h5>
-
-            <div class="collapse" id="liveDBCollapse">
-              <div class="card card-body mt-3 border border-1 rounded shadow-sm">
-                <div class="mb-3">
-                  <label class="form-label">Veritabanı Türü:</label>
-                  <select name="db_type" class="form-select">
-                    <option value="">Seçiniz</option>
-                    <option value="mysql">MySQL</option>
-                    <option value="postgres">PostgreSQL</option>
-                  </select>
+          <!-- Live Database Connection -->
+          <div class="form-section">
+            <div class="section-divider">
+              <span>veya</span>
+            </div>
+            
+            <div class="collapsible-section">
+              <button type="button" class="collapsible-header" data-bs-toggle="collapse" 
+                      data-bs-target="#liveDBCollapse" aria-expanded="false">
+                <div class="collapsible-icon">
+                  <i class="bi bi-plug-fill"></i>
                 </div>
-
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Host:</label>
-                    <input type="text" name="host" class="form-control" placeholder="örn: localhost">
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Port:</label>
-                    <input type="text" name="port" class="form-control" placeholder="örn: 3306 (MySQL) / 5432 (PostgreSQL)">
-                  </div>
+                <div class="collapsible-title">Canlı Veritabanı ile Bağlantı Kur</div>
+                <div class="collapsible-arrow">
+                  <i class="bi bi-chevron-down"></i>
                 </div>
+              </button>
+              
+              <div class="collapse" id="liveDBCollapse">
+                <div class="collapsible-content">
+                  <div class="db-connection-form">
+                    
+                    <div class="form-group">
+                      <label class="form-label">Veritabanı Türü</label>
+                      <select name="db_type" class="form-select custom-select">
+                        <option value="">Seçiniz</option>
+                        <option value="mysql">MySQL</option>
+                        <option value="postgres">PostgreSQL</option>
+                      </select>
+                    </div>
 
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Kullanıcı Adı:</label>
-                    <input type="text" name="user" class="form-control" placeholder="örn: root">
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Şifre:</label>
-                    <input type="password" name="password" class="form-control" placeholder="Veritabanı şifreniz">
-                  </div>
-                </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label class="form-label">Host</label>
+                        <input type="text" name="host" class="form-control custom-input" placeholder="localhost">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Port</label>
+                        <input type="text" name="port" class="form-control custom-input" placeholder="3306 / 5432">
+                      </div>
+                    </div>
 
-                <div class="mb-3">
-                  <label class="form-label">Veritabanı Adı:</label>
-                  <input type="text" name="database" class="form-control" placeholder="örn: my_database">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input type="text" name="user" class="form-control custom-input" placeholder="root">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Şifre</label>
+                        <input type="password" name="password" class="form-control custom-input" placeholder="••••••••">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Veritabanı Adı</label>
+                      <input type="text" name="database" class="form-control custom-input" placeholder="my_database">
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
 
           <!-- Submit Button -->
-          <div class="text-center">
-            <button type="submit" class="btn btn-primary btn-lg px-5 submit-btn">
-              <i class="bi bi-play-circle me-2"></i>
-              <span class="btn-text">Sorgula</span>
-              <div class="loading-spinner d-none"></div>
+          <div class="submit-section">
+            <button type="submit" class="submit-btn primary-btn">
+              <div class="btn-content">
+                <i class="bi bi-play-circle btn-icon"></i>
+                <span class="btn-text">Sorgula</span>
+              </div>
+              <div class="btn-loading">
+                <div class="loading-spinner"></div>
+                <span>İşleniyor...</span>
+              </div>
             </button>
           </div>
         </form>
       </div>
-    </div>
-  </div>
 
-  <!-- SQL Query Display -->
-  {% if sql_query %}
-  <div class="container">
-    <div class="row justify-content-center mt-4">
-      <div class="col-lg-10">
-        <div class="sql-card" data-aos="fade-up">
-
-        <div class="sql-header">
-          <h5 class="mb-0">
-            <i class="bi bi-code-slash text-info me-2"></i>Üretilen SQL Sorgusu
-          </h5>
-        </div>
-        <div class="sql-content">
-          <pre class="sql-query mb-0"><code>{{ sql_query }}</code></pre>
-          <button class="btn btn-sm btn-outline-secondary copy-sql" onclick="copySql()">
-            <i class="bi bi-clipboard me-1"></i>Kopyala
+      <!-- SQL Query Display -->
+      {% if sql_query %}
+      <div class="result-card sql-result-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="result-header">
+          <div class="result-header-content">
+            <div class="result-icon">
+              <i class="bi bi-code-slash"></i>
+            </div>
+            <div class="result-title">Üretilen SQL Sorgusu</div>
+          </div>
+          <button class="copy-btn" onclick="copySql()">
+            <i class="bi bi-clipboard"></i>
+            <span>Kopyala</span>
           </button>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-  {% endif %}
-
-  <!-- Results Section -->
-  {% if result %}
-  <div class="row justify-content-center mt-5">
-    <div class="col-lg-10">
-      <div class="results-card" data-aos="fade-up">
-        {% if result["columns"][0] == "Hata" %}
-        <!-- Error Display -->
-        <div class="error-section">
-          <div class="error-header">
-            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-            <h4 class="mb-0">Hata Oluştu</h4>
-          </div>
-          <div class="error-content">
-            <p class="mb-0">{{ result["rows"][0][0] }}</p>
-          </div>
-        </div>
-        {% else %}
-        <!-- Success Results -->
-        <div class="results-header">
-          <h4 class="mb-0">
-            <i class="bi bi-table text-success me-2"></i>Sorgu Sonuçları
-          </h4>
-          <div class="results-actions">
-            <button class="btn btn-outline-success btn-sm" onclick='downloadResult("csv")'>
-              <i class="bi bi-download me-1"></i>CSV
-            </button>
-            <button class="btn btn-outline-primary btn-sm" onclick='downloadResult("xlsx")'>
-              <i class="bi bi-download me-1"></i>Excel
-            </button>
-          </div>
-        </div>
-        
-        <div class="table-container">
-          <table class="table table-hover results-table">
-            <thead>
-              <tr>
-                {% for col in result["columns"] %}
-                  <th>{{ col }}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in result["rows"] %}
-                <tr>
-                  {% for item in row %}
-                    <td>{{ item }}</td>
-                  {% endfor %}
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Chart Section -->
-     {% if result["columns"]|length >= 2 and result["rows"]|length > 0 %}
-      <div class="chart-section">
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-          <div>
-            <label class="form-label mb-1"><small>X Eksen Sütunu</small></label>
-            <select id="labelColumn" class="form-select form-select-sm"></select>
-          </div>
-          <div>
-            <label class="form-label mb-1"><small>Y Eksen Sütunu</small></label>
-            <select id="valueColumn" class="form-select form-select-sm"></select>
-          </div>
-          <div class="flex-grow-1"></div>
-          <div>
-            <label class="form-label mb-1">Grafik Tipi:</label>
-            <select id="chartType" class="form-select form-select-sm w-auto" style="min-width:130px">
-              <option value="bar">📊 Sütun Grafik</option>
-              <option value="line">📈 Çizgi Grafik</option>
-              <option value="pie">🥧 Pasta Grafik</option>
-              <option value="doughnut">🍩 Halka Grafik</option>
-              <option value="radar">🎯 Radar Grafik</option>
-            </select>
-          </div>
-        </div>
-        <div class="chart-container">
-          <canvas id="chartArea"></canvas>
+        <div class="sql-content">
+          <pre class="sql-query"><code>{{ sql_query }}</code></pre>
         </div>
       </div>
       {% endif %}
 
+      <!-- Results Section -->
+      {% if result %}
+      <div class="result-card data-result-card" data-aos="fade-up" data-aos-delay="400">
+        {% if result["columns"][0] == "Hata" %}
+        <!-- Error Display -->
+        <div class="error-display">
+          <div class="error-header">
+            <div class="error-icon">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="error-title">Hata Oluştu</div>
+          </div>
+          <div class="error-content">
+            <p>{{ result["rows"][0][0] }}</p>
+          </div>
+        </div>
+        {% else %}
+        <!-- Success Results -->
+        <div class="result-header">
+          <div class="result-header-content">
+            <div class="result-icon success">
+              <i class="bi bi-table"></i>
+            </div>
+            <div class="result-info">
+              <div class="result-title">Sorgu Sonuçları</div>
+              <div class="result-count">{{ result["rows"]|length }} kayıt bulundu</div>
+            </div>
+          </div>
+          <div class="result-actions">
+            <button class="action-btn csv-btn" onclick='downloadResult("csv")'>
+              <i class="bi bi-download"></i>
+              <span>CSV</span>
+            </button>
+            <button class="action-btn excel-btn" onclick='downloadResult("xlsx")'>
+              <i class="bi bi-download"></i>
+              <span>Excel</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="table-wrapper">
+          <div class="table-container">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  {% for col in result["columns"] %}
+                    <th>{{ col }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in result["rows"] %}
+                  <tr>
+                    {% for item in row %}
+                      <td>{{ item }}</td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Chart Section -->
+        {% if result["columns"]|length >= 2 and result["rows"]|length > 0 %}
+        <div class="chart-section">
+          <div class="chart-header">
+            <div class="chart-title">
+              <i class="bi bi-graph-up"></i>
+              <span>Grafiksel Görselleştirme</span>
+            </div>
+          </div>
+          
+          <div class="chart-controls">
+            <div class="control-group">
+              <label class="control-label">X Eksen</label>
+              <select id="labelColumn" class="chart-select"></select>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Y Eksen</label>
+              <select id="valueColumn" class="chart-select"></select>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Grafik Tipi</label>
+              <select id="chartType" class="chart-select">
+                <option value="bar">📊 Sütun Grafik</option>
+                <option value="line">📈 Çizgi Grafik</option>
+                <option value="pie">🥧 Pasta Grafik</option>
+                <option value="doughnut">🍩 Halka Grafik</option>
+                <option value="radar">🎯 Radar Grafik</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="chart-container">
+            <canvas id="chartArea"></canvas>
+          </div>
+        </div>
+        {% endif %}
+
         {% endif %}
       </div>
+      {% endif %}
     </div>
   </div>
+</div>
 
-  <!-- Chart.js and Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js and Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% if result and result["columns"][0] != "Hata" %}
 <script>
 const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
@@ -290,7 +378,6 @@ function generateColors(count) {
     return colors;
 }
 
-// Sütunları dropdownlara yerleştir
 function populateColumnDropdowns() {
     const labelDropdown = document.getElementById("labelColumn");
     const valueDropdown = document.getElementById("valueColumn");
@@ -313,7 +400,6 @@ function populateColumnDropdowns() {
     valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0;
 }
 
-// Grafik çizimi (dropdown seçimlerine göre)
 function drawChart() {
     const type = document.getElementById("chartType").value;
     const labelIdx = parseInt(document.getElementById("labelColumn").value);
@@ -331,7 +417,6 @@ function drawChart() {
         }
     }
 
-    // Grafik oluşturulacaksa önceki varsa sil
     if (chartInstance) chartInstance.destroy();
 
     if (labels.length > 0 && values.length > 0) {
@@ -363,7 +448,6 @@ function drawChart() {
                         labels: { usePointStyle: true }
                     }
                 },
-                // Eksende sayılar vs. için
                 ...(type === "bar" || type === "line"
                     ? {
                         scales: {
@@ -378,18 +462,15 @@ function drawChart() {
     }
 }
 
-// Sayfa açılınca ve seçim değişince güncelle
 document.addEventListener('DOMContentLoaded', function() {
     populateColumnDropdowns();
     drawChart();
 
-    // Grafik tipi ve sütun dropdownları değişince tekrar çiz
     document.getElementById("chartType").addEventListener("change", drawChart);
     document.getElementById("labelColumn").addEventListener("change", drawChart);
     document.getElementById("valueColumn").addEventListener("change", drawChart);
 });
 
-// CSV/XLSX indir fonksiyonu
 function downloadResult(format) {
     const btn = event.target.closest('button');
     const originalText = btn.innerHTML;
@@ -417,523 +498,1762 @@ function downloadResult(format) {
         btn.disabled = false;
     });
 }
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const toggleBtn = document.getElementById("toggle-summary-btn");
+  const summaryBox = document.getElementById("db-summary-text");
+  const dbFilename = document.getElementById("current-db-filename")?.value || "";
+
+  let isDetailed = false;
+  let originalShort = summaryBox?.textContent; // Sayfa ilk yüklendiğindeki özet
+
+  if (toggleBtn && summaryBox && dbFilename) {
+    toggleBtn.addEventListener("click", async function () {
+      toggleBtn.disabled = true;
+      toggleBtn.innerHTML = `<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>`;
+
+      try {
+        const mode = isDetailed ? "short" : "detail";
+        const response = await fetch(`/get-db-summary?filename=${encodeURIComponent(dbFilename)}&mode=${mode}`);
+        const data = await response.json();
+
+        if (data.summary) {
+          summaryBox.textContent = data.summary;
+        } else {
+          summaryBox.textContent = "❌ Özet alınamadı.";
+        }
+
+        // Buton metnini değiştir
+        if (isDetailed) {
+          toggleBtn.innerHTML = '<span>Daha ayrıntılı göster</span> <i class="bi bi-chevron-right"></i>';
+        } else {
+          toggleBtn.innerHTML = '<span>Daha kısa göster</span> <i class="bi bi-chevron-up"></i>';
+        }
+
+        isDetailed = !isDetailed;
+      } catch (e) {
+        summaryBox.textContent = "❌ Özet getirilirken bir hata oluştu.";
+        toggleBtn.innerHTML = '<span>Tekrar dene</span> <i class="bi bi-arrow-clockwise"></i>';
+      } finally {
+        toggleBtn.disabled = false;
+      }
+    });
+  }
+});
+
+
+
+
 </script>
 {% endif %}
-
-  {% endif %}
-</div>
 
 {% endblock %}
 
 {% block styles %}
 <style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  /* Primary Colors */
+  --primary-color: #007bff;
+  --secondary-color: #6610f2;
+  --success-color: #28a745;
+  --info-color: #17a2b8;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  
+  /* Gradient Colors */
+  --primary-gradient: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+  --secondary-gradient: linear-gradient(135deg, #6610f2 0%, #007bff 100%);
+  --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  
+  /* Light Theme Colors */
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border-color: rgba(0,0,0,0.1);
+  --bg-overlay: rgba(255,255,255,0.95);
+  --bg-blur: rgba(255,255,255,0.8);
+  --bg-main: #ffffff;
+  --input-bg: rgba(255,255,255,0.9);
+  --table-header-bg: rgba(255,255,255,0.9);
+  --table-row-even: rgba(0,0,0,0.02);
+  --table-row-hover: rgba(0,123,255,0.05);
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Borders */
+  --border-radius: 12px;
+  --border-radius-lg: 20px;
+  --border-radius-xl: 24px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+  --shadow-md: 0 8px 25px rgba(0,0,0,0.15);
+  --shadow-lg: 0 15px 35px rgba(0,0,0,0.1);
+  --shadow-glow: 0 0 20px rgba(102,16,242,0.3);
+  
+  /* Animations */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ===== IMPROVED DARK THEME ===== */
+html[data-bs-theme="dark"] {
+  /* Daha iyi kontrast için ana renkler */
+  --text-primary: #e8eaed;
+  --text-secondary: #c3c4c7;
+  --text-muted: #9aa0a6;
+  
+  /* Daha okunaklı arka planlar */
+  --bg-main: #0f1419;
+  --bg-overlay: rgba(21, 23, 29, 0.95);
+  --bg-blur: rgba(30, 32, 38, 0.85);
+  --input-bg: rgba(45, 47, 53, 0.8);
+  
+  /* Daha net border'lar */
+  --border-color: rgba(255,255,255,0.15);
+  
+  /* Tablo renkleri - daha okunaklı */
+  --table-header-bg: rgba(40, 42, 48, 0.9);
+  --table-row-even: rgba(255,255,255,0.03);
+  --table-row-hover: rgba(0,123,255,0.15);
+  
+  /* Daha soft shadow'lar */
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
+  --shadow-md: 0 8px 25px rgba(0,0,0,0.5);
+  --shadow-lg: 0 15px 35px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 20px rgba(102,16,242,0.4);
+}
+
+/* Body background için */
+html[data-bs-theme="dark"] body {
+  background: linear-gradient(135deg, #0f1419 0%, #1a1d23 100%);
+  color: var(--text-primary);
+}
+
+
+/* Form elemanları - daha okunaklı */
+html[data-bs-theme="dark"] .custom-input,
+html[data-bs-theme="dark"] .custom-select,
+html[data-bs-theme="dark"] .question-input {
+  background: var(--input-bg);
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text-primary);
+}
+
+html[data-bs-theme="dark"] .custom-input:focus,
+html[data-bs-theme="dark"] .custom-select:focus,
+html[data-bs-theme="dark"] .question-input:focus {
+  background: rgba(45, 47, 53, 0.95);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+}
+
+/* Placeholder text - daha okunabilir */
+html[data-bs-theme="dark"] input::placeholder,
+html[data-bs-theme="dark"] textarea::placeholder {
+  color: #9aa0a6 !important;
+  opacity: 1;
+}
+
+/* Tablo stilleri - çok daha okunaklı */
+html[data-bs-theme="dark"] .results-table {
+  background: rgba(21, 23, 29, 0.8);
+}
+
+html[data-bs-theme="dark"] .results-table th {
+  background: var(--table-header-bg);
+  color: var(--text-primary);
+  border-bottom-color: rgba(255,255,255,0.2);
+  font-weight: 600;
+}
+
+html[data-bs-theme="dark"] .results-table td {
+  color: var(--text-secondary);
+  border-color: rgba(255,255,255,0.08);
+  background: transparent;
+}
+
+html[data-bs-theme="dark"] .results-table tr:nth-child(even) {
+  background: var(--table-row-even);
+}
+
+html[data-bs-theme="dark"] .results-table tr:hover {
+  background: var(--table-row-hover) !important;
+}
+
+/* SQL kod bloğu - syntax highlighting benzeri */
+html[data-bs-theme="dark"] .sql-query {
+  background: rgba(30, 32, 38, 0.9);
+  color: #e8eaed;
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* Chart container - daha uyumlu */
+html[data-bs-theme="dark"] .chart-container {
+  background: rgba(21, 23, 29, 0.6);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* Glass cards - daha net */
+html[data-bs-theme="dark"] .glass-card {
+  background: var(--bg-overlay);
+  border-color: rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+html[data-bs-theme="dark"] .glass-card:hover {
+  background: rgba(21, 23, 29, 0.98);
+  border-color: rgba(0,123,255,0.3);
+  box-shadow: 
+    0 8px 25px rgba(0,0,0,0.4),
+    0 0 20px rgba(0,123,255,0.15);
+}
+
+/* Butonlar - daha görünür */
+html[data-bs-theme="dark"] .action-btn {
+  background: rgba(45, 47, 53, 0.8);
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text-secondary);
+}
+
+html[data-bs-theme="dark"] .action-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* Upload zone - daha çekici */
+html[data-bs-theme="dark"] .upload-zone {
+  background: rgba(30, 32, 38, 0.6);
+  border-color: rgba(255,255,255,0.2);
+}
+
+html[data-bs-theme="dark"] .upload-zone:hover {
+  background: linear-gradient(135deg, 
+    rgba(0,123,255,0.1) 0%, 
+    rgba(102,16,242,0.1) 100%
+  );
+  border-color: var(--primary-color);
+}
+
+/* Alert ve notification'lar */
+html[data-bs-theme="dark"] .db-alert {
+  background: linear-gradient(135deg, 
+    rgba(40,167,69,0.15) 0%, 
+    rgba(40,167,69,0.08) 100%
+  );
+  border-color: rgba(40,167,69,0.3);
+}
+
+/* Error display */
+html[data-bs-theme="dark"] .error-content {
+  background: rgba(220,53,69,0.15);
+  border-color: rgba(220,53,69,0.3);
+  color: var(--text-primary);
+}
+
+/* Suggestion pills - daha tıklanabilir görünüm */
+html[data-bs-theme="dark"] .suggestion-pill {
+  background: rgba(45, 47, 53, 0.8);
+  border-color: rgba(255,255,255,0.15);
+  color: var(--text-secondary);
+}
+
+html[data-bs-theme="dark"] .suggestion-pill:hover {
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+/* Collapsible sections */
+html[data-bs-theme="dark"] .collapsible-header {
+  background: rgba(30, 32, 38, 0.8);
+  color: var(--text-primary);
+}
+
+html[data-bs-theme="dark"] .collapsible-header:hover {
+  background: rgba(40, 42, 48, 0.9);
+}
+
+html[data-bs-theme="dark"] .collapsible-header[aria-expanded="true"] {
+  background: linear-gradient(135deg, 
+    rgba(102,16,242,0.2) 0%, 
+    rgba(0,123,255,0.2) 100%
+  );
+}
+
+html[data-bs-theme="dark"] .collapsible-content {
+  background: rgba(21, 23, 29, 0.8);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* Chart controls */
+html[data-bs-theme="dark"] .chart-controls {
+  background: rgba(30, 32, 38, 0.8);
+  border-color: rgba(255,255,255,0.1);
+}
+
+html[data-bs-theme="dark"] .chart-select {
+  background: rgba(45, 47, 53, 0.8);
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text-primary);
+}
+
+html[data-bs-theme="dark"] .chart-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+}
+
+/* Result cards - daha modern görünüm */
+html[data-bs-theme="dark"] .result-card {
+  background: var(--bg-overlay);
+  border-color: rgba(255,255,255,0.12);
+}
+
+html[data-bs-theme="dark"] .result-header {
+  background: rgba(30, 32, 38, 0.6);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* Scrollbar - koyu tema uyumlu */
+html[data-bs-theme="dark"] .table-container::-webkit-scrollbar-track,
+html[data-bs-theme="dark"] .sql-content::-webkit-scrollbar-track {
+  background: rgba(30, 32, 38, 0.5);
+}
+
+html[data-bs-theme="dark"] .table-container::-webkit-scrollbar-thumb,
+html[data-bs-theme="dark"] .sql-content::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+}
+
+html[data-bs-theme="dark"] .table-container::-webkit-scrollbar-thumb:hover,
+html[data-bs-theme="dark"] .sql-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Firefox scrollbar */
+html[data-bs-theme="dark"] .table-container,
+html[data-bs-theme="dark"] .sql-content {
+  scrollbar-color: rgba(255,255,255,0.2) rgba(30, 32, 38, 0.5);
+}
+
+/* Section divider */
+html[data-bs-theme="dark"] .section-divider::before {
+  background: rgba(255,255,255,0.15);
+}
+
+html[data-bs-theme="dark"] .section-divider span {
+  background: var(--bg-overlay);
+  color: var(--text-muted);
+}
+
+/* Form labels */
+html[data-bs-theme="dark"] .form-label,
+html[data-bs-theme="dark"] .section-title,
+html[data-bs-theme="dark"] .result-title {
+  color: var(--text-primary);
+}
+
+/* Loading spinner - koyu tema uyumlu */
+html[data-bs-theme="dark"] .loading-spinner {
+  border-color: rgba(255,255,255,0.2);
+  border-top-color: white;
+}
+
+/* Focus states - daha görünür */
+html[data-bs-theme="dark"] *:focus {
+  outline-color: rgba(0,123,255,0.6);
+}
+
+/* File preview */
+html[data-bs-theme="dark"] .file-preview {
+  background: linear-gradient(135deg, 
+    rgba(40,167,69,0.15) 0%, 
+    rgba(40,167,69,0.08) 100%
+  );
+  border-color: rgba(40,167,69,0.3);
+}
+
+/* Mobile responsive adjustments for dark theme */
+@media (max-width: 576px) {
+  html[data-bs-theme="dark"] .glass-card {
+    background: rgba(21, 23, 29, 0.98);
+  }
+  
+  html[data-bs-theme="dark"] .query-card {
+    background: rgba(15, 20, 25, 0.95);
+  }
+}
+
+/* High contrast mode için dark theme */
+@media (prefers-contrast: high) {
+  html[data-bs-theme="dark"] {
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --border-color: rgba(255,255,255,0.3);
+    --bg-overlay: rgba(0,0,0,0.9);
+  }
+}
+
+/* ===== HERO SECTION ===== */
 .query-hero {
   background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
   border-radius: 0 0 30px 30px;
-}
-
-.query-card {
-  background: white;
-  border-radius: 20px;
-  padding: 2.5rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  border: 1px solid #f0f0f0;
-}
-
-.upload-area {
-  border: 2px dashed #dee2e6;
-  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  margin-bottom: 2rem;
   padding: 2rem;
+  transition: var(--transition);
+}
+
+
+
+@keyframes backgroundFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+.hero-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.hero-icon {
+  font-size: 4rem;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 4px 8px rgba(102,16,242,0.3));
+  animation: iconPulse 3s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-decoration {
+  width: 100px;
+  height: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-decoration::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.main-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== GLASS CARD EFFECT ===== */
+.glass-card {
+  background: var(--bg-overlay);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  /* Göz yorgunluğunu azaltan ek özellikler */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 100%
+  );
+}
+
+.glass-card:hover {
+  transform: translateY(-2px); /* Daha yumuşak hareket */
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.08),
+    0 0 15px rgba(0, 123, 255, 0.08); /* Daha soft glow */
+  border-color: rgba(0, 123, 255, 0.15); /* Daha subtle border */
+}
+
+/* ===== QUERY CARD ===== */
+.query-card {
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* ===== DATABASE ALERT ===== */
+.db-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(40,167,69,0.1) 0%, rgba(40,167,69,0.05) 100%);
+  border: 1px solid rgba(40,167,69,0.2);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+  transition: var(--transition-smooth);
+}
+
+.db-alert:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.db-alert-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: var(--success-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.db-alert-content {
+  flex: 1;
+}
+
+.db-alert-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.db-alert-subtitle {
+  font-weight: 500;
+  color: var(--success-color);
+  margin-bottom: 0.25rem;
+}
+
+.db-alert-note {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* ===== DATABASE SUMMARY ===== */
+.db-summary-container {
+  background: var(--bg-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+}
+
+.db-summary-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(23,162,184,0.1) 0%, rgba(23,162,184,0.05) 100%);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.db-summary-content {
+  padding: var(--spacing-md);
+}
+
+.summary-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--info-color);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: var(--spacing-sm);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.summary-toggle-btn:hover {
+  color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.summary-toggle-btn i {
+  transition: var(--transition-smooth);
+}
+
+.summary-toggle-btn:hover i {
+  transform: rotate(90deg);
+}
+
+/* ===== FORM SECTIONS ===== */
+.form-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.section-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.125rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ===== UPLOAD ZONE ===== */
+.upload-zone {
+  position: relative;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xl);
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: #fafbfc;
+  transition: var(--transition-smooth);
+  background: var(--bg-blur);
 }
 
-.upload-area:hover {
-  border-color: var(--bs-primary);
-  background: rgba(0, 123, 255, 0.05);
+.upload-zone:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, rgba(0,123,255,0.05) 0%, rgba(102,16,242,0.05) 100%);
+  transform: translateY(-2px);
 }
 
-.upload-area.dragover {
-  border-color: var(--bs-success);
-  background: rgba(40, 167, 69, 0.05);
+.upload-zone.dragover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, rgba(0,123,255,0.1) 0%, rgba(102,16,242,0.1) 100%);
+  transform: scale(1.02);
+}
+
+.upload-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-icon-wrapper {
+  margin-bottom: var(--spacing-md);
 }
 
 .upload-icon {
   font-size: 3rem;
-  color: var(--bs-primary);
-  margin-bottom: 1rem;
+  color: var(--primary-color);
+  opacity: 0.7;
+  transition: var(--transition-smooth);
+}
+
+.upload-zone:hover .upload-icon {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .upload-text {
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   font-weight: 500;
-  color: #495057;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
 }
 
-.file-info {
-  padding: 1rem;
-  background: rgba(40, 167, 69, 0.1);
-  border-radius: 8px;
-  display: flex;
+.upload-formats {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* ===== FILE PREVIEW ===== */
+.file-preview {
+  display: none;
   align-items: center;
-  margin-top: 1rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(40,167,69,0.1) 0%, rgba(40,167,69,0.05) 100%);
+  border: 1px solid rgba(40,167,69,0.2);
+  border-radius: var(--border-radius);
+  margin-top: var(--spacing-md);
 }
 
-.question-input-container {
+.file-preview.show {
+  display: flex;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.file-preview-icon {
+  color: var(--success-color);
+  font-size: 1.25rem;
+}
+
+.file-preview-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.file-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: var(--transition-smooth);
+}
+
+.file-remove-btn:hover {
+  background: rgba(220,53,69,0.1);
+  color: var(--danger-color);
+  transform: scale(1.1);
+}
+
+/* ===== QUESTION SECTION ===== */
+.question-container {
   position: relative;
+}
+
+.question-input-wrapper {
+  position: relative;
+  margin-bottom: var(--spacing-lg);
 }
 
 .question-input {
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  font-size: 1.1rem;
-  border: 2px solid #e9ecef;
-  transition: all 0.3s ease;
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1.125rem;
+  background: var(--bg-blur);
+  color: var(--text-primary);
+  transition: var(--transition-smooth);
+  position: relative;
+  z-index: 1;
 }
 
 .question-input:focus {
-  border-color: var(--bs-primary);
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-.suggestion-pills {
+.input-focus-ring {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: var(--border-radius);
+  background: var(--primary-gradient);
+  opacity: 0;
+  transition: var(--transition-smooth);
+  z-index: 0;
+}
+
+.question-input:focus + .input-focus-ring {
+  opacity: 0.3;
+}
+
+/* ===== SUGGESTIONS ===== */
+.suggestions-container {
+  margin-top: var(--spacing-md);
+}
+
+.suggestions-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.suggestions-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .suggestion-pill {
-  background: #f8f9fa;
-  padding: 6px 12px;
+  background: var(--bg-blur);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
 }
 
 .suggestion-pill:hover {
-  background: var(--bs-primary);
+  background: var(--primary-gradient);
   color: white;
+  border-color: transparent;
   transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== SECTION DIVIDER ===== */
+.section-divider {
+  text-align: center;
+  margin: var(--spacing-xl) 0;
+  position: relative;
+}
+
+.section-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-color);
+  z-index: 1;
+}
+
+.section-divider span {
+  background: var(--bg-overlay);
+  padding: 0 var(--spacing-md);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== COLLAPSIBLE SECTION ===== */
+.collapsible-section {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: var(--transition-smooth);
+}
+
+.collapsible-header {
+  width: 100%;
+  background: var(--bg-blur);
+  border: none;
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-align: left;
+}
+
+.collapsible-header:hover {
+  background: var(--bg-overlay);
+}
+
+.collapsible-header[aria-expanded="true"] {
+  background: linear-gradient(135deg, rgba(102,16,242,0.1) 0%, rgba(0,123,255,0.1) 100%);
+}
+
+.collapsible-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--secondary-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+}
+
+.collapsible-title {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.collapsible-arrow {
+  color: var(--text-muted);
+  transition: var(--transition-smooth);
+}
+
+.collapsible-header[aria-expanded="true"] .collapsible-arrow {
+  transform: rotate(180deg);
+}
+
+.collapsible-content {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-blur);
+}
+
+/* ===== DATABASE CONNECTION FORM ===== */
+.db-connection-form {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.custom-input,
+.custom-select {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-blur);
+  color: var(--text-primary);
+  transition: var(--transition-smooth);
+  font-size: 0.9rem;
+}
+
+.custom-input:focus,
+.custom-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(255,255,255,0.1);
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+/* ===== SUBMIT SECTION ===== */
+.submit-section {
+  text-align: center;
+  margin-top: var(--spacing-xl);
 }
 
 .submit-btn {
-  border-radius: 50px;
-  padding: 12px 40px;
-  font-weight: 600;
-  transition: all 0.3s ease;
   position: relative;
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md) var(--spacing-xl);
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: var(--transition-smooth);
 }
 
 .submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 
-/* SQL Query Card */
-.sql-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  border: 1px solid #e3f2fd;
+.submit-btn:hover::before {
+  left: 100%;
+  transition: left 0.5s ease;
 }
 
-.sql-header {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid #e3f2fd;
+.submit-btn:active {
+  transform: translateY(-1px);
 }
 
-.sql-content {
-  padding: 2rem;
-  position: relative;
-}
-
-.sql-query {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #17a2b8;
-  font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  overflow-x: auto;
-}
-
-.copy-sql {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-}
-
-/* Results Card */
-.results-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-
-.results-header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 1.5rem 2rem;
+.btn-content {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  transition: var(--transition-smooth);
 }
 
-.results-actions {
+.btn-loading {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.submit-btn.loading .btn-content {
+  display: none;
+}
+
+.submit-btn.loading .btn-loading {
   display: flex;
-  gap: 10px;
 }
 
-.table-container {
-  max-height: 500px;
-  overflow-y: auto;
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.results-table {
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== RESULT CARDS ===== */
+.result-card {
+  background: var(--bg-overlay);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-xl);
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+  transition: var(--transition-smooth);
+}
+
+.result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    var(--shadow-lg), 
+    0 0 20px rgba(0, 123, 255, 0.15);
+  border-color: rgba(0, 123, 255, 0.2);
+}
+
+/* ===== RESULT HEADER ===== */
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-blur);
+}
+
+.result-header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.result-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+  background: var(--primary-gradient);
+}
+
+.result-icon.success {
+  background: var(--success-color);
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.result-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0;
 }
 
-.results-table th {
-  background: #f8f9fa;
+.result-count {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* ===== RESULT ACTIONS ===== */
+.result-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-blur);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.action-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.copy-btn:hover {
+  background: var(--info-color);
+  color: white;
+  border-color: var(--info-color);
+}
+
+/* ===== SQL CONTENT ===== */
+.sql-content {
+  padding: var(--spacing-lg);
+}
+
+.sql-query {
+  background: rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  margin: 0;
+  overflow-x: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* ===== ERROR DISPLAY ===== */
+.error-display {
+  padding: var(--spacing-lg);
+}
+
+.error-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.error-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--danger-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.error-title {
+  font-size: 1.25rem;
   font-weight: 600;
-  border: none;
-  padding: 1rem;
+  color: var(--danger-color);
+}
+
+.error-content {
+  background: rgba(220,53,69,0.1);
+  border: 1px solid rgba(220,53,69,0.2);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+/* ===== TABLE WRAPPER ===== */
+.table-wrapper {
+  padding: var(--spacing-lg);
+}
+
+.table-container {
+  max-height: 600px;  /* Sabit yükseklik ayarı */
+  overflow-y: auto;   /* Dikey scroll */
+  overflow-x: auto;   /* Yatay scroll da dursun */
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-blur);
+  font-size: 0.9rem;
+}
+
+.results-table th {
+  background: rgba(255, 255, 255, 0.6);
+  padding: var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .results-table td {
-  padding: 0.75rem 1rem;
-  border-color: #f0f0f0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  vertical-align: top;
 }
 
-/* Error Section */
-.error-section {
-  padding: 2rem;
+.results-table tr:hover {
+  background: var(--bg-blur);
 }
 
-.error-header {
+.results-table tr:nth-child(even) {
+  background: rgba(0,0,0,0.02);
+}
+
+.results-table tr:nth-child(even):hover {
+  background: var(--bg-blur);
+}
+
+/* ===== CHART SECTION ===== */
+.chart-section {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-blur);
+}
+
+.chart-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.chart-title {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #f8d7da;
-}
-
-.error-content {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 1rem;
-  border-radius: 8px;
-  border-left: 4px solid #dc3545;
-}
-
-/* Chart Section */
-.chart-section {
-  padding: 2rem;
-  border-top: 1px solid #e9ecef;
-  background: #fafbfc;
+  gap: var(--spacing-sm);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .chart-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-overlay);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.control-group {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .chart-select {
-  max-width: 200px;
-  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-blur);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: var(--transition-smooth);
+}
+
+.chart-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
 }
 
 .chart-container {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: relative;
   height: 400px;
+  background: white;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Dark Theme */
-html[data-bs-theme="dark"] .query-card {
-  background: #2d2d2d;
-  border-color: #404040;
+html[data-bs-theme="dark"] .query-hero {
+  background: linear-gradient(135deg, #181c22 0%, #15171d 100%); /* contact.html ile uyumlu */
 }
 
-html[data-bs-theme="dark"] .upload-area {
-  background: #383838;
-  border-color: #555;
-}
+/* ===== RESPONSIVE DESIGN ===== */
 
-html[data-bs-theme="dark"] .results-card {
-  background: #2d2d2d;
-}
-
-html[data-bs-theme="dark"] .results-header {
-  background: linear-gradient(135deg, #404040 0%, #555 100%);
-}
-
-html[data-bs-theme="dark"] .sql-card {
-  background: #2d2d2d;
-  border-color: #404040;
-}
-
-html[data-bs-theme="dark"] .sql-header {
-  background: linear-gradient(135deg, #404040 0%, #555 100%);
-}
-
-html[data-bs-theme="dark"] .sql-query {
-  background: #383838;
-  border-color: #17a2b8;
-}
-
-html[data-bs-theme="dark"] .chart-section {
-  background: #383838;
-}
-
-html[data-bs-theme="dark"] .chart-container {
-  background: #2d2d2d;
-}
-
-html[data-bs-theme="dark"] .suggestion-pill {
-  background: #383838;
-  color: #dbe8fa;
-  border-color: #555;
-}
-
-html[data-bs-theme="dark"] .suggestion-pill:hover {
-  background: #4c8cff;
-  color: white;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .query-card {
-    padding: 1.5rem;
+/* Mobile Styles */
+@media (max-width: 576px) {
+  :root {
+    --spacing-xl: 2rem;
   }
   
-  .suggestion-pills {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .query-card {
+    padding: var(--spacing-lg);
+    margin: 0 var(--spacing-sm);
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .upload-zone {
+    padding: var(--spacing-lg);
+  }
+  
+  .upload-icon {
+    font-size: 2.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .suggestions-grid {
+    flex-direction: column;
+  }
+  
+  .suggestion-pill {
+    text-align: center;
+    white-space: normal;
+  }
+  
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .result-actions {
+    width: 100%;
     justify-content: center;
   }
   
-  .results-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
   .chart-controls {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
   }
   
   .chart-container {
     height: 300px;
-    padding: 1rem;
   }
   
-  .sql-content {
-    padding: 1rem;
+  .db-alert {
+    flex-direction: column;
+    text-align: center;
   }
   
-  .copy-sql {
-    position: static;
-    margin-top: 1rem;
+  .collapsible-header {
+    padding: var(--spacing-sm) var(--spacing-md);
   }
-  #db-summary-box .d-flex { flex-wrap: wrap; }
-  #db-summary-text { flex-grow: 1; min-width: 0; max-width: 80vw; white-space: pre-line; word-break: break-word; }
-@media (max-width: 576px) {
-  #db-summary-box .d-flex { flex-direction: column; align-items: stretch; }
-  #db-summary-text { max-width: 100%; margin-bottom: 8px; }
-}
-
-}
-.db-summary-bubble {
-  background: #f8f9fa;
-  border-radius: 18px;
-  box-shadow: 0 2px 16px rgba(16, 42, 90, 0.10), 0 1.5px 6px rgba(80,80,130,0.09);
-  border: 1.5px solid #e2e6ea;
-  padding: 1.7rem 2.2rem 3.5rem 2.2rem;
-  min-height: 120px;
-  position: relative;
-}
-
-html[data-bs-theme="dark"] .db-summary-bubble {
-  background: #232833;
-  border-color: #32364c;
-  color: #e0e6ef;
-}
-
-#db-summary-text {
-  font-size: 1.07rem;
-  line-height: 1.7;
-  color: #35373b;
-}
-
-html[data-bs-theme="dark"] #db-summary-text {
-  color: #dbe8fa;
-}
-
-/* Butonun baloncuk içinde, sağ alt köşede görünmesini garantile */
-#toggle-summary-btn {
-  z-index: 2;
-  /* Optional: */
-  min-width: 165px;
-}
-
-/* Responsive uyarlama */
-@media (max-width: 600px) {
-  .db-summary-bubble {
-    padding: 1.2rem 1rem 3.3rem 1rem;
-  }
-  #toggle-summary-btn {
-    min-width: 120px;
-    font-size: 0.94rem;
-    margin-bottom: 0.3rem !important;
+  
+  .collapsible-title {
+    font-size: 0.95rem;
   }
 }
 
+/* Tablet Styles */
+@media (min-width: 577px) and (max-width: 768px) {
+  .query-card {
+    margin: 0 var(--spacing-md);
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .chart-controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 992px) {
+  .suggestions-grid {
+    justify-content: flex-start;
+  }
+  
+  .chart-controls {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .result-header {
+    padding: var(--spacing-xl);
+  }
+  
+  .table-wrapper {
+    padding: var(--spacing-xl);
+  }
+  
+  .chart-section {
+    padding: var(--spacing-xl);
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+
+/* Fade in animation for AOS */
+[data-aos="fade-up"] {
+  transform: translateY(30px);
+  opacity: 0;
+  transition: all 0.6s ease-out;
+}
+
+[data-aos="fade-up"].aos-animate {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+[data-aos="fade-down"] {
+  transform: translateY(-30px);
+  opacity: 0;
+  transition: all 0.6s ease-out;
+}
+
+[data-aos="fade-down"].aos-animate {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Button click animation */
+.submit-btn:active {
+  animation: buttonPress 0.1s ease-in-out;
+}
+
+@keyframes buttonPress {
+  0% { transform: translateY(-3px) scale(1); }
+  50% { transform: translateY(-1px) scale(0.98); }
+  100% { transform: translateY(-3px) scale(1); }
+}
+
+/* Card hover animations */
+
+
+@keyframes cardFloat {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-5px) scale(1.01); }
+}
+
+/* Input focus animations */
+.question-input:focus {
+  animation: inputFocus 0.3s ease-out;
+}
+
+@keyframes inputFocus {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.01); }
+  100% { transform: translateY(-2px) scale(1); }
+}
+
+/* Suggestion pill hover animation */
+.suggestion-pill {
+  transition: var(--transition-bounce);
+}
+
+.suggestion-pill:hover {
+  animation: pillBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes pillBounce {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.05); }
+  100% { transform: translateY(-2px) scale(1); }
+}
+
+/* ===== UTILITY CLASSES ===== */
+.text-gradient {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient {
+  background: var(--primary-gradient);
+}
+
+.border-gradient {
+  border: 2px solid transparent;
+  border-radius: var(--border-radius);
+  background: linear-gradient(white, white) padding-box,
+              var(--primary-gradient) border-box;
+}
+
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.blur-bg {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ===== DARK THEME SPECIFIC STYLES ===== */
+html[data-bs-theme="dark"] .results-table {
+  background: rgba(255,255,255,0.02);
+}
+
+html[data-bs-theme="dark"] .results-table th {
+  background: rgba(24, 26, 32, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+html[data-bs-theme="dark"] .results-table tr:nth-child(even) {
+  background: rgba(255,255,255,0.02);
+}
+
+html[data-bs-theme="dark"] .sql-query {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-primary);
+}
+
+html[data-bs-theme="dark"] .chart-container {
+  background: rgba(24, 26, 32, 0.4);
+  border-color: rgba(255,255,255,0.08);
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .query-hero,
+  .query-card,
+  .result-header .result-actions,
+  .chart-controls {
+    display: none !important;
+  }
+  
+  .result-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+  
+  .results-table {
+    border-collapse: collapse;
+  }
+  
+  .results-table th,
+  .results-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus styles for keyboard navigation */
+*:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+button:focus,
+input:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000;
+    --text-muted: #666;
+    --bg-blur: rgba(255,255,255,0.9);
+  }
+  
+  .glass-card {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-card:hover {
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 0 15px rgba(0, 123, 255, 0.12);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .hero-icon,
+  .hero-decoration::after,
+  .loading-spinner {
+    animation: none !important;
+  }
+
+    .glass-card {
+    transition: none;
+  }
+  
+  .glass-card:hover {
+    transform: none;
+  }
+}
+
+.glass-card:focus-visible {
+  outline: 2px solid rgba(0, 123, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+.table-container::-webkit-scrollbar,
+.sql-content::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.table-container::-webkit-scrollbar-track,
+.sql-content::-webkit-scrollbar-track {
+  background: var(--bg-blur);
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.sql-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+  transition: var(--transition-smooth);
+}
+
+.table-container::-webkit-scrollbar-thumb:hover,
+.sql-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Firefox scrollbar styling */
+.table-container,
+.sql-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--bg-blur);
+}
 </style>
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<script>
-// File Upload Handling
-document.addEventListener('DOMContentLoaded', function() {
-  const uploadArea = document.getElementById('uploadArea');
-  const fileInput = document.getElementById('databaseFile');
-  const fileInfo = document.getElementById('fileInfo');
-  const fileName = document.getElementById('fileName');
-  const removeFile = document.getElementById('removeFile');
-
-  if (uploadArea && fileInput) {
-    uploadArea.addEventListener('click', () => fileInput.click());
-    
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('dragover');
-    });
-    
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('dragover');
-    });
-    
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('dragover');
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        fileInput.files = files;
-        showFileInfo(files[0]);
-      }
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        showFileInfo(e.target.files[0]);
-      }
-    });
-
-    if (removeFile) {
-      removeFile.addEventListener('click', () => {
-        fileInput.value = '';
-        hideFileInfo();
-      });
-    }
-
-    function showFileInfo(file) {
-      if (fileName && fileInfo && uploadArea) {
-        fileName.textContent = file.name;
-        uploadArea.classList.add('d-none');
-        fileInfo.classList.remove('d-none');
-      }
-    }
-
-    function hideFileInfo() {
-      if (uploadArea && fileInfo) {
-        uploadArea.classList.remove('d-none');
-        fileInfo.classList.add('d-none');
-      }
-    }
-  }
-});
-
-function setSuggestion(element) {
-  const questionInput = document.querySelector('.question-input');
-  if (questionInput) {
-    questionInput.value = element.textContent;
-  }
-}
-
-// Form Submission with Loading
-const queryForm = document.querySelector('.query-form');
-if (queryForm) {
-  queryForm.addEventListener('submit', function() {
-    const btn = document.querySelector('.submit-btn');
-    const btnText = btn.querySelector('.btn-text');
-    const spinner = btn.querySelector('.loading-spinner');
-    
-    if (btnText && spinner) {
-      btnText.classList.add('d-none');
-      spinner.classList.remove('d-none');
-      btn.disabled = true;
-    }
-  });
-}
-
-// Copy SQL function
-function copySql() {
-  const sqlQuery = document.querySelector('.sql-query').textContent;
-  navigator.clipboard.writeText(sqlQuery).then(() => {
-    const btn = event.target.closest('button');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-check me-1"></i>Kopyalandı';
-    setTimeout(() => {
-      btn.innerHTML = originalText;
-    }, 2000);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  let mode = "short";
-  const btn = document.getElementById("toggle-summary-btn");
-  if (btn) {
-    btn.onclick = function() {
-      btn.disabled = true;
-      btn.textContent = "Yükleniyor...";
-      let db_filename = document.getElementById("current-db-filename").value;
-      fetch("/db_summary", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({db_filename: db_filename, mode: (mode === "short" ? "detail" : "short")})
-      })
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById("db-summary-text").textContent = data.summary;
-        mode = (mode === "short" ? "detail" : "short");
-        btn.textContent = (mode === "short" ? "Daha ayrıntılı göster" : "Daha az göster");
-        btn.disabled = false;
-      })
-      .catch(() => {
-        btn.textContent = "Hata oluştu";
-        setTimeout(() => {
-          btn.textContent = (mode === "short" ? "Daha ayrıntılı göster" : "Daha az göster");
-          btn.disabled = false;
-        }, 1500);
-      });
-    };
-  }
-});
-
-</script>
 {% endblock %}

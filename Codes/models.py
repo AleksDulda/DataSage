@@ -4,7 +4,7 @@ def init_db():
     conn = sqlite3.connect("database.sqlite")
     cursor = conn.cursor()
 
-    # Kullanıcı tablosu (güncellenmiş)
+    # Kullanıcılar tablosu (şifre sıfırlama alanları dahil)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,11 +12,15 @@ def init_db():
         password TEXT NOT NULL,
         first_name TEXT,
         last_name TEXT,
-        email TEXT UNIQUE,       -- Artık aynı e-posta tekrar kullanılamaz
+        email TEXT UNIQUE,
         gender TEXT,
         birth_date TEXT,
         profile_picture TEXT,
-        role TEXT DEFAULT 'user' -- Yeni: kullanıcı rolü ('user' veya 'admin')
+        role TEXT DEFAULT 'user',
+        tokens INTEGER DEFAULT 10,
+        last_token_reset TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        reset_token TEXT,
+        reset_expiry TIMESTAMP
     )
     """)
 

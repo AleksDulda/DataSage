@@ -17,6 +17,8 @@
     </div>
 
     <button type="submit" class="btn btn-success">Giriş Yap</button>
+    <a href="{{ url_for('auth.forgot_password') }}" class="btn btn-link">Şifrenizi mi unuttunuz?</a>
+
     <a href="{{ url_for('auth.register') }}" class="btn btn-link">Hesabınız yok mu?</a>
 </form>
 {% endblock %}
