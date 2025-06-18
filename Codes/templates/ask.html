@@ -2,7 +2,7 @@
 {% block title %}Sorgu - DATASAGE{% endblock %}
 {% block content %}
 
-<!-- Hero Section -->
+<!-- Hero Section: Sayfanın üst kısmındaki başlık ve tanıtım alanı -->
 <section class="query-hero">
   <div class="hero-background"></div>
   <div class="container position-relative">
@@ -19,11 +19,12 @@
   </div>
 </section>
 
-<!-- Main Content -->
+<!-- Main Content: Sayfanın ana içeriğini barındıran kapsayıcı -->
 <div class="container main-container">
   <div class="row justify-content-center">
     <div class="col-lg-10">
-      
+
+      {# Kullanıcı token bilgisi varsa gösterilir #}
       {% if tokens is not none %}
       <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -45,29 +46,29 @@
           </div>
         </div>
       </div>
-    {% endif %}
-    
-      <!-- Query Form Card -->
+      {% endif %}
+
+      <!-- Query Form Card: Ana sorgu ve dosya yükleme formu kartı -->
       <div class="query-card glass-card" data-aos="fade-up" data-aos-delay="200">
-        
-        <!-- Active Database Alert -->
-        {% if last_db %}
-        <div class="db-alert" data-aos="fade-down">
+
+        <!-- Aktif Veritabanı Uyarısı: Sadece geçerli bir veritabanı varsa gösterilir -->
+        {# last_db değeri Python tarafından gönderilir. None veya "None" stringi ise gizli kalır. #}
+        <div id="dbAlert" class="db-alert {% if last_db and last_db != 'None' and last_db.strip() != '' %}show{% endif %}" data-aos="fade-down" style="{% if not last_db or last_db == 'None' or last_db.strip() == '' %}display: none;{% endif %}">
           <div class="db-alert-icon">
             <i class="bi bi-database-check"></i>
           </div>
           <div class="db-alert-content">
             <div class="db-alert-title">Aktif veritabanı</div>
-            <div class="db-alert-subtitle">{{ last_db.split('_', 1)[1] if '_' in last_db else last_db }}</div>
+            {# last_db boşsa veya "None" ise boş string gösterilir #}
+            <div class="db-alert-subtitle" id="activeDbName">{{ (last_db.split('_', 1)[1] if '_' in last_db else last_db) if last_db and last_db != 'None' and last_db.strip() != '' else '' }}</div>
             <small class="db-alert-note">Yeni bir veritabanı yüklersen, bu veritabanının yerine geçer.</small>
           </div>
         </div>
-        {% endif %}
 
-        <!-- Database Summary -->
-        {% if db_summary %}
-        <input type="hidden" id="current-db-filename" value="{{ last_db }}">
-        <div class="db-summary-container">
+        <!-- Veritabanı Özeti Alanı: Sadece özet varsa gösterilir -->
+        {# current-db-filename için de None kontrolü yapıldı #}
+        <input type="hidden" id="current-db-filename" value="{{ last_db if last_db and last_db != 'None' and last_db.strip() != '' else '' }}">
+        <div id="dbSummaryContainer" class="db-summary-container" style="{% if not db_summary %}display: none;{% endif %}">
           <div class="db-summary-header">
             <i class="bi bi-info-circle"></i>
             <span>Veritabanı Özeti</span>
@@ -80,12 +81,11 @@
             </button>
           </div>
         </div>
-        {% endif %}
 
-        <!-- Query Form -->
-        <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form">
-          
-          <!-- Database Upload Section -->
+        <!-- Sorgu Formu -->
+        <form action="{{ url_for('ask') }}" method="post" enctype="multipart/form-data" class="query-form" id="queryForm">
+
+          <!-- Veritabanı Yükleme Bölümü -->
           <div class="form-section">
             <div class="section-header">
               <div class="section-icon">
@@ -93,7 +93,7 @@
               </div>
               <div class="section-title">Veritabanı Dosyası</div>
             </div>
-            
+
             <div class="upload-zone" id="uploadArea">
               <input type="file" name="database" class="upload-input" id="databaseFile" accept=".db,.sqlite,.sqlite3">
               <div class="upload-content">
@@ -104,19 +104,21 @@
                 <div class="upload-formats">Desteklenen formatlar: .db, .sqlite, .sqlite3</div>
               </div>
             </div>
-            
-            <div class="file-preview" id="fileInfo">
+
+            <!-- Dosya Önizleme Alanı: Sadece geçerli bir veritabanı varsa gösterilir -->
+            <div class="file-preview {% if last_db and last_db != 'None' and last_db.strip() != '' %}show{% endif %}" id="fileInfo">
               <div class="file-preview-icon">
                 <i class="bi bi-file-earmark-check"></i>
               </div>
-              <div class="file-preview-name" id="fileName"></div>
+              {# last_db boşsa veya "None" ise boş string gösterilir #}
+              <div class="file-preview-name" id="fileName">{{ (last_db.split('_', 1)[1] if '_' in last_db else last_db) if last_db and last_db != 'None' and last_db.strip() != '' else '' }}</div>
               <button type="button" class="file-remove-btn" id="removeFile">
                 <i class="bi bi-x"></i>
               </button>
             </div>
           </div>
 
-          <!-- Question Section -->
+          <!-- Soru Bölümü -->
           <div class="form-section">
             <div class="section-header">
               <div class="section-icon">
@@ -124,14 +126,14 @@
               </div>
               <div class="section-title">Sorunuz</div>
             </div>
-            
+
             <div class="question-container">
               <div class="question-input-wrapper">
-                <input type="text" name="question" class="question-input" 
+                <input type="text" name="question" class="question-input"
                        placeholder="Örn: En uzun film nedir?" required>
                 <div class="input-focus-ring"></div>
               </div>
-              
+
               <div class="suggestions-container">
                 <div class="suggestions-label">Örnek sorular:</div>
                 <div class="suggestions-grid">
@@ -149,14 +151,14 @@
             </div>
           </div>
 
-          <!-- Live Database Connection -->
+          <!-- Canlı Veritabanı Bağlantısı Bölümü -->
           <div class="form-section">
             <div class="section-divider">
               <span>veya</span>
             </div>
-            
+
             <div class="collapsible-section">
-              <button type="button" class="collapsible-header" data-bs-toggle="collapse" 
+              <button type="button" class="collapsible-header" data-bs-toggle="collapse"
                       data-bs-target="#liveDBCollapse" aria-expanded="false">
                 <div class="collapsible-icon">
                   <i class="bi bi-plug-fill"></i>
@@ -166,11 +168,11 @@
                   <i class="bi bi-chevron-down"></i>
                 </div>
               </button>
-              
+
               <div class="collapse" id="liveDBCollapse">
                 <div class="collapsible-content">
                   <div class="db-connection-form">
-                    
+
                     <div class="form-group">
                       <label class="form-label">Veritabanı Türü</label>
                       <select name="db_type" class="form-select custom-select">
@@ -212,7 +214,7 @@
             </div>
           </div>
 
-          <!-- Submit Button -->
+          <!-- Gönder Butonu -->
           <div class="submit-section">
             <button type="submit" class="submit-btn primary-btn">
               <div class="btn-content">
@@ -228,7 +230,7 @@
         </form>
       </div>
 
-      <!-- SQL Query Display -->
+      <!-- SQL Sorgu Görüntüleme Alanı -->
       {% if sql_query %}
       <div class="result-card sql-result-card" data-aos="fade-up" data-aos-delay="300">
         <div class="result-header">
@@ -249,11 +251,11 @@
       </div>
       {% endif %}
 
-      <!-- Results Section -->
+      <!-- Sonuçlar Bölümü: 'results-section' id'si eklendi -->
       {% if result %}
-      <div class="result-card data-result-card" data-aos="fade-up" data-aos-delay="400">
+      <div id="results-section" class="result-card data-result-card" data-aos="fade-up" data-aos-delay="400">
         {% if result["columns"][0] == "Hata" %}
-        <!-- Error Display -->
+        <!-- Hata Görüntüleme -->
         <div class="error-display">
           <div class="error-header">
             <div class="error-icon">
@@ -266,7 +268,7 @@
           </div>
         </div>
         {% else %}
-        <!-- Success Results -->
+        <!-- Başarılı Sonuçlar -->
         <div class="result-header">
           <div class="result-header-content">
             <div class="result-icon success">
@@ -288,7 +290,7 @@
             </button>
           </div>
         </div>
-        
+
         <div class="table-wrapper">
           <div class="table-container">
             <table class="results-table">
@@ -312,7 +314,7 @@
           </div>
         </div>
 
-        <!-- Chart Section -->
+        <!-- Grafik Bölümü -->
         {% if result["columns"]|length >= 2 and result["rows"]|length > 0 %}
         <div class="chart-section">
           <div class="chart-header">
@@ -321,7 +323,7 @@
               <span>Grafiksel Görselleştirme</span>
             </div>
           </div>
-          
+
           <div class="chart-controls">
             <div class="control-group">
               <label class="control-label">X Eksen</label>
@@ -342,7 +344,7 @@
               </select>
             </div>
           </div>
-          
+
           <div class="chart-container">
             <canvas id="chartArea"></canvas>
           </div>
@@ -356,14 +358,20 @@
   </div>
 </div>
 
-<!-- Chart.js and Scripts -->
+<!-- Chart.js Kütüphanesi ve Diğer JavaScript Kodları -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% if result and result["columns"][0] != "Hata" %}
 <script>
+// Chart.js ile ilgili fonksiyonlar (eğer sonuç varsa çalışır)
+{% if result and result["columns"][0] != "Hata" %}
 const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
 const columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
 let chartInstance = null;
 
+/**
+ * Belirtilen sayıda renk oluşturur.
+ * @param {number} count - Oluşturulacak renk sayısı.
+ * @returns {string[]} Renk kodları dizisi.
+ */
 function generateColors(count) {
     const baseColors = [
         '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1',
@@ -378,13 +386,17 @@ function generateColors(count) {
     return colors;
 }
 
+/**
+ * X ve Y eksen dropdown'larını veritabanı sütunlarıyla doldurur.
+ */
 function populateColumnDropdowns() {
     const labelDropdown = document.getElementById("labelColumn");
     const valueDropdown = document.getElementById("valueColumn");
-    if (!labelDropdown || !valueDropdown) return;
+    if (!labelDropdown || !valueDropdown) return; // Elementler yoksa çık
 
-    labelDropdown.innerHTML = "";
+    labelDropdown.innerHTML = ""; // Mevcut seçenekleri temizle
     valueDropdown.innerHTML = "";
+
     columns.forEach((col, i) => {
         let opt1 = document.createElement("option");
         opt1.value = i;
@@ -396,10 +408,13 @@ function populateColumnDropdowns() {
         opt2.text = col;
         valueDropdown.appendChild(opt2);
     });
-    labelDropdown.selectedIndex = 0;
-    valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0;
+    labelDropdown.selectedIndex = 0; // İlk sütunu varsayılan olarak seç
+    valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0; // İkinci sütunu (varsa) seç
 }
 
+/**
+ * Seçilen verilere ve grafik tipine göre grafiği çizer.
+ */
 function drawChart() {
     const type = document.getElementById("chartType").value;
     const labelIdx = parseInt(document.getElementById("labelColumn").value);
@@ -407,36 +422,39 @@ function drawChart() {
 
     const labels = [];
     const values = [];
+    // Veritabanı satırlarını döngüye alarak etiketleri ve değerleri çıkar
     for (let i = 0; i < rows.length; i++) {
         const label = rows[i][labelIdx];
         const raw = rows[i][valueIdx];
+        // Değeri temizle ve sayıya dönüştür
         const value = parseFloat(String(raw).replace(/[^\d.-]/g, ""));
-        if (!isNaN(value)) {
+        if (!isNaN(value)) { // Geçerli bir sayı ise ekle
             labels.push(label);
             values.push(value);
         }
     }
 
-    if (chartInstance) chartInstance.destroy();
+    if (chartInstance) chartInstance.destroy(); // Mevcut grafik örneğini yok et
 
+    // Etiket ve değerler varsa yeni grafiği çiz
     if (labels.length > 0 && values.length > 0) {
         const ctx = document.getElementById("chartArea").getContext("2d");
         chartInstance = new Chart(ctx, {
-            type: type,
+            type: type, // Grafik tipi (bar, line, pie vb.)
             data: {
-                labels: labels,
+                labels: labels, // X ekseni etiketleri
                 datasets: [{
-                    label: columns[valueIdx],
-                    data: values,
-                    backgroundColor: generateColors(labels.length),
+                    label: columns[valueIdx], // Veri kümesi etiketi
+                    data: values, // Y ekseni değerleri
+                    backgroundColor: generateColors(labels.length), // Renkler
                     borderColor: generateColors(labels.length),
                     borderWidth: 2,
-                    tension: 0.4
+                    tension: 0.4 // Çizgi grafikler için yumuşaklık
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, // Duyarlı boyutlandırma
+                maintainAspectRatio: false, // Oran korumayı devre dışı bırak
                 plugins: {
                     title: {
                         display: true,
@@ -444,10 +462,12 @@ function drawChart() {
                         font: { size: 16, weight: 'bold' }
                     },
                     legend: {
+                        // Pasta/Halka grafikler için legend pozisyonu
                         position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
                         labels: { usePointStyle: true }
                     }
                 },
+                // Sütun ve Çizgi grafikler için eksen ayarları
                 ...(type === "bar" || type === "line"
                     ? {
                         scales: {
@@ -462,54 +482,66 @@ function drawChart() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    populateColumnDropdowns();
-    drawChart();
-
-    document.getElementById("chartType").addEventListener("change", drawChart);
-    document.getElementById("labelColumn").addEventListener("change", drawChart);
-    document.getElementById("valueColumn").addEventListener("change", drawChart);
-});
-
+/**
+ * Sorgu sonuçlarını CSV veya Excel olarak indirir.
+ * @param {string} format - İndirilecek format ("csv" veya "xlsx").
+ */
 function downloadResult(format) {
-    const btn = event.target.closest('button');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> İndiriliyor...';
-    btn.disabled = true;
+    const btn = event.target.closest('button'); // Tıklanan butonu bul
+    const originalText = btn.innerHTML; // Butonun orijinal içeriğini sakla
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> İndiriliyor...'; // Yükleme animasyonu göster
+    btn.disabled = true; // Butonu devre dışı bırak
 
+    // İndirme isteğini sunucuya gönder
     fetch("/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rows: rows, columns: columns, format: format })
     })
-    .then(response => response.blob())
+    .then(response => response.blob()) // Yanıtı Blob olarak al
     .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = format === "xlsx" ? "sonuc.xlsx" : "sonuc.csv";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+        const url = window.URL.createObjectURL(blob); // Blob'dan URL oluştur
+        const a = document.createElement("a"); // Geçici bir <a> etiketi oluştur
+        a.href = url; // URL'yi atama
+        a.download = format === "xlsx" ? "sonuc.xlsx" : "sonuc.csv"; // Dosya adını belirle
+        document.body.appendChild(a); // Etiketi DOM'a ekle
+        a.click(); // Tıklama olayını tetikle (indirmeyi başlatır)
+        a.remove(); // Etiketi DOM'dan kaldır
+        window.URL.revokeObjectURL(url); // Oluşturulan URL'yi temizle
     })
     .finally(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        btn.innerHTML = originalText; // Butonun içeriğini orijinal haline getir
+        btn.disabled = false; // Butonu tekrar etkinleştir
     });
 }
+{% endif %} {# Chart.js ile ilgili Flask if bloğu kapanışı #}
 
 
+// Genel sayfa etkileşimleri ve olay dinleyicileri
 document.addEventListener("DOMContentLoaded", function () {
   const toggleBtn = document.getElementById("toggle-summary-btn");
   const summaryBox = document.getElementById("db-summary-text");
-  const dbFilename = document.getElementById("current-db-filename")?.value || "";
+  const dbFilenameInput = document.getElementById("current-db-filename");
+  const dbSummaryContainer = document.getElementById("dbSummaryContainer");
+  const uploadArea = document.getElementById("uploadArea");
+  const databaseFile = document.getElementById("databaseFile");
+  const fileInfo = document.getElementById("fileInfo");
+  const fileNameDisplay = document.getElementById("fileName");
+  const removeFileBtn = document.getElementById("removeFile");
+  const dbAlert = document.getElementById("dbAlert");
+  const activeDbName = document.getElementById("activeDbName");
+  const queryForm = document.getElementById("queryForm");
 
   let isDetailed = false;
-  let originalShort = summaryBox?.textContent; // Sayfa ilk yüklendiğindeki özet
 
-  if (toggleBtn && summaryBox && dbFilename) {
+  // ===========================================
+  // Veritabanı Özeti Açma/Kapatma İşlevi
+  // ===========================================
+  if (toggleBtn && summaryBox && dbFilenameInput) {
     toggleBtn.addEventListener("click", async function () {
+      const dbFilename = dbFilenameInput.value;
+      if (!dbFilename) return; // Dosya adı yoksa işlem yapma
+
       toggleBtn.disabled = true;
       toggleBtn.innerHTML = `<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>`;
 
@@ -524,7 +556,6 @@ document.addEventListener("DOMContentLoaded", function () {
           summaryBox.textContent = "❌ Özet alınamadı.";
         }
 
-        // Buton metnini değiştir
         if (isDetailed) {
           toggleBtn.innerHTML = '<span>Daha ayrıntılı göster</span> <i class="bi bi-chevron-right"></i>';
         } else {
@@ -533,6 +564,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         isDetailed = !isDetailed;
       } catch (e) {
+        console.error("Veritabanı özeti getirilirken hata:", e);
         summaryBox.textContent = "❌ Özet getirilirken bir hata oluştu.";
         toggleBtn.innerHTML = '<span>Tekrar dene</span> <i class="bi bi-arrow-clockwise"></i>';
       } finally {
@@ -540,14 +572,212 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+
+  // ===========================================
+  // Dosya Yükleme Alanı ve Önizleme İşlevi
+  // ===========================================
+
+  /**
+   * Aktif veritabanı uyarı ve özetini günceller.
+   * @param {string|null} filename - Yüklenecek/seçilen dosya adı (None ise gizler).
+   * @param {boolean} [showFileInfo=true] - fileInfo önizlemesini gösterip göstermeyeceği.
+   */
+  async function updateDbDisplay(filename, showFileInfo = true) {
+      // 'None' stringini veya boş stringi kontrol et
+      if (filename && filename !== 'None' && filename.trim() !== '') {
+          // Dosya önizleme bilgisini güncelle
+          fileNameDisplay.textContent = filename.split('_', 1)[1] || filename;
+          if (showFileInfo) {
+              fileInfo.classList.add("show");
+          } else {
+              fileInfo.classList.remove("show");
+          }
+          uploadArea.style.display = "none";
+
+          // Aktif DB uyarısını güncelle
+          activeDbName.textContent = filename.split('_', 1)[1] || filename;
+          dbAlert.style.display = "flex"; // Alert'i görünür yap
+          dbAlert.classList.add("show"); // Animasyon için show sınıfını ekle
+
+          // DB özetini güncelle
+          dbSummaryContainer.style.display = "block"; // Özeti görünür yap
+          dbFilenameInput.value = filename; // Özet çekmek için gizli inputu güncelle
+          await fetchDbSummary(filename, "short"); // Kısa özeti çek ve göster
+      } else {
+          // Dosya yoksa veya geçersizse tüm alanları gizle ve sıfırla
+          fileInfo.classList.remove("show");
+          uploadArea.style.display = "block"; // Yükleme alanını göster
+          dbAlert.style.display = "none"; // Alert'i gizle
+          dbSummaryContainer.style.display = "none"; // Özeti gizle
+          dbFilenameInput.value = ""; // Gizli inputu temizle
+      }
+  }
+
+  /**
+   * Sunucudan veritabanı özetini çeker ve günceller.
+   * @param {string} filename - Özetin çekileceği dosya adı.
+   * @param {string} mode - Özetin modu ("short" veya "detail").
+   */
+  async function fetchDbSummary(filename, mode) {
+      const summaryBox = document.getElementById("db-summary-text");
+      const toggleBtn = document.getElementById("toggle-summary-btn");
+
+      if (!summaryBox || !toggleBtn) return;
+
+      summaryBox.textContent = "Veritabanı özeti yükleniyor...";
+      toggleBtn.disabled = true;
+      toggleBtn.innerHTML = `<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>`;
+
+      try {
+          const response = await fetch(`/get-db-summary?filename=${encodeURIComponent(filename)}&mode=${mode}`);
+          const data = await response.json();
+          if (data.summary) {
+              summaryBox.textContent = data.summary;
+          } else {
+              summaryBox.textContent = "❌ Özet alınamadı.";
+          }
+          toggleBtn.innerHTML = '<span>Daha ayrıntılı göster</span> <i class="bi bi-chevron-right"></i>';
+          isDetailed = false; // Her zaman kısa moda sıfırla
+      } catch (e) {
+          console.error("Veritabanı özeti getirilirken hata:", e);
+          summaryBox.textContent = "❌ Özet getirilirken bir hata oluştu.";
+          toggleBtn.innerHTML = '<span>Tekrar dene</span> <i class="bi bi-arrow-clockwise"></i>';
+      } finally {
+          toggleBtn.disabled = false;
+      }
+  }
+
+
+  // Sayfa ilk yüklendiğinde mevcut bir veritabanı varsa başlangıç durumunu ayarla
+  const initialLastDb = "{{ last_db }}";
+  // 'None' stringini, boş stringi ve sadece boşluk içeren stringleri de kontrol et
+  if (initialLastDb && initialLastDb.trim() !== '' && initialLastDb !== 'None') {
+      updateDbDisplay(initialLastDb, true);
+  } else {
+      // Eğer başlangıçta veritabanı yoksa, tüm ilgili alanları gizle
+      fileInfo.classList.remove("show");
+      uploadArea.style.display = "block";
+      dbAlert.style.display = "none";
+      dbSummaryContainer.style.display = "none";
+      dbFilenameInput.value = "";
+  }
+
+
+  // Dosya seçildiğinde olay dinleyicisi
+  databaseFile.addEventListener("change", function () {
+    if (this.files.length > 0) {
+      const filename = this.files[0].name;
+      // Anlık geri bildirim için kullanıcının seçtiği dosya adını kullan
+      updateDbDisplay(filename);
+    } else {
+      updateDbDisplay(null); // Dosya seçimi iptal edilirse her şeyi gizle
+    }
+  });
+
+  // Dosya kaldırma butonu olay dinleyicisi
+  removeFileBtn.addEventListener("click", function () {
+    databaseFile.value = ""; // Input'u temizle
+    updateDbDisplay(null); // Görüntülemeleri sıfırla
+  });
+
+  // Drag-and-drop işlevselliği
+  uploadArea.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    this.classList.add("dragover");
+  });
+
+  uploadArea.addEventListener("dragleave", function (e) {
+    e.preventDefault();
+    this.classList.remove("dragover");
+  });
+
+  uploadArea.addEventListener("drop", function (e) {
+    e.preventDefault();
+    this.classList.remove("dragover");
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      databaseFile.files = files; // Sürüklenen dosyayı input'a ata
+      const event = new Event('change');
+      databaseFile.dispatchEvent(event); // Change event'i tetikle
+    }
+  });
+
+  // ===========================================
+  // Submit Butonu Animasyonu
+  // ===========================================
+  queryForm.addEventListener("submit", function() {
+    const submitBtn = this.querySelector(".submit-btn");
+    submitBtn.classList.add("loading");
+    submitBtn.disabled = true;
+  });
+
+  // Kaydırma fonksiyonlarını tanımladıktan sonra çağırın
+  // Sayfa yüklendiğinde ve form gönderildiğinde kaydırma işlemi
+  const resultsSection = document.getElementById('results-section');
+  if (resultsSection) {
+    // Küçük bir gecikme ile kaydırma işlemini başlat
+    setTimeout(() => {
+      const navbar = document.getElementById('main-navbar');
+      const navbarHeight = navbar ? navbar.offsetHeight : 0;
+      const targetScrollPosition = resultsSection.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 20;
+
+      window.scrollTo({
+        top: targetScrollPosition,
+        behavior: 'smooth'
+      });
+    }, 100); // 100ms gecikme, içeriğin yerleşmesi için yeterli olmalı
+  }
+
 });
 
+/**
+ * Önerilen soruyu input alanına yerleştirir.
+ * @param {HTMLElement} buttonElement - Tıklanan öneri butonu elementi.
+ */
+function setSuggestion(buttonElement) {
+    const questionInput = document.querySelector('.question-input');
+    if (questionInput) {
+        questionInput.value = buttonElement.textContent.trim();
+    }
+}
 
+/**
+ * Üretilen SQL sorgusunu panoya kopyalar.
+ */
+function copySql() {
+    const sqlQueryElement = document.querySelector('.sql-query code');
+    if (sqlQueryElement) {
+        const sqlText = sqlQueryElement.textContent;
+        // Eski yöntem (iframe'lerde daha uyumlu)
+        copyTextToClipboardLegacy(sqlText);
+    }
+}
 
+/**
+ * Metni panoya kopyalamak için eski (fallback) yöntem.
+ * @param {string} text - Kopyalanacak metin.
+ */
+function copyTextToClipboardLegacy(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    // Ekran dışına taşı
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    textArea.style.top = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        const successful = document.execCommand('copy');
+        const msg = successful ? 'başarılı' : 'başarısız';
+        console.log('Kopyalama ' + msg);
+    } catch (err) {
+        console.error('Fallback kopyalama hatası:', err);
+    }
+    document.body.removeChild(textArea);
+}
 
 </script>
-{% endif %}
-
 {% endblock %}
 
 {% block styles %}
@@ -561,12 +791,12 @@ document.addEventListener("DOMContentLoaded", function () {
   --info-color: #17a2b8;
   --warning-color: #ffc107;
   --danger-color: #dc3545;
-  
+
   /* Gradient Colors */
   --primary-gradient: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
   --secondary-gradient: linear-gradient(135deg, #6610f2 0%, #007bff 100%);
   --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-  
+
   /* Light Theme Colors */
   --text-primary: #2c3e50;
   --text-secondary: #6c757d;
@@ -579,25 +809,25 @@ document.addEventListener("DOMContentLoaded", function () {
   --table-header-bg: rgba(255,255,255,0.9);
   --table-row-even: rgba(0,0,0,0.02);
   --table-row-hover: rgba(0,123,255,0.05);
-  
+
   /* Spacing */
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  
+
   /* Borders */
   --border-radius: 12px;
   --border-radius-lg: 20px;
   --border-radius-xl: 24px;
-  
+
   /* Shadows */
   --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
   --shadow-md: 0 8px 25px rgba(0,0,0,0.15);
   --shadow-lg: 0 15px 35px rgba(0,0,0,0.1);
   --shadow-glow: 0 0 20px rgba(102,16,242,0.3);
-  
+
   /* Animations */
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -609,21 +839,21 @@ html[data-bs-theme="dark"] {
   --text-primary: #e8eaed;
   --text-secondary: #c3c4c7;
   --text-muted: #9aa0a6;
-  
+
   /* Daha okunaklı arka planlar */
   --bg-main: #0f1419;
   --bg-overlay: rgba(21, 23, 29, 0.95);
   --bg-blur: rgba(30, 32, 38, 0.85);
   --input-bg: rgba(45, 47, 53, 0.8);
-  
+
   /* Daha net border'lar */
   --border-color: rgba(255,255,255,0.15);
-  
+
   /* Tablo renkleri - daha okunaklı */
   --table-header-bg: rgba(40, 42, 48, 0.9);
   --table-row-even: rgba(255,255,255,0.03);
   --table-row-hover: rgba(0,123,255,0.15);
-  
+
   /* Daha soft shadow'lar */
   --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
   --shadow-md: 0 8px 25px rgba(0,0,0,0.5);
@@ -712,7 +942,7 @@ html[data-bs-theme="dark"] .glass-card {
 html[data-bs-theme="dark"] .glass-card:hover {
   background: rgba(21, 23, 29, 0.98);
   border-color: rgba(0,123,255,0.3);
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0,0,0,0.4),
     0 0 20px rgba(0,123,255,0.15);
 }
@@ -737,8 +967,8 @@ html[data-bs-theme="dark"] .upload-zone {
 }
 
 html[data-bs-theme="dark"] .upload-zone:hover {
-  background: linear-gradient(135deg, 
-    rgba(0,123,255,0.1) 0%, 
+  background: linear-gradient(135deg,
+    rgba(0,123,255,0.1) 0%,
     rgba(102,16,242,0.1) 100%
   );
   border-color: var(--primary-color);
@@ -746,8 +976,8 @@ html[data-bs-theme="dark"] .upload-zone:hover {
 
 /* Alert ve notification'lar */
 html[data-bs-theme="dark"] .db-alert {
-  background: linear-gradient(135deg, 
-    rgba(40,167,69,0.15) 0%, 
+  background: linear-gradient(135deg,
+    rgba(40,167,69,0.15) 0%,
     rgba(40,167,69,0.08) 100%
   );
   border-color: rgba(40,167,69,0.3);
@@ -785,8 +1015,8 @@ html[data-bs-theme="dark"] .collapsible-header:hover {
 }
 
 html[data-bs-theme="dark"] .collapsible-header[aria-expanded="true"] {
-  background: linear-gradient(135deg, 
-    rgba(102,16,242,0.2) 0%, 
+  background: linear-gradient(135deg,
+    rgba(102,16,242,0.2) 0%,
     rgba(0,123,255,0.2) 100%
   );
 }
@@ -843,6 +1073,7 @@ html[data-bs-theme="dark"] .sql-content::-webkit-scrollbar-thumb:hover {
 /* Firefox scrollbar */
 html[data-bs-theme="dark"] .table-container,
 html[data-bs-theme="dark"] .sql-content {
+  scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.2) rgba(30, 32, 38, 0.5);
 }
 
@@ -876,8 +1107,8 @@ html[data-bs-theme="dark"] *:focus {
 
 /* File preview */
 html[data-bs-theme="dark"] .file-preview {
-  background: linear-gradient(135deg, 
-    rgba(40,167,69,0.15) 0%, 
+  background: linear-gradient(135deg,
+    rgba(40,167,69,0.15) 0%,
     rgba(40,167,69,0.08) 100%
   );
   border-color: rgba(40,167,69,0.3);
@@ -888,7 +1119,7 @@ html[data-bs-theme="dark"] .file-preview {
   html[data-bs-theme="dark"] .glass-card {
     background: rgba(21, 23, 29, 0.98);
   }
-  
+
   html[data-bs-theme="dark"] .query-card {
     background: rgba(15, 20, 25, 0.95);
   }
@@ -1015,16 +1246,16 @@ html[data-bs-theme="dark"] .file-preview {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.1) 50%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
     transparent 100%
   );
 }
 
 .glass-card:hover {
   transform: translateY(-2px); /* Daha yumuşak hareket */
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.08),
     0 0 15px rgba(0, 123, 255, 0.08); /* Daha soft glow */
   border-color: rgba(0, 123, 255, 0.15); /* Daha subtle border */
@@ -1046,7 +1277,14 @@ html[data-bs-theme="dark"] .file-preview {
   border: 1px solid rgba(40,167,69,0.2);
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-lg);
-  transition: var(--transition-smooth);
+  transition: all 0.3s ease-out; /* Sadece başlangıçta görünür olması için animasyon */
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.db-alert.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .db-alert:hover {
@@ -1535,11 +1773,6 @@ html[data-bs-theme="dark"] .file-preview {
   box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 
-.submit-btn:hover::before {
-  left: 100%;
-  transition: left 0.5s ease;
-}
-
 .submit-btn:active {
   transform: translateY(-1px);
 }
@@ -1595,8 +1828,8 @@ html[data-bs-theme="dark"] .file-preview {
 
 .result-card:hover {
   transform: translateY(-5px);
-  box-shadow: 
-    var(--shadow-lg), 
+  box-shadow:
+    var(--shadow-lg),
     0 0 20px rgba(0, 123, 255, 0.15);
   border-color: rgba(0, 123, 255, 0.2);
 }
@@ -1885,75 +2118,75 @@ html[data-bs-theme="dark"] .query-hero {
   :root {
     --spacing-xl: 2rem;
   }
-  
+
   .hero-title {
     font-size: 2.5rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1.1rem;
   }
-  
+
   .query-card {
     padding: var(--spacing-lg);
     margin: 0 var(--spacing-sm);
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
   }
-  
+
   .upload-zone {
     padding: var(--spacing-lg);
   }
-  
+
   .upload-icon {
     font-size: 2.5rem;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .suggestions-grid {
     flex-direction: column;
   }
-  
+
   .suggestion-pill {
     text-align: center;
     white-space: normal;
   }
-  
+
   .result-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
   }
-  
+
   .result-actions {
     width: 100%;
     justify-content: center;
   }
-  
+
   .chart-controls {
     grid-template-columns: 1fr;
   }
-  
+
   .chart-container {
     height: 300px;
   }
-  
+
   .db-alert {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .collapsible-header {
     padding: var(--spacing-sm) var(--spacing-md);
   }
-  
+
   .collapsible-title {
     font-size: 0.95rem;
   }
@@ -1964,12 +2197,12 @@ html[data-bs-theme="dark"] .query-hero {
   .query-card {
     margin: 0 var(--spacing-md);
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: var(--spacing-sm);
   }
-  
+
   .chart-controls {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1980,19 +2213,19 @@ html[data-bs-theme="dark"] .query-hero {
   .suggestions-grid {
     justify-content: flex-start;
   }
-  
+
   .chart-controls {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .result-header {
     padding: var(--spacing-xl);
   }
-  
+
   .table-wrapper {
     padding: var(--spacing-xl);
   }
-  
+
   .chart-section {
     padding: var(--spacing-xl);
   }
@@ -2129,17 +2362,17 @@ html[data-bs-theme="dark"] .chart-container {
   .chart-controls {
     display: none !important;
   }
-  
+
   .result-card {
     box-shadow: none;
     border: 1px solid #ddd;
     break-inside: avoid;
   }
-  
+
   .results-table {
     border-collapse: collapse;
   }
-  
+
   .results-table th,
   .results-table td {
     border: 1px solid #ddd;
@@ -2180,7 +2413,7 @@ select:focus {
     --text-muted: #666;
     --bg-blur: rgba(255,255,255,0.9);
   }
-  
+
   .glass-card {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -2188,7 +2421,7 @@ select:focus {
   }
 
   .glass-card:hover {
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.3),
     0 0 15px rgba(0, 123, 255, 0.12);
   }
@@ -2203,7 +2436,7 @@ select:focus {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   .hero-icon,
   .hero-decoration::after,
   .loading-spinner {
@@ -2213,7 +2446,7 @@ select:focus {
     .glass-card {
     transition: none;
   }
-  
+
   .glass-card:hover {
     transform: none;
   }
