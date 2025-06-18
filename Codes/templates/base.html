@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr" data-bs-theme="light">
 <head>
@@ -87,17 +88,167 @@
             </ul>
           </div>
         {% else %}
-          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
+          <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
             <i class="bi bi-box-arrow-in-right me-1"></i>Giriş
-          </a>
-          <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+          </button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">
             <i class="bi bi-person-plus me-1"></i>Kayıt
-          </a>
+          </button>
         {% endif %}
       </div>
     </div>
   </div>
 </nav>
+
+<!-- LOGIN MODAL -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}">
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-person me-2"></i>Kullanıcı Adı
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input type="text" name="username" class="form-control" placeholder="Kullanıcı adınızı girin" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-lock me-2"></i>Şifre
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input type="password" name="password" class="form-control" placeholder="Şifrenizi girin" required>
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('login')">
+                <i class="bi bi-eye" id="login-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">
+              Beni hatırla
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="d-flex flex-column w-100">
+          <button type="submit" form="loginForm" class="btn btn-primary mb-2">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
+          </button>
+          <div class="text-center">
+            <button type="button" class="btn btn-link p-0 me-3" onclick="switchToForgotPassword()">Şifremi Unuttum</button>
+            <span class="text-muted">|</span>
+            <button type="button" class="btn btn-link p-0 ms-3" onclick="switchToRegister()">Hesap Oluştur</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="registerModalLabel">
+          <i class="bi bi-person-plus me-2"></i>Hesap Oluştur
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="registerForm" method="POST" action="{{ url_for('auth.register') }}">
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-person me-2"></i>Kullanıcı Adı
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input type="text" name="username" class="form-control" placeholder="Kullanıcı adınızı girin" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="mb-3 col-md-6">
+              <label class="form-label">
+                <i class="bi bi-card-text me-2"></i>Ad
+              </label>
+              <input type="text" name="first_name" class="form-control" placeholder="Adınız" required>
+            </div>
+            <div class="mb-3 col-md-6">
+              <label class="form-label">
+                <i class="bi bi-card-text me-2"></i>Soyad
+              </label>
+              <input type="text" name="last_name" class="form-control" placeholder="Soyadınız" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-envelope me-2"></i>E-posta
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="ornek@email.com" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-people me-2"></i>Cinsiyet (İsteğe bağlı)
+            </label>
+            <select name="gender" class="form-select">
+              <option value="">Belirtmek istemiyorum</option>
+              <option value="Erkek">Erkek</option>
+              <option value="Kadın">Kadın</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-lock me-2"></i>Şifre
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input type="password" name="password" class="form-control" placeholder="En az 6 karakter" required>
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('register')">
+                <i class="bi bi-eye" id="register-eye"></i>
+              </button>
+            </div>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>Şifreniz en az 6 karakter olmalıdır
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="d-flex flex-column w-100">
+          <button type="submit" form="registerForm" class="btn btn-primary mb-2">
+            <i class="bi bi-person-plus me-2"></i>Hesap Oluştur
+          </button>
+          <div class="text-center">
+            <span class="text-muted">Zaten hesabınız var mı?</span>
+            <button type="button" class="btn btn-link p-0 ms-2" onclick="switchToLogin()">Giriş Yapın</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Flash Messages & Content -->
 <div id="page-content-wrapper">
@@ -183,6 +334,69 @@ window.addEventListener('scroll', () => {
   const navbar = document.getElementById('main-navbar');
   navbar.classList.toggle('scrolled', window.scrollY > 50);
 });
+
+// Switch to login function
+function switchToLogin() {
+  const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+  if (registerModal) registerModal.hide();
+  
+  setTimeout(() => {
+    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+    loginModal.show();
+  }, 300);
+}
+
+// Switch to register function
+function switchToRegister() {
+  const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+  if (loginModal) loginModal.hide();
+  
+  setTimeout(() => {
+    const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+    registerModal.show();
+  }, 300);
+}
+
+// Switch to forgot password function
+function switchToForgotPassword() {
+  const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+  if (loginModal) loginModal.hide();
+  window.location.href = "{{ url_for('auth.forgot_password') }}";
+}
+
+// Password visibility toggle
+function togglePassword(formType) {
+  const passwordInput = document.querySelector(`#${formType}Form input[type="password"], #${formType}Form input[type="text"][name="password"]`);
+  const eyeIcon = document.getElementById(`${formType}-eye`);
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    eyeIcon.className = 'bi bi-eye-slash';
+  } else {
+    passwordInput.type = 'password';
+    eyeIcon.className = 'bi bi-eye';
+  }
+}
+
+// Form validation and submission
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+  const password = this.querySelector('input[name="password"]').value;
+  if (password.length < 6) {
+    e.preventDefault();
+    alert('Şifre en az 6 karakter olmalıdır.');
+    return false;
+  }
+});
+
+// Clear forms when modals are hidden
+document.getElementById('loginModal').addEventListener('hidden.bs.modal', function () {
+  document.getElementById('loginForm').reset();
+});
+
+document.getElementById('registerModal').addEventListener('hidden.bs.modal', function () {
+  document.getElementById('registerForm').reset();
+});
+
 </script>
 {% endblock %}
 
@@ -314,6 +528,55 @@ body {
   color: var(--primary-color);
 }
 
+/* Modal Styles */
+.modal-content {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.5rem;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color);
+  padding: 1.5rem;
+}
+
+/* Form Styles */
+.form-control, .form-select {
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+  background: white;
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+}
+
 /* Dropdown */
 .dropdown-menu {
   border: none;
@@ -394,6 +657,83 @@ body {
   transform: translateY(-2px);
 }
 
+/* Modal Form Enhancements */
+.input-group-text {
+  background: rgba(0, 123, 255, 0.05);
+  border-color: var(--border-light);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.input-group .form-control {
+  border-left: none;
+}
+
+.input-group .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: none;
+}
+
+.input-group .form-control:focus + .input-group-text,
+.input-group-text + .form-control:focus {
+  border-color: var(--primary-color);
+}
+
+.form-text {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.form-check-label {
+  font-weight: 500;
+  color: var(--accent-color);
+}
+
+/* Password Toggle Button */
+.input-group .btn-outline-secondary {
+  border-left: none;
+  border-color: var(--border-light);
+  color: var(--text-muted);
+}
+
+.input-group .btn-outline-secondary:hover {
+  background: rgba(0, 123, 255, 0.05);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Dark Theme Modal Enhancements */
+html[data-bs-theme="dark"] .input-group-text {
+  background: rgba(76, 140, 255, 0.1);
+  border-color: var(--dark-border);
+  color: #4c8cff;
+}
+
+html[data-bs-theme="dark"] .form-text {
+  color: var(--dark-muted);
+}
+
+html[data-bs-theme="dark"] .form-check-label {
+  color: var(--dark-text);
+}
+
+html[data-bs-theme="dark"] .input-group .btn-outline-secondary {
+  border-color: var(--dark-border);
+  color: var(--dark-muted);
+}
+
+html[data-bs-theme="dark"] .input-group .btn-outline-secondary:hover {
+  background: rgba(76, 140, 255, 0.1);
+  border-color: #4c8cff;
+  color: #4c8cff;
+}
+
 /* Dark Theme */
 html[data-bs-theme="dark"] {
   --bs-body-bg: var(--dark-bg);
@@ -432,6 +772,40 @@ html[data-bs-theme="dark"] .btn-user {
 html[data-bs-theme="dark"] .btn-user:hover {
   background: rgba(76, 140, 255, 0.1);
   color: #4c8cff;
+}
+
+html[data-bs-theme="dark"] .modal-content {
+  background: rgba(30, 35, 41, 0.98);
+}
+
+html[data-bs-theme="dark"] .modal-header {
+  border-bottom-color: var(--dark-border);
+}
+
+html[data-bs-theme="dark"] .modal-footer {
+  border-top-color: var(--dark-border);
+}
+
+html[data-bs-theme="dark"] .modal-title {
+  color: var(--dark-text);
+}
+
+html[data-bs-theme="dark"] .form-control, 
+html[data-bs-theme="dark"] .form-select {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+html[data-bs-theme="dark"] .form-control:focus, 
+html[data-bs-theme="dark"] .form-select:focus {
+  background: var(--dark-surface);
+  border-color: #4c8cff;
+  box-shadow: 0 0 0 0.2rem rgba(76, 140, 255, 0.1);
+}
+
+html[data-bs-theme="dark"] .form-label {
+  color: var(--dark-text);
 }
 
 html[data-bs-theme="dark"] .dropdown-menu {
@@ -474,6 +848,10 @@ html[data-bs-theme="dark"] .social-link:hover {
   .btn {
     padding: 6px 16px;
     font-size: 0.9rem;
+  }
+  
+  .modal-dialog {
+    margin: 1rem;
   }
 }
 

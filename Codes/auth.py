@@ -87,7 +87,7 @@ def register():
         conn.close()
         return redirect(url_for("ask"))
 
-    return render_template("register.html")
+    return redirect(url_for("index"))
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
@@ -108,13 +108,14 @@ def login():
         else:
             flash("Hatalı kullanıcı adı veya şifre.", "danger")
 
-    return render_template("login.html")
+    return redirect(url_for("index"))
+
 
 @auth.route("/logout")
 def logout():
     session.clear()
     flash("Oturum sonlandırıldı.", "info")
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("index"))
 
 @auth.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
