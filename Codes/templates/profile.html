@@ -1,112 +1,511 @@
 {% extends "base.html" %}
-{% block title %}Profilim{% endblock %}
+{% block title %}Profilim - DATASAGE{% endblock %}
 
 {% block content %}
+<!-- PROFILE SECTION -->
+<section class="profile-section py-6 min-vh-100">
+  <div class="profile-bg"></div>
+  <div class="container position-relative z-3">
+    <div class="row justify-content-center">
+      <div class="col-xl-10 col-lg-11">
+        <!-- Header -->
+        <div class="profile-header text-center mb-5" data-aos="fade-up">
+          <div class="section-badge">Profil Ayarları</div>
+          <h1 class="section-title">Profil Bilgilerim</h1>
+          <p class="section-subtitle">
+            Hesap bilgilerinizi güncelleyin ve kişiselleştirin
+          </p>
+        </div>
 
-<style>
-  .profile-picture {
-    object-fit: cover;
-    border: 3px solid #ddd;
-    transition: 0.3s;
-  }
+        <!-- Profile Form Card -->
+        <div class="profile-card" data-aos="fade-up" data-aos-delay="200">
+          <form method="POST" action="{{ url_for('update_profile') }}" enctype="multipart/form-data">
+            <div class="row g-5">
+              <!-- Profile Picture Section -->
+              <div class="col-lg-4">
+                <div class="profile-picture-section">
+                  <div class="profile-picture-wrapper">
+                    <label for="profile_picture_input" class="profile-picture-label">
+                      <img id="previewImage"
+                           src="{% if user.profile_picture %}{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}{% else %}{{ url_for('static', filename='images/default-profile.png') }}{% endif %}"
+                           class="profile-picture"
+                           alt="Profil Fotoğrafı">
+                      <div class="profile-overlay">
+                        <i class="bi bi-camera"></i>
+                        <span>Fotoğraf Değiştir</span>
+                      </div>
+                    </label>
+                    <input type="file" id="profile_picture_input" name="profile_picture" class="d-none" accept="image/*">
+                    <input type="hidden" name="remove_picture" id="remove_picture" value="0">
+                  </div>
+                  
+                  <div class="profile-actions">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="resetProfilePicture()">
+                      <i class="bi bi-trash me-2"></i>Fotoğrafı Kaldır
+                    </button>
+                  </div>
+                  
+                  <div class="profile-stats">
+                    <div class="stat-item">
+                      <div class="stat-number">{{ user.queries_count or 0 }}</div>
+                      <div class="stat-label">Toplam Sorgu</div>
+                    </div>
+                    <div class="stat-item">
+                      <div class="stat-number">{{ user.join_date.strftime('%m/%Y') if user.join_date else 'N/A' }}</div>
+                      <div class="stat-label">Üyelik Tarihi</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-  .profile-picture-label {
-    cursor: pointer;
-    position: relative;
-    display: inline-block;
-  }
+              <!-- Profile Form Section -->
+              <div class="col-lg-8">
+                <div class="profile-form-section">
+                  <h3 class="form-section-title">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Kişisel Bilgiler
+                  </h3>
+                  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="first_name" class="form-label">
+                          <i class="bi bi-person me-2"></i>Ad
+                        </label>
+                        <input type="text" class="form-control form-control-modern" id="first_name" name="first_name" value="{{ user.first_name or '' }}" placeholder="Adınızı girin">
+                      </div>
+                    </div>
 
-  .overlay-text {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    text-align: center;
-    padding: 5px;
-    border-radius: 0 0 50% 50%;
-    font-size: 0.9rem;
-    opacity: 0;
-    transition: 0.3s;
-  }
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="last_name" class="form-label">
+                          <i class="bi bi-person me-2"></i>Soyad
+                        </label>
+                        <input type="text" class="form-control form-control-modern" id="last_name" name="last_name" value="{{ user.last_name or '' }}" placeholder="Soyadınızı girin">
+                      </div>
+                    </div>
 
-  .profile-picture-label:hover .overlay-text {
-    opacity: 1;
-  }
+                    <div class="col-12">
+                      <div class="form-group">
+                        <label for="email" class="form-label">
+                          <i class="bi bi-envelope me-2"></i>E-posta Adresi
+                        </label>
+                        <input type="email" class="form-control form-control-modern" id="email" name="email" value="{{ user.email or '' }}" placeholder="email@example.com">
+                      </div>
+                    </div>
 
-  .remove-btn {
-    display: block;
-    margin-top: 5px;
-    font-size: 0.9rem;
-    color: #dc3545;
-    cursor: pointer;
-    text-align: center;
-  }
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="gender" class="form-label">
+                          <i class="bi bi-gender-ambiguous me-2"></i>Cinsiyet
+                        </label>
+                        <select class="form-select form-control-modern" id="gender" name="gender">
+                          <option value="">Seçiniz</option>
+                          <option value="Erkek" {% if user.gender == "Erkek" %}selected{% endif %}>Erkek</option>
+                          <option value="Kadın" {% if user.gender == "Kadın" %}selected{% endif %}>Kadın</option>
+                          <option value="Diğer" {% if user.gender == "Diğer" %}selected{% endif %}>Diğer</option>
+                        </select>
+                      </div>
+                    </div>
 
-  .remove-btn:hover {
-    text-decoration: underline;
-  }
-</style>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="birth_date" class="form-label">
+                          <i class="bi bi-calendar-date me-2"></i>Doğum Tarihi
+                        </label>
+                        <input type="date" class="form-control form-control-modern" id="birth_date" name="birth_date" value="{{ user.birth_date or '' }}">
+                      </div>
+                    </div>
+                  </div>
 
-<h2 class="mb-4">Profil Bilgilerim</h2>
-<br>
-
-<form method="POST" action="{{ url_for('update_profile') }}" enctype="multipart/form-data">
-  <div class="row">
-    <!-- Sol: Fotoğraf -->
-    <div class="col-md-4 text-center mb-4">
-      <label for="profile_picture_input" class="profile-picture-label">
-        <img id="previewImage"
-             src="{% if user.profile_picture %}{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}{% else %}{{ url_for('static', filename='images/default-profile.png') }}{% endif %}"
-             class="rounded-circle shadow profile-picture"
-             alt="Profil Fotoğrafı" width="160" height="160">
-        <div class="overlay-text">📷 Değiştir</div>
-      </label>
-      <input type="file" id="profile_picture_input" name="profile_picture" class="d-none" onchange="clearRemoveFlag()">
-      <input type="hidden" name="remove_picture" id="remove_picture" value="0">
-      <span class="remove-btn" onclick="resetProfilePicture()">Fotoğrafı Kaldır</span>
-    </div>
-
-    <!-- Sağ: Bilgiler -->
-    <div class="col-md-8">
-      <div class="mb-3">
-        <label for="first_name" class="form-label">Ad</label>
-        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name or '' }}">
+                  <!-- Action Buttons -->
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                      <i class="bi bi-check-circle me-2"></i>Profili Güncelle
+                    </button>
+                    <a href="{{ url_for('change_password') }}" class="btn btn-outline-warning btn-lg">
+                      <i class="bi bi-shield-lock me-2"></i>Şifre Değiştir
+                    </a>
+                    <a href="{{ url_for('delete_account') }}" class="btn btn-outline-danger btn-lg">
+                      <i class="bi bi-exclamation-triangle me-2"></i>Hesabı Sil
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-
-      <div class="mb-3">
-        <label for="last_name" class="form-label">Soyad</label>
-        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name or '' }}">
-      </div>
-
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" value="{{ user.email or '' }}">
-      </div>
-
-      <div class="mb-3">
-        <label for="gender" class="form-label">Cinsiyet</label>
-        <select class="form-select" id="gender" name="gender">
-          <option value="">Seçiniz</option>
-          <option value="Erkek" {% if user.gender == "Erkek" %}selected{% endif %}>Erkek</option>
-          <option value="Kadın" {% if user.gender == "Kadın" %}selected{% endif %}>Kadın</option>
-          <option value="Diğer" {% if user.gender == "Diğer" %}selected{% endif %}>Diğer</option>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label for="birth_date" class="form-label">Doğum Tarihi</label>
-        <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ user.birth_date or '' }}">
-      </div>
-
-      <button type="submit" class="btn btn-success">Güncelle</button>
-      <a href="{{ url_for('change_password') }}" class="btn btn-warning ms-2">Şifre Değiştir</a>
-      <a href="{{ url_for('delete_account') }}" class="btn btn-danger ms-2">Hesabı Sil</a>
     </div>
   </div>
-</form>
+</section>
 
+{% endblock %}
+
+{% block styles %}
+<style>
+:root {
+  --profile-card-radius: 24px;
+  --profile-transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Profile Section Background */
+.profile-section {
+  background: linear-gradient(135deg, #f8fafe 0%, #e8efff 100%);
+  position: relative;
+  overflow: hidden;
+  padding-top: 3rem;
+  padding-bottom: 6rem;
+}
+
+.profile-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(102, 16, 242, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Section styling */
+.section-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  background: rgba(0, 123, 255, 0.1);
+  color: var(--bs-primary);
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.section-subtitle {
+  font-size: 1.25rem;
+  color: #6c757d;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Profile Card */
+.profile-card {
+  background: white;
+  border-radius: var(--profile-card-radius);
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 123, 255, 0.08);
+  transition: var(--profile-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--bs-primary), var(--bs-info));
+}
+
+/* Profile Picture Section */
+.profile-picture-section {
+  text-align: center;
+  position: sticky;
+  top: 2rem;
+}
+
+.profile-picture-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 2rem;
+}
+
+.profile-picture-label {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
+  transition: var(--profile-transition);
+}
+
+.profile-picture-label:hover {
+  transform: scale(1.05);
+}
+
+.profile-picture {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: var(--profile-transition);
+}
+
+.profile-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 123, 255, 0.8);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: var(--profile-transition);
+  gap: 0.5rem;
+}
+
+.profile-overlay i {
+  font-size: 2rem;
+}
+
+.profile-picture-label:hover .profile-overlay {
+  opacity: 1;
+}
+
+.profile-actions {
+  margin-bottom: 2rem;
+}
+
+/* Profile Stats */
+.profile-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 123, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 123, 255, 0.1);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--bs-primary);
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Form Section */
+.form-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+  display: flex;
+  align-items: center;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.form-label i {
+  color: var(--bs-primary);
+}
+
+.form-control-modern,
+.form-select {
+  padding: 16px 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: var(--profile-transition);
+  background: #f8f9fa;
+}
+
+.form-control-modern:focus,
+.form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background: white;
+  outline: none;
+}
+
+/* Form Actions */
+.form-actions {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e9ecef;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: var(--profile-transition);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.btn-lg:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+
+
+/* Dark Theme Support */
+html[data-bs-theme="dark"] .profile-section {
+  background: linear-gradient(135deg, #1a1d23 0%, #15171d 100%);
+}
+
+html[data-bs-theme="dark"] .profile-bg {
+  background: radial-gradient(circle at 30% 20%, rgba(76, 140, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(102, 16, 242, 0.08) 0%, transparent 50%);
+}
+
+html[data-bs-theme="dark"] .section-title {
+  color: #f4f7fa;
+}
+
+html[data-bs-theme="dark"] .section-subtitle {
+  color: #a9b5c7;
+}
+
+html[data-bs-theme="dark"] .profile-card {
+  background: #1e2329;
+  border-color: #2d3748;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+html[data-bs-theme="dark"] .form-section-title {
+  color: #f7fafc;
+  border-bottom-color: #2d3748;
+}
+
+html[data-bs-theme="dark"] .form-label {
+  color: #e2e8f0;
+}
+
+html[data-bs-theme="dark"] .form-control-modern,
+html[data-bs-theme="dark"] .form-select {
+  background: #2d3748;
+  border-color: #4a5568;
+  color: #e2e8f0;
+}
+
+html[data-bs-theme="dark"] .form-control-modern:focus,
+html[data-bs-theme="dark"] .form-select:focus {
+  background: #1a202c;
+  border-color: #4c8cff;
+}
+
+html[data-bs-theme="dark"] .profile-stats {
+  background: rgba(76, 140, 255, 0.08);
+  border-color: #2d3748;
+}
+
+html[data-bs-theme="dark"] .stat-number {
+  color: #4c8cff;
+}
+
+html[data-bs-theme="dark"] .stat-label {
+  color: #a0aec0;
+}
+
+html[data-bs-theme="dark"] .action-content h5 {
+  color: #f7fafc;
+}
+
+html[data-bs-theme="dark"] .action-content p {
+  color: #a0aec0;
+}
+
+html[data-bs-theme="dark"] .form-actions {
+  border-top-color: #2d3748;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-card {
+    padding: 2rem;
+  }
+  
+  .section-title {
+    font-size: 2.5rem;
+  }
+  
+  .profile-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .btn-lg {
+    justify-content: center;
+  }
+  
+
+}
+
+@media (max-width: 480px) {
+  .profile-picture {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .profile-card {
+    padding: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Profile picture preview functionality
   function resetProfilePicture() {
     const defaultPath = "{{ url_for('static', filename='images/default-profile.png') }}";
     document.getElementById("previewImage").src = defaultPath;
@@ -118,16 +517,80 @@
     document.getElementById("remove_picture").value = "0";
   }
 
+  // File input change handler
   document.getElementById("profile_picture_input").addEventListener("change", function (e) {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Lütfen geçerli bir resim dosyası seçin.');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Dosya boyutu 5MB\'dan küçük olmalıdır.');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = function (event) {
         document.getElementById("previewImage").src = event.target.result;
       };
       reader.readAsDataURL(file);
+      clearRemoveFlag();
     }
   });
-</script>
 
+  // Make functions global
+  window.resetProfilePicture = resetProfilePicture;
+  window.clearRemoveFlag = clearRemoveFlag;
+
+  // Form validation
+  const form = document.querySelector('form');
+  form.addEventListener('submit', function(e) {
+    const email = document.getElementById('email').value;
+    const firstName = document.getElementById('first_name').value;
+    const lastName = document.getElementById('last_name').value;
+    
+    // Basic email validation
+    if (email && !isValidEmail(email)) {
+      e.preventDefault();
+      alert('Lütfen geçerli bir e-posta adresi girin.');
+      return;
+    }
+    
+    // Name validation
+    if (firstName && firstName.length < 2) {
+      e.preventDefault();
+      alert('Ad en az 2 karakter olmalıdır.');
+      return;
+    }
+    
+    if (lastName && lastName.length < 2) {
+      e.preventDefault();
+      alert('Soyad en az 2 karakter olmalıdır.');
+      return;
+    }
+  });
+
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+
+  // Form input focus effects
+  const formInputs = document.querySelectorAll('.form-control-modern, .form-select');
+  formInputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.style.transform = 'translateY(-2px)';
+    });
+    
+    input.addEventListener('blur', function() {
+      this.parentElement.style.transform = 'translateY(0)';
+    });
+  });
+});
+</script>
 {% endblock %}
