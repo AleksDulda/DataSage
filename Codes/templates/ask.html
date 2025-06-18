@@ -2,6 +2,17 @@
 {% block title %}Sorgu - DATASAGE{% endblock %}
 {% block content %}
 
+<style>
+/* Conditional visibility classes */
+.db-alert.hidden {
+    display: none !important;
+}
+
+.db-summary-container.hidden {
+    display: none !important;
+}
+</style>
+
 <!-- Hero Section: Sayfanın üst kısmındaki başlık ve tanıtım alanı -->
 <section class="query-hero">
   <div class="hero-background"></div>
@@ -24,7 +35,7 @@
   <div class="row justify-content-center">
     <div class="col-lg-10">
 
-      {# Kullanıcı token bilgisi varsa gösterilir #}
+      <!-- Kullanıcı token bilgisi varsa gösterilir -->
       {% if tokens is not none %}
       <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -51,24 +62,24 @@
       <!-- Query Form Card: Ana sorgu ve dosya yükleme formu kartı -->
       <div class="query-card glass-card" data-aos="fade-up" data-aos-delay="200">
 
-        <!-- Aktif Veritabanı Uyarısı: Sadece geçerli bir veritabanı varsa gösterilir -->
-        {# last_db değeri Python tarafından gönderilir. None veya "None" stringi ise gizli kalır. #}
-        <div id="dbAlert" class="db-alert {% if last_db and last_db != 'None' and last_db.strip() != '' %}show{% endif %}" data-aos="fade-down" style="{% if not last_db or last_db == 'None' or last_db.strip() == '' %}display: none;{% endif %}">
+        <!-- Birleşik Aktif Veritabanı Bölümü -->
+        <div id="dbAlert" class="db-alert {% if not last_db or last_db == 'None' or last_db.strip() == '' %}hidden{% else %}show{% endif %}" data-aos="fade-down">
           <div class="db-alert-icon">
             <i class="bi bi-database-check"></i>
           </div>
           <div class="db-alert-content">
             <div class="db-alert-title">Aktif veritabanı</div>
-            {# last_db boşsa veya "None" ise boş string gösterilir #}
             <div class="db-alert-subtitle" id="activeDbName">{{ (last_db.split('_', 1)[1] if '_' in last_db else last_db) if last_db and last_db != 'None' and last_db.strip() != '' else '' }}</div>
             <small class="db-alert-note">Yeni bir veritabanı yüklersen, bu veritabanının yerine geçer.</small>
           </div>
+          <button type="button" class="file-remove-btn" id="removeFile">
+            <i class="bi bi-x"></i>
+          </button>
         </div>
 
         <!-- Veritabanı Özeti Alanı: Sadece özet varsa gösterilir -->
-        {# current-db-filename için de None kontrolü yapıldı #}
         <input type="hidden" id="current-db-filename" value="{{ last_db if last_db and last_db != 'None' and last_db.strip() != '' else '' }}">
-        <div id="dbSummaryContainer" class="db-summary-container" style="{% if not db_summary %}display: none;{% endif %}">
+        <div id="dbSummaryContainer" class="db-summary-container {% if not db_summary %}hidden{% endif %}">
           <div class="db-summary-header">
             <i class="bi bi-info-circle"></i>
             <span>Veritabanı Özeti</span>
@@ -87,13 +98,6 @@
 
           <!-- Veritabanı Yükleme Bölümü -->
           <div class="form-section">
-            <div class="section-header">
-              <div class="section-icon">
-                <i class="bi bi-database"></i>
-              </div>
-              <div class="section-title">Veritabanı Dosyası</div>
-            </div>
-
             <div class="upload-zone" id="uploadArea">
               <input type="file" name="database" class="upload-input" id="databaseFile" accept=".db,.sqlite,.sqlite3">
               <div class="upload-content">
@@ -103,18 +107,6 @@
                 <div class="upload-text">SQLite dosyanızı sürükleyin veya tıklayın</div>
                 <div class="upload-formats">Desteklenen formatlar: .db, .sqlite, .sqlite3</div>
               </div>
-            </div>
-
-            <!-- Dosya Önizleme Alanı: Sadece geçerli bir veritabanı varsa gösterilir -->
-            <div class="file-preview {% if last_db and last_db != 'None' and last_db.strip() != '' %}show{% endif %}" id="fileInfo">
-              <div class="file-preview-icon">
-                <i class="bi bi-file-earmark-check"></i>
-              </div>
-              {# last_db boşsa veya "None" ise boş string gösterilir #}
-              <div class="file-preview-name" id="fileName">{{ (last_db.split('_', 1)[1] if '_' in last_db else last_db) if last_db and last_db != 'None' and last_db.strip() != '' else '' }}</div>
-              <button type="button" class="file-remove-btn" id="removeFile">
-                <i class="bi bi-x"></i>
-              </button>
             </div>
           </div>
 
@@ -251,7 +243,7 @@
       </div>
       {% endif %}
 
-      <!-- Sonuçlar Bölümü: 'results-section' id'si eklendi -->
+      <!-- Sonuçlar Bölümü -->
       {% if result %}
       <div id="results-section" class="result-card data-result-card" data-aos="fade-up" data-aos-delay="400">
         {% if result["columns"][0] == "Hata" %}
@@ -358,19 +350,16 @@
   </div>
 </div>
 
-<!-- Chart.js Kütüphanesi ve Diğer JavaScript Kodları -->
+<!-- Chart.js and Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Chart.js ile ilgili fonksiyonlar (eğer sonuç varsa çalışır)
 {% if result and result["columns"][0] != "Hata" %}
+<script>
 const rows = JSON.parse('{{ result["rows"] | tojson | safe }}');
 const columns = JSON.parse('{{ result["columns"] | tojson | safe }}');
 let chartInstance = null;
 
 /**
  * Belirtilen sayıda renk oluşturur.
- * @param {number} count - Oluşturulacak renk sayısı.
- * @returns {string[]} Renk kodları dizisi.
  */
 function generateColors(count) {
     const baseColors = [
@@ -392,9 +381,9 @@ function generateColors(count) {
 function populateColumnDropdowns() {
     const labelDropdown = document.getElementById("labelColumn");
     const valueDropdown = document.getElementById("valueColumn");
-    if (!labelDropdown || !valueDropdown) return; // Elementler yoksa çık
+    if (!labelDropdown || !valueDropdown) return;
 
-    labelDropdown.innerHTML = ""; // Mevcut seçenekleri temizle
+    labelDropdown.innerHTML = "";
     valueDropdown.innerHTML = "";
 
     columns.forEach((col, i) => {
@@ -408,8 +397,9 @@ function populateColumnDropdowns() {
         opt2.text = col;
         valueDropdown.appendChild(opt2);
     });
-    labelDropdown.selectedIndex = 0; // İlk sütunu varsayılan olarak seç
-    valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0; // İkinci sütunu (varsa) seç
+    
+    labelDropdown.selectedIndex = 0;
+    valueDropdown.selectedIndex = columns.length > 1 ? 1 : 0;
 }
 
 /**
@@ -422,39 +412,37 @@ function drawChart() {
 
     const labels = [];
     const values = [];
-    // Veritabanı satırlarını döngüye alarak etiketleri ve değerleri çıkar
+    
     for (let i = 0; i < rows.length; i++) {
         const label = rows[i][labelIdx];
         const raw = rows[i][valueIdx];
-        // Değeri temizle ve sayıya dönüştür
         const value = parseFloat(String(raw).replace(/[^\d.-]/g, ""));
-        if (!isNaN(value)) { // Geçerli bir sayı ise ekle
+        if (!isNaN(value)) {
             labels.push(label);
             values.push(value);
         }
     }
 
-    if (chartInstance) chartInstance.destroy(); // Mevcut grafik örneğini yok et
+    if (chartInstance) chartInstance.destroy();
 
-    // Etiket ve değerler varsa yeni grafiği çiz
     if (labels.length > 0 && values.length > 0) {
         const ctx = document.getElementById("chartArea").getContext("2d");
         chartInstance = new Chart(ctx, {
-            type: type, // Grafik tipi (bar, line, pie vb.)
+            type: type,
             data: {
-                labels: labels, // X ekseni etiketleri
+                labels: labels,
                 datasets: [{
-                    label: columns[valueIdx], // Veri kümesi etiketi
-                    data: values, // Y ekseni değerleri
-                    backgroundColor: generateColors(labels.length), // Renkler
+                    label: columns[valueIdx],
+                    data: values,
+                    backgroundColor: generateColors(labels.length),
                     borderColor: generateColors(labels.length),
                     borderWidth: 2,
-                    tension: 0.4 // Çizgi grafikler için yumuşaklık
+                    tension: 0.4
                 }]
             },
             options: {
-                responsive: true, // Duyarlı boyutlandırma
-                maintainAspectRatio: false, // Oran korumayı devre dışı bırak
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     title: {
                         display: true,
@@ -462,12 +450,10 @@ function drawChart() {
                         font: { size: 16, weight: 'bold' }
                     },
                     legend: {
-                        // Pasta/Halka grafikler için legend pozisyonu
                         position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
                         labels: { usePointStyle: true }
                     }
                 },
-                // Sütun ve Çizgi grafikler için eksen ayarları
                 ...(type === "bar" || type === "line"
                     ? {
                         scales: {
@@ -484,40 +470,50 @@ function drawChart() {
 
 /**
  * Sorgu sonuçlarını CSV veya Excel olarak indirir.
- * @param {string} format - İndirilecek format ("csv" veya "xlsx").
  */
 function downloadResult(format) {
-    const btn = event.target.closest('button'); // Tıklanan butonu bul
-    const originalText = btn.innerHTML; // Butonun orijinal içeriğini sakla
-    btn.innerHTML = '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> İndiriliyor...'; // Yükleme animasyonu göster
-    btn.disabled = true; // Butonu devre dışı bırak
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise spinner-border spinner-border-sm"></i> İndiriliyor...';
+    btn.disabled = true;
 
-    // İndirme isteğini sunucuya gönder
     fetch("/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rows: rows, columns: columns, format: format })
     })
-    .then(response => response.blob()) // Yanıtı Blob olarak al
+    .then(response => response.blob())
     .then(blob => {
-        const url = window.URL.createObjectURL(blob); // Blob'dan URL oluştur
-        const a = document.createElement("a"); // Geçici bir <a> etiketi oluştur
-        a.href = url; // URL'yi atama
-        a.download = format === "xlsx" ? "sonuc.xlsx" : "sonuc.csv"; // Dosya adını belirle
-        document.body.appendChild(a); // Etiketi DOM'a ekle
-        a.click(); // Tıklama olayını tetikle (indirmeyi başlatır)
-        a.remove(); // Etiketi DOM'dan kaldır
-        window.URL.revokeObjectURL(url); // Oluşturulan URL'yi temizle
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = format === "xlsx" ? "sonuc.xlsx" : "sonuc.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
     })
     .finally(() => {
-        btn.innerHTML = originalText; // Butonun içeriğini orijinal haline getir
-        btn.disabled = false; // Butonu tekrar etkinleştir
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     });
 }
-{% endif %} {# Chart.js ile ilgili Flask if bloğu kapanışı #}
 
+// Grafik başlatma
+document.addEventListener("DOMContentLoaded", function() {
+    populateColumnDropdowns();
+    drawChart();
+    
+    // Grafik kontrol olay dinleyicileri
+    document.getElementById("chartType").addEventListener("change", drawChart);
+    document.getElementById("labelColumn").addEventListener("change", drawChart);
+    document.getElementById("valueColumn").addEventListener("change", drawChart);
+});
+</script>
+{% endif %}
 
-// Genel sayfa etkileşimleri ve olay dinleyicileri
+<script>
+// Genel sayfa etkileşimleri
 document.addEventListener("DOMContentLoaded", function () {
   const toggleBtn = document.getElementById("toggle-summary-btn");
   const summaryBox = document.getElementById("db-summary-text");
@@ -525,25 +521,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const dbSummaryContainer = document.getElementById("dbSummaryContainer");
   const uploadArea = document.getElementById("uploadArea");
   const databaseFile = document.getElementById("databaseFile");
-  const fileInfo = document.getElementById("fileInfo");
-  const fileNameDisplay = document.getElementById("fileName");
   const removeFileBtn = document.getElementById("removeFile");
   const dbAlert = document.getElementById("dbAlert");
   const activeDbName = document.getElementById("activeDbName");
   const queryForm = document.getElementById("queryForm");
 
   let isDetailed = false;
+  const initialLastDb = "{{ last_db if last_db else '' }}";
 
-  // ===========================================
   // Veritabanı Özeti Açma/Kapatma İşlevi
-  // ===========================================
   if (toggleBtn && summaryBox && dbFilenameInput) {
     toggleBtn.addEventListener("click", async function () {
       const dbFilename = dbFilenameInput.value;
-      if (!dbFilename) return; // Dosya adı yoksa işlem yapma
+      if (!dbFilename) return;
 
       toggleBtn.disabled = true;
-      toggleBtn.innerHTML = `<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>`;
+      toggleBtn.innerHTML = '<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>';
 
       try {
         const mode = isDetailed ? "short" : "detail";
@@ -573,51 +566,29 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // ===========================================
-  // Dosya Yükleme Alanı ve Önizleme İşlevi
-  // ===========================================
-
-  /**
-   * Aktif veritabanı uyarı ve özetini günceller.
-   * @param {string|null} filename - Yüklenecek/seçilen dosya adı (None ise gizler).
-   * @param {boolean} [showFileInfo=true] - fileInfo önizlemesini gösterip göstermeyeceği.
-   */
-  async function updateDbDisplay(filename, showFileInfo = true) {
-      // 'None' stringini veya boş stringi kontrol et
+  // Aktif veritabanı uyarı ve özetini günceller
+  async function updateDbDisplay(filename, showAlert = true) {
       if (filename && filename !== 'None' && filename.trim() !== '') {
-          // Dosya önizleme bilgisini güncelle
-          fileNameDisplay.textContent = filename.split('_', 1)[1] || filename;
-          if (showFileInfo) {
-              fileInfo.classList.add("show");
-          } else {
-              fileInfo.classList.remove("show");
+          const displayName = filename.includes('_') ? filename.split('_').slice(1).join('_') : filename;
+          activeDbName.textContent = displayName;
+          if (showAlert) {
+              dbAlert.classList.remove("hidden");
+              dbAlert.classList.add("show");
           }
           uploadArea.style.display = "none";
 
-          // Aktif DB uyarısını güncelle
-          activeDbName.textContent = filename.split('_', 1)[1] || filename;
-          dbAlert.style.display = "flex"; // Alert'i görünür yap
-          dbAlert.classList.add("show"); // Animasyon için show sınıfını ekle
-
-          // DB özetini güncelle
-          dbSummaryContainer.style.display = "block"; // Özeti görünür yap
-          dbFilenameInput.value = filename; // Özet çekmek için gizli inputu güncelle
-          await fetchDbSummary(filename, "short"); // Kısa özeti çek ve göster
+          dbSummaryContainer.classList.remove("hidden");
+          dbFilenameInput.value = filename;
+          await fetchDbSummary(filename, "short");
       } else {
-          // Dosya yoksa veya geçersizse tüm alanları gizle ve sıfırla
-          fileInfo.classList.remove("show");
-          uploadArea.style.display = "block"; // Yükleme alanını göster
-          dbAlert.style.display = "none"; // Alert'i gizle
-          dbSummaryContainer.style.display = "none"; // Özeti gizle
-          dbFilenameInput.value = ""; // Gizli inputu temizle
+          dbAlert.classList.add("hidden");
+          dbAlert.classList.remove("show");
+          uploadArea.style.display = "block";
+          dbSummaryContainer.classList.add("hidden");
+          dbFilenameInput.value = "";
       }
   }
 
-  /**
-   * Sunucudan veritabanı özetini çeker ve günceller.
-   * @param {string} filename - Özetin çekileceği dosya adı.
-   * @param {string} mode - Özetin modu ("short" veya "detail").
-   */
   async function fetchDbSummary(filename, mode) {
       const summaryBox = document.getElementById("db-summary-text");
       const toggleBtn = document.getElementById("toggle-summary-btn");
@@ -626,7 +597,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       summaryBox.textContent = "Veritabanı özeti yükleniyor...";
       toggleBtn.disabled = true;
-      toggleBtn.innerHTML = `<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>`;
+      toggleBtn.innerHTML = '<span><span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...</span>';
 
       try {
           const response = await fetch(`/get-db-summary?filename=${encodeURIComponent(filename)}&mode=${mode}`);
@@ -637,7 +608,7 @@ document.addEventListener("DOMContentLoaded", function () {
               summaryBox.textContent = "❌ Özet alınamadı.";
           }
           toggleBtn.innerHTML = '<span>Daha ayrıntılı göster</span> <i class="bi bi-chevron-right"></i>';
-          isDetailed = false; // Her zaman kısa moda sıfırla
+          isDetailed = false;
       } catch (e) {
           console.error("Veritabanı özeti getirilirken hata:", e);
           summaryBox.textContent = "❌ Özet getirilirken bir hata oluştu.";
@@ -647,40 +618,49 @@ document.addEventListener("DOMContentLoaded", function () {
       }
   }
 
-
-  // Sayfa ilk yüklendiğinde mevcut bir veritabanı varsa başlangıç durumunu ayarla
-  const initialLastDb = "{{ last_db }}";
-  // 'None' stringini, boş stringi ve sadece boşluk içeren stringleri de kontrol et
+  // Sayfa başlangıcında mevcut veritabanını kontrol et
   if (initialLastDb && initialLastDb.trim() !== '' && initialLastDb !== 'None') {
       updateDbDisplay(initialLastDb, true);
   } else {
-      // Eğer başlangıçta veritabanı yoksa, tüm ilgili alanları gizle
-      fileInfo.classList.remove("show");
+      dbAlert.classList.add("hidden");
       uploadArea.style.display = "block";
-      dbAlert.style.display = "none";
-      dbSummaryContainer.style.display = "none";
+      dbSummaryContainer.classList.add("hidden");
       dbFilenameInput.value = "";
   }
 
-
-  // Dosya seçildiğinde olay dinleyicisi
+  // Dosya seçimi
   databaseFile.addEventListener("change", function () {
     if (this.files.length > 0) {
       const filename = this.files[0].name;
-      // Anlık geri bildirim için kullanıcının seçtiği dosya adını kullan
       updateDbDisplay(filename);
     } else {
-      updateDbDisplay(null); // Dosya seçimi iptal edilirse her şeyi gizle
+      updateDbDisplay(null);
     }
   });
 
-  // Dosya kaldırma butonu olay dinleyicisi
-  removeFileBtn.addEventListener("click", function () {
-    databaseFile.value = ""; // Input'u temizle
-    updateDbDisplay(null); // Görüntülemeleri sıfırla
-  });
+  // Dosya kaldırma
+removeFileBtn.addEventListener("click", async function () {
+  databaseFile.value = "";
+  updateDbDisplay(null);
 
-  // Drag-and-drop işlevselliği
+  // Backend'e session temizlet
+  try {
+    await fetch("/clear-db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (err) {
+    console.error("Veritabanı temizlenirken hata:", err);
+  }
+
+  // Sayfayı resetli olarak yeniden yükle
+  window.location.href = "/ask?reset=1";
+});
+
+
+
+
+  // Drag-and-drop
   uploadArea.addEventListener("dragover", function (e) {
     e.preventDefault();
     this.classList.add("dragover");
@@ -696,26 +676,22 @@ document.addEventListener("DOMContentLoaded", function () {
     this.classList.remove("dragover");
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-      databaseFile.files = files; // Sürüklenen dosyayı input'a ata
+      databaseFile.files = files;
       const event = new Event('change');
-      databaseFile.dispatchEvent(event); // Change event'i tetikle
+      databaseFile.dispatchEvent(event);
     }
   });
 
-  // ===========================================
-  // Submit Butonu Animasyonu
-  // ===========================================
+  // Submit butonu animasyonu
   queryForm.addEventListener("submit", function() {
     const submitBtn = this.querySelector(".submit-btn");
     submitBtn.classList.add("loading");
     submitBtn.disabled = true;
   });
 
-  // Kaydırma fonksiyonlarını tanımladıktan sonra çağırın
-  // Sayfa yüklendiğinde ve form gönderildiğinde kaydırma işlemi
+  // Sonuçlara kaydırma
   const resultsSection = document.getElementById('results-section');
   if (resultsSection) {
-    // Küçük bir gecikme ile kaydırma işlemini başlat
     setTimeout(() => {
       const navbar = document.getElementById('main-navbar');
       const navbarHeight = navbar ? navbar.offsetHeight : 0;
@@ -725,15 +701,10 @@ document.addEventListener("DOMContentLoaded", function () {
         top: targetScrollPosition,
         behavior: 'smooth'
       });
-    }, 100); // 100ms gecikme, içeriğin yerleşmesi için yeterli olmalı
+    }, 100);
   }
-
 });
 
-/**
- * Önerilen soruyu input alanına yerleştirir.
- * @param {HTMLElement} buttonElement - Tıklanan öneri butonu elementi.
- */
 function setSuggestion(buttonElement) {
     const questionInput = document.querySelector('.question-input');
     if (questionInput) {
@@ -741,26 +712,17 @@ function setSuggestion(buttonElement) {
     }
 }
 
-/**
- * Üretilen SQL sorgusunu panoya kopyalar.
- */
 function copySql() {
     const sqlQueryElement = document.querySelector('.sql-query code');
     if (sqlQueryElement) {
         const sqlText = sqlQueryElement.textContent;
-        // Eski yöntem (iframe'lerde daha uyumlu)
         copyTextToClipboardLegacy(sqlText);
     }
 }
 
-/**
- * Metni panoya kopyalamak için eski (fallback) yöntem.
- * @param {string} text - Kopyalanacak metin.
- */
 function copyTextToClipboardLegacy(text) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
-    // Ekran dışına taşı
     textArea.style.position = "fixed";
     textArea.style.left = "-9999px";
     textArea.style.top = "-9999px";
@@ -776,7 +738,6 @@ function copyTextToClipboardLegacy(text) {
     }
     document.body.removeChild(textArea);
 }
-
 </script>
 {% endblock %}
 
