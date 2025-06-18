@@ -207,11 +207,30 @@ def ask():
 
         session["current_db"] = filename
     else:
+<<<<<<< Updated upstream
         if "current_db" not in session:
             flash("Lütfen önce bir veritabanı yükleyin.", "danger")
             return render_template("ask.html")
         filename = session["current_db"]
+=======
+        # Daha önce yüklenmiş veritabanı
+        filename = session.get("current_db")
+        if not filename:
+            flash("Lütfen önce bir veritabanı yükleyin.", "danger")
+            return render_template("ask.html", tokens=tokens, remaining_timedelta=remaining_timedelta)
+>>>>>>> Stashed changes
         filepath = os.path.join(DB_UPLOAD_FOLDER, filename)
+    
+    # app.py içinde, ask route'unda:
+    if request.method == "GET":
+    # eğer kullanıcı ?reset=1 ile gelmişse session'ı da temizle
+        if request.args.get("reset") == "1":
+            session.pop("current_db", None)
+            return render_template("ask.html", last_db=None, tokens=tokens, remaining_timedelta=remaining_timedelta)
+
+        last_db = session.get("current_db")
+        return render_template("ask.html", last_db=last_db, tokens=tokens, remaining_timedelta=remaining_timedelta)
+
 
     schema = get_schema(filepath)
     sql_query = generate_sql(schema, question)
@@ -242,7 +261,20 @@ def ask():
     conn.commit()
     conn.close()
 
+<<<<<<< Updated upstream
     return render_template("ask.html", result=result, sql_query=sql_query, last_db=last_db, db_summary=db_summary)
+=======
+    return render_template("ask.html", result=result, sql_query=sql_query, last_db=last_db, db_summary=db_summary, tokens=tokens, remaining_timedelta=remaining_timedelta)
+
+@app.route("/clear-db", methods=["POST"])
+def clear_db():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    session["current_db"] = None
+    return jsonify({"success": True})
+
+>>>>>>> Stashed changes
 
 @app.route("/download", methods=["POST"])
 def download():
