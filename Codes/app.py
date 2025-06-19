@@ -10,6 +10,7 @@ from functools import wraps
 import os
 import io
 import sqlite3
+import json
 import pymysql
 import psycopg2
 import zipfile
@@ -283,8 +284,8 @@ def ask():
     # Sorgu geçmişine kaydet
     conn = sqlite3.connect("database.sqlite")
     conn.execute(
-        "INSERT INTO query_history (user_id, question, sql_query, result) VALUES (?, ?, ?, ?)",
-        (user_id, question, sql_query, str(result["rows"]))
+        "INSERT INTO query_history (user_id, question, sql_query, result, columns, db_filename) VALUES (?, ?, ?, ?, ?, ?)",
+        (user_id, question, sql_query, json.dumps(result["rows"]), json.dumps(result["columns"]), last_db)
     )
     conn.commit()
     conn.close()
@@ -470,43 +471,28 @@ def download_query(query_id, format):
 
     conn = sqlite3.connect("database.sqlite")
     conn.row_factory = sqlite3.Row
-    query = conn.execute(
-        "SELECT * FROM query_history WHERE id = ? AND user_id = ?",
-        (query_id, session["user_id"])
-    ).fetchone()
+    row = conn.execute("SELECT result, columns FROM query_history WHERE id = ? AND user_id = ?", (query_id, session["user_id"])).fetchone()
     conn.close()
 
-    if not query:
+    if not row:
         return "Sorgu bulunamadı", 404
 
-    rows = eval(query["result"])
-    # YENİ EKLENDİ:
-    if "columns" in query.keys() and query["columns"]:
-        columns = eval(query["columns"])
-        df = pd.DataFrame(rows, columns=columns)
-    else:
-        df = pd.DataFrame(rows)
-
+    rows = json.loads(row["result"])
+    columns = json.loads(row["columns"])
+    df = pd.DataFrame(rows, columns=columns)
+    
     buffer = io.BytesIO()
     if format == "xlsx":
         df.to_excel(buffer, index=False, engine="openpyxl")
         mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ext = "xlsx"
+        filename = "sorgu_sonucu.xlsx"
     else:
         df.to_csv(buffer, index=False)
         mimetype = "text/csv"
-        ext = "csv"
+        filename = "sorgu_sonucu.csv"
+
     buffer.seek(0)
-    filename = f"query_{query_id}.{ext}"
-
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=filename,
-        mimetype=mimetype
-    )
-
-
+    return send_file(buffer, as_attachment=True, download_name=filename, mimetype=mimetype)
 
 @app.route("/delete_query/<int:query_id>")
 def delete_query(query_id):
