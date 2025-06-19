@@ -1018,5 +1018,21 @@ function switchTab(tabName) {
     }, 300);
   }
 }
+
+function toggleShowMoreGeneric(link, type) {
+    const parent = link.closest('td');
+    const shortElem = parent.querySelector(`.${type}-short`);
+    const fullElem = parent.querySelector(`.${type}-full`);
+
+    if (fullElem.style.display === 'none') {
+      fullElem.style.display = 'inline';
+      shortElem.style.display = 'none';
+      link.textContent = 'Kısalt';
+    } else {
+      fullElem.style.display = 'none';
+      shortElem.style.display = 'inline';
+      link.textContent = 'Devamını gör';
+    }
+  }
 </script>
 {% endblock %}
