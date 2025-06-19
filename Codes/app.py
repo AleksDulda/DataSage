@@ -683,20 +683,29 @@ def profile():
     user = cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
     # Toplam sorgu sayısı
-    queries_count = cursor.execute("SELECT COUNT(*) FROM query_history WHERE user_id = ?", (user_id,)).fetchone()[0]
+    queries_count = cursor.execute(
+        "SELECT COUNT(*) FROM query_history WHERE user_id = ?", (user_id,)
+    ).fetchone()[0]
 
-    # İlk sorgu tarihi (üyelik başlangıcı olarak)
-    join_date_str = cursor.execute("SELECT MIN(timestamp) FROM query_history WHERE user_id = ?", (user_id,)).fetchone()[0]
-    join_date = datetime.fromisoformat(join_date_str) if join_date_str else None
+    # İlk sorgu tarihi (üyelik başlangıcı gibi gösterilecek)
+    join_date_str = cursor.execute(
+        "SELECT COALESCE(MIN(timestamp), CURRENT_TIMESTAMP) FROM query_history WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()[0]
 
-    # Row nesnesi salt okunur olduğundan dictionary'ye dönüştürülüp yeni veriler eklenir
+    # ISO format hatasına karşı korumalı
+    try:
+        join_date = datetime.fromisoformat(join_date_str)
+    except:
+        join_date = datetime.now()
+
+    # Row nesnesini dict'e çevir ve ek bilgileri yerleştir
     user_dict = dict(user)
     user_dict["queries_count"] = queries_count
     user_dict["join_date"] = join_date
 
     conn.close()
     return render_template("profile.html", user=user_dict)
-
 @app.route("/change-password", methods=["GET", "POST"])
 def change_password():
     if "user_id" not in session:
