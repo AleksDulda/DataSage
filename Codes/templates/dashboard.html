@@ -908,9 +908,18 @@ document.addEventListener('DOMContentLoaded', function () {
       sessionStorage.setItem('scrollY', window.scrollY);
     });
   });
+  
+  // Per-page select event listeners
   const perPageSelect = document.querySelector('select[name="per_page"]');
   if (perPageSelect) {
     perPageSelect.addEventListener('change', () => {
+      sessionStorage.setItem('scrollY', window.scrollY);
+    });
+  }
+  
+  const uploadsPerPageSelect = document.querySelector('select[name="uploads_per_page"]');
+  if (uploadsPerPageSelect) {
+    uploadsPerPageSelect.addEventListener('change', () => {
       sessionStorage.setItem('scrollY', window.scrollY);
     });
   }
@@ -921,12 +930,14 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // AOS animasyonları
-  AOS.init({
-    duration: 800,
-    easing: 'ease-out-cubic',
-    once: true,
-    offset: 100
-  });
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 100
+    });
+  }
 
   // Tab sistemini başlat
   document.querySelectorAll('.tab-button').forEach(button => {
@@ -939,12 +950,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // Tooltipler
   document.querySelectorAll('[title]').forEach(element => {
     element.addEventListener('mouseenter', function () {
+      // Önceki tooltip'i kaldır
+      const existingTooltip = document.querySelector('.tooltip-custom');
+      if (existingTooltip) existingTooltip.remove();
+      
       const tooltip = document.createElement('div');
       tooltip.className = 'tooltip-custom';
       tooltip.textContent = this.getAttribute('title');
       tooltip.style.cssText = `
         position: absolute;
-        background: var(--text-primary);
+        background: var(--text-primary, #333);
         color: white;
         padding: 0.5rem;
         border-radius: 6px;
@@ -953,22 +968,45 @@ document.addEventListener('DOMContentLoaded', function () {
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.3s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       `;
       document.body.appendChild(tooltip);
+      
       const rect = this.getBoundingClientRect();
-      tooltip.style.left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
-      tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      // Tooltip pozisyonunu hesapla
+      let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+      let top = rect.top - tooltipRect.height - 10;
+      
+      // Ekran sınırları kontrolü
+      if (left < 0) left = 10;
+      if (left + tooltipRect.width > window.innerWidth) left = window.innerWidth - tooltipRect.width - 10;
+      if (top < 0) top = rect.bottom + 10;
+      
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      
       setTimeout(() => tooltip.style.opacity = '1', 100);
-      this.addEventListener('mouseleave', () => tooltip.remove(), { once: true });
+      
+      const removeTooltip = () => {
+        if (tooltip.parentNode) tooltip.remove();
+      };
+      
+      this.addEventListener('mouseleave', removeTooltip, { once: true });
+      setTimeout(removeTooltip, 5000); // 5 saniye sonra otomatik kaldır
     });
   });
 
   // Uyarıları 5 saniyede kaldır
   document.querySelectorAll('.alert').forEach(alert => {
     setTimeout(() => {
+      alert.style.transition = 'opacity 0.3s, transform 0.3s';
       alert.style.opacity = '0';
       alert.style.transform = 'translateY(-20px)';
-      setTimeout(() => alert.remove(), 300);
+      setTimeout(() => {
+        if (alert.parentNode) alert.remove();
+      }, 300);
     }, 5000);
   });
 
@@ -979,7 +1017,10 @@ document.addEventListener('DOMContentLoaded', function () {
     searchInput.addEventListener('input', function () {
       clearTimeout(searchTimeout);
       this.style.borderColor = '#007bff';
-      searchTimeout = setTimeout(() => this.style.borderColor = '', 1000);
+      this.style.transition = 'border-color 0.3s';
+      searchTimeout = setTimeout(() => {
+        this.style.borderColor = '';
+      }, 1000);
     });
   }
 
@@ -995,13 +1036,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
       e.preventDefault();
-      toggleBtn?.click();
+      if (toggleBtn) toggleBtn.click();
     }
   });
 });
 
 // Tab geçiş fonksiyonu (global)
 function switchTab(tabName) {
+  // Aktif tab'ları temizle
   document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
 
@@ -1012,6 +1054,8 @@ function switchTab(tabName) {
     tabBtn.classList.add('active');
     tabContent.classList.add('active');
     sessionStorage.setItem('activeTab', tabName);
+    
+    // Loading animasyonu
     tabContent.classList.add('loading');
     setTimeout(() => {
       tabContent.classList.remove('loading');
@@ -1019,20 +1063,25 @@ function switchTab(tabName) {
   }
 }
 
+// Toggle show more function for generic content
 function toggleShowMoreGeneric(link, type) {
-    const parent = link.closest('td');
-    const shortElem = parent.querySelector(`.${type}-short`);
-    const fullElem = parent.querySelector(`.${type}-full`);
-
-    if (fullElem.style.display === 'none') {
-      fullElem.style.display = 'inline';
-      shortElem.style.display = 'none';
-      link.textContent = 'Kısalt';
-    } else {
-      fullElem.style.display = 'none';
-      shortElem.style.display = 'inline';
-      link.textContent = 'Devamını gör';
-    }
+  const row = link.closest('tr');
+  if (!row) return;
+  
+  const shortElement = row.querySelector(`.${type}-short`);
+  const fullElement = row.querySelector(`.${type}-full`);
+  
+  if (!shortElement || !fullElement) return;
+  
+  if (fullElement.style.display === 'none' || !fullElement.style.display) {
+    shortElement.style.display = 'none';
+    fullElement.style.display = 'block';
+    link.textContent = 'Daha az göster';
+  } else {
+    shortElement.style.display = 'block';
+    fullElement.style.display = 'none';
+    link.textContent = 'Devamını gör';
   }
+}
 </script>
 {% endblock %}
