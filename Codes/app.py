@@ -674,12 +674,28 @@ def profile():
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
+    user_id = session["user_id"]
     conn = sqlite3.connect("database.sqlite")
     conn.row_factory = sqlite3.Row
-    user = conn.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
-    conn.close()
+    cursor = conn.cursor()
 
-    return render_template("profile.html", user=user)
+    # Ana kullanıcı bilgisi
+    user = cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+
+    # Toplam sorgu sayısı
+    queries_count = cursor.execute("SELECT COUNT(*) FROM query_history WHERE user_id = ?", (user_id,)).fetchone()[0]
+
+    # İlk sorgu tarihi (üyelik başlangıcı olarak)
+    join_date_str = cursor.execute("SELECT MIN(timestamp) FROM query_history WHERE user_id = ?", (user_id,)).fetchone()[0]
+    join_date = datetime.fromisoformat(join_date_str) if join_date_str else None
+
+    # Row nesnesi salt okunur olduğundan dictionary'ye dönüştürülüp yeni veriler eklenir
+    user_dict = dict(user)
+    user_dict["queries_count"] = queries_count
+    user_dict["join_date"] = join_date
+
+    conn.close()
+    return render_template("profile.html", user=user_dict)
 
 @app.route("/change-password", methods=["GET", "POST"])
 def change_password():

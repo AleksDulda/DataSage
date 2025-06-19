@@ -250,6 +250,44 @@
   </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="forgotPasswordModalLabel">
+          <i class="bi bi-shield-lock me-2"></i>Şifremi Unuttum
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <i class="bi bi-key text-primary" style="font-size: 3rem;"></i>
+          <p class="mt-2 text-muted">Şifrenizi sıfırlamak için kullanıcı adınızı veya e-posta adresinizi girin.</p>
+        </div>
+        <form id="forgotPasswordForm" method="POST" action="{{ url_for('auth.forgot_password') }}">
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-person-circle me-2"></i>Kullanıcı Adı veya E-posta
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+              <input type="text" name="identifier" class="form-control" placeholder="Kullanıcı adı veya e-posta adresiniz" required>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="d-flex flex-column w-100">
+          <button type="submit" form="forgotPasswordForm" class="btn btn-primary mb-2">
+            <i class="bi bi-envelope me-2"></i>Sıfırlama Bağlantısı Gönder
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Flash Messages & Content -->
 <div id="page-content-wrapper">
     <div class="container mt-4">
@@ -361,7 +399,11 @@ function switchToRegister() {
 function switchToForgotPassword() {
   const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
   if (loginModal) loginModal.hide();
-  window.location.href = "{{ url_for('auth.forgot_password') }}";
+  
+  setTimeout(() => {
+    const forgotPasswordModal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+    forgotPasswordModal.show();
+  }, 300);
 }
 
 // Password visibility toggle
@@ -395,6 +437,10 @@ document.getElementById('loginModal').addEventListener('hidden.bs.modal', functi
 
 document.getElementById('registerModal').addEventListener('hidden.bs.modal', function () {
   document.getElementById('registerForm').reset();
+});
+
+document.getElementById('forgotPasswordModal').addEventListener('hidden.bs.modal', function () {
+  document.getElementById('forgotPasswordForm').reset();
 });
 
 </script>

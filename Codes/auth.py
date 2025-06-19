@@ -117,32 +117,40 @@ def logout():
     flash("Oturum sonlandırıldı.", "info")
     return redirect(url_for("index"))
 
-@auth.route("/forgot-password", methods=["GET", "POST"])
+@auth.route("/forgot-password", methods=["POST"])
 def forgot_password():
-    if request.method == "POST":
-        identifier = request.form.get("identifier", "").strip().lower()
-        conn = get_db_connection()
-        user = conn.execute("SELECT * FROM users WHERE username = ? OR email = ?", (identifier, identifier)).fetchone()
-        
-        if user:
-            token = str(uuid.uuid4())
-            expiry = datetime.utcnow() + timedelta(hours=1)
-            conn.execute("UPDATE users SET reset_token = ?, reset_expiry = ? WHERE id = ?", (token, expiry.isoformat(), user["id"]))
-            conn.commit()
-            reset_link = url_for("auth.reset_password", token=token, _external=True)
+    identifier = request.form.get("identifier", "").strip().lower()
+    conn = get_db_connection()
+    user = conn.execute(
+        "SELECT * FROM users WHERE username = ? OR email = ?",
+        (identifier, identifier)
+    ).fetchone()
 
-            msg = Message("Şifre Sıfırlama - DataSage",
-                          recipients=[user["email"]],
-                          body=f"Merhaba {user['first_name']},\n\nŞifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:\n{reset_link}\n\nBağlantı 1 saat boyunca geçerlidir.")
-            from app import mail
-            mail.send(msg)
+    if user:
+        token = str(uuid.uuid4())
+        expiry = datetime.utcnow() + timedelta(hours=1)
+        conn.execute("UPDATE users SET reset_token = ?, reset_expiry = ? WHERE id = ?",
+                     (token, expiry.isoformat(), user["id"]))
+        conn.commit()
+        reset_link = url_for("auth.reset_password", token=token, _external=True)
 
-            flash("Eğer bilgiler doğruysa şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", "info")
-        else:
-            flash("Eğer bilgiler doğruysa şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", "info")
+        msg = Message(
+            subject="Şifre Sıfırlama - DataSage",
+            recipients=[user["email"]],
+            body=f"""Merhaba {user['first_name']},
 
-        conn.close()
-    return render_template("forgot_password.html")
+Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:
+{reset_link}
+
+Bu bağlantı 1 saat boyunca geçerlidir."""
+        )
+        from app import mail
+        mail.send(msg)
+
+    conn.close()
+    flash("Eğer bilgiler doğruysa şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", "info")
+    return redirect(url_for("index"))  # ✅ forgot_password.html yerine index'e yönlen
+
 
 @auth.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
