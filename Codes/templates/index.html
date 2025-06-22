@@ -56,24 +56,23 @@
               </div>
             </div>
           </div>
-          
-          <div class="cta-buttons mb-5">
-            {% if session.username %}
-              <a href="{{ url_for('ask') }}" class="btn btn-primary btn-xl me-3">
-                <i class="bi bi-rocket-takeoff me-2"></i>Hemen Başla
-              </a>
-              <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-xl">
-                <i class="bi bi-speedometer2 me-2"></i>Panelim
-              </a>
-            {% else %}
-              <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-xl me-3">
-                <i class="bi bi-rocket-takeoff me-2"></i>Ücretsiz Dene
-              </a>
-              <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-xl">
-                <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
-              </a>
-            {% endif %}
-          </div>
+            <div class="cta-buttons mb-5">
+              {% if session.username %}
+                <a href="{{ url_for('ask') }}" class="btn btn-primary btn-xl me-3">
+                  <i class="bi bi-rocket-takeoff me-2"></i>Hemen Başla
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-xl">
+                  <i class="bi bi-speedometer2 me-2"></i>Panelim
+                </a>
+              {% else %}
+                <button class="btn btn-primary btn-xl me-3" data-bs-toggle="modal" data-bs-target="#registerModal">
+                  <i class="bi bi-rocket-takeoff me-2"></i>Ücretsiz Dene
+                </button>
+                <button class="btn btn-outline-primary btn-xl" data-bs-toggle="modal" data-bs-target="#loginModal">
+                  <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
+                </button>
+              {% endif %}
+            </div>
         </div>
 
         <div data-aos="fade-up" data-aos-delay="600">
@@ -252,17 +251,17 @@
             </p>
           </div>
         </div>
-        <div class="col-lg-4 text-lg-end" data-aos="fade-left">
-          {% if session.username %}
-            <a href="{{ url_for('ask') }}" class="btn btn-light btn-xl">
-              <i class="bi bi-rocket-takeoff me-2"></i>Hemen Sorgula
-            </a>
-          {% else %}
-            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-xl">
-              <i class="bi bi-rocket-takeoff me-2"></i>Ücretsiz Başla
-            </a>
-          {% endif %}
-        </div>
+          <div class="col-lg-4 text-lg-end" data-aos="fade-left">
+            {% if session.username %}
+              <a href="{{ url_for('ask') }}" class="btn btn-light btn-xl">
+                <i class="bi bi-rocket-takeoff me-2"></i>Hemen Sorgula
+              </a>
+            {% else %}
+              <button class="btn btn-light btn-xl" data-bs-toggle="modal" data-bs-target="#registerModal">
+                <i class="bi bi-rocket-takeoff me-2"></i>Ücretsiz Başla
+              </button>
+            {% endif %}
+          </div>
       </div>
     </div>
   </div>

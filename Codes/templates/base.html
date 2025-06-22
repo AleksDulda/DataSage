@@ -420,6 +420,23 @@ function togglePassword(formType) {
   }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+  const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+  const navbarToggler = document.querySelector('.navbar-toggler');
+  const navbarCollapse = document.querySelector('.navbar-collapse');
+  
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 992) {
+        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+          toggle: false
+        });
+        bsCollapse.hide();
+      }
+    });
+  });
+});
+
 // Form validation and submission
 document.getElementById('registerForm').addEventListener('submit', function(e) {
   const password = this.querySelector('input[name="password"]').value;
@@ -877,6 +894,72 @@ html[data-bs-theme="dark"] .social-link {
 html[data-bs-theme="dark"] .social-link:hover {
   background: #4c8cff;
   color: white;
+}
+
+/* Mobile Navbar Fixes */
+
+/* Make navbar collapse have solid background */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    margin-top: 12px;
+    padding: 1rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+  }
+  
+  /* Smooth collapse animation without conflicts */
+  .navbar-collapse {
+    transition: none;
+  }
+  
+  .navbar-collapse.collapsing {
+    transition: height 0.25s ease-in-out;
+    overflow: hidden;
+  }
+  
+  .navbar-collapse.show {
+    opacity: 1;
+  }
+  
+  .navbar-collapse:not(.show) {
+    opacity: 0;
+  }
+  
+  /* Enhanced mobile nav items */
+  .navbar-nav .nav-link {
+    padding: 12px 16px !important;
+    margin: 4px 0;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  
+  /* Better spacing for mobile buttons */
+  .d-flex.align-items-center.gap-3 {
+    flex-direction: column;
+    gap: 12px !important;
+    margin-top: 1rem;
+    width: 100%;
+  }
+  
+  .d-flex.align-items-center.gap-3 .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Auto-close on link click (smooth UX) */
+  .navbar-nav .nav-link {
+    transition: all 0.3s ease;
+  }
+}
+
+/* Dark theme mobile navbar */
+html[data-bs-theme="dark"] .navbar-collapse {
+  background: rgba(30, 35, 41, 0.98);
+  border-color: var(--dark-border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive */
